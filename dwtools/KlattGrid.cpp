@@ -1,6 +1,6 @@
 /* KlattGrid.cpp
  *
- * Copyright (C) 2008-2020 David Weenink, 2015,2017 Paul Boersma
+ * Copyright (C) 2008-2023 David Weenink, 2015,2017,2023 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,21 +93,21 @@
 conststring32 KlattGrid_getFormantName (kKlattGridFormantType formantType) {
 	conststring32 result;
 	if (formantType == kKlattGridFormantType::ORAL)
-		result = U"Oral formant";
+		result = U"oral formant";
 	else if (formantType == kKlattGridFormantType::NASAL)
-		result = U"Nasal formant";
+		result = U"nasal formant";
 	else if (formantType == kKlattGridFormantType::FRICATION)
-		result = U"Frication Formant";
+		result = U"frication Formant";
 	else if (formantType == kKlattGridFormantType::TRACHEAL)
-		result = U"Tracheal formant";
+		result = U"tracheal formant";
 	else if (formantType == kKlattGridFormantType::NASAL_ANTI)
-		result = U"Nasal Antiformant";
-	else if (formantType == kKlattGridFormantType::TRACHEALANTI)
-		result = U"Tracheal antiformant";
+		result = U"nasal Antiformant";
+	else if (formantType == kKlattGridFormantType::TRACHEAL_ANTI)
+		result = U"tracheal antiformant";
 	else if (formantType == kKlattGridFormantType::DELTA)
-		result = U"Delta formant";
+		result = U"delta formant";
 	else
-		result = U"Unknown formant";
+		result = U"unknown formant";
 	return result;
 }
 
@@ -2111,7 +2111,7 @@ autoKlattGrid KlattGrid_createExample () {
 }
 
 // y is the height in units of the height of one section,
-// y1 is the height from the top to the split between the uppper, non-diffed, and lower diffed part
+// y1 is the height from the top to the split between the upper, non-diffed, and lower diffed part
 static void _KlattGrid_queryParallelSplit (KlattGrid me, double dy, double *out_y, double *out_y1) {
 	const integer ny = my vocalTract -> nasal_formants -> formants.size +
 		my vocalTract -> oral_formants -> formants.size + my coupling -> tracheal_formants -> formants.size;
@@ -2250,7 +2250,7 @@ void KlattGrid_draw (KlattGrid me, Graphics g, kKlattGridFilterModel filterModel
 		ys1 = ys2 - height_phonation;
 		PhonationGrid_draw_inside (my phonation.get(), g, xs1, xs2, ys1, ys2, dy_phonation, & yout_phonation);
 
-		// units in cascade have same heigth as units in source part.
+		// units in cascade have same height as units in source part.
 
 		xc1 = xmin + accumulatedWidths [2]; // end of phonation
 		xc2 = xc1 + relativeWidths [3]; // same width as vocaltract
@@ -2372,7 +2372,7 @@ autoFormantGrid* KlattGrid_getAddressOfFormantGrid (KlattGrid me, kKlattGridForm
 	       formantType == kKlattGridFormantType::FRICATION ? & my frication -> frication_formants :
 	       formantType == kKlattGridFormantType::TRACHEAL ? & my coupling -> tracheal_formants :
 	       formantType == kKlattGridFormantType::NASAL_ANTI ? & my vocalTract -> nasal_antiformants :
-	       formantType == kKlattGridFormantType::TRACHEALANTI ? & my coupling -> tracheal_antiformants :
+	       formantType == kKlattGridFormantType::TRACHEAL_ANTI ? & my coupling -> tracheal_antiformants :
 		   & my coupling -> delta_formants; // kKlattGridFormantType::Delta
 }
 
@@ -2510,7 +2510,7 @@ void KlattGrid_replaceFormantGrid (KlattGrid me, kKlattGridFormantType formantTy
 
 void KlattGrid_addFormantAmplitudeTier (KlattGrid me, kKlattGridFormantType formantType, integer position) {
 	try {
-		Melder_require (formantType != kKlattGridFormantType::NASAL_ANTI && formantType != kKlattGridFormantType::TRACHEALANTI && formantType != kKlattGridFormantType::DELTA,
+		Melder_require (formantType != kKlattGridFormantType::NASAL_ANTI && formantType != kKlattGridFormantType::TRACHEAL_ANTI && formantType != kKlattGridFormantType::DELTA,
 			U"Cannot add amplitude tier to this formant type.");
 		OrderedOf<structIntensityTier>* ordered = KlattGrid_getAddressOfAmplitudes (me, formantType);
 		const integer noa = ordered->size;
@@ -2525,12 +2525,11 @@ void KlattGrid_addFormantAmplitudeTier (KlattGrid me, kKlattGridFormantType form
 
 void KlattGrid_removeFormantAmplitudeTier (KlattGrid me, kKlattGridFormantType formantType, integer position) {
 	try {
-		Melder_require (formantType != kKlattGridFormantType::NASAL_ANTI && formantType != kKlattGridFormantType::TRACHEALANTI && formantType != kKlattGridFormantType::DELTA, 
+		Melder_require (formantType != kKlattGridFormantType::NASAL_ANTI && formantType != kKlattGridFormantType::TRACHEAL_ANTI && formantType != kKlattGridFormantType::DELTA,
 			U"Cannot remove amplitude tier from this formant type.");
 		OrderedOf<structIntensityTier>* ordered = KlattGrid_getAddressOfAmplitudes (me, formantType);
-		if (position > 0 && position <= ordered->size) {
+		if (position > 0 && position <= ordered->size)
 			ordered -> removeItem (position);
-		}
 	} catch (MelderError) {
 		Melder_throw (me, U": no formant amplitude tier removed.");
 	}
@@ -2543,12 +2542,12 @@ void KlattGrid_addFormant (KlattGrid me, kKlattGridFormantType formantType, inte
 		autoFormantGrid* fg = KlattGrid_getAddressOfFormantGrid (me, formantType);
 		
 		const integer nof = (*fg) -> formants.size;
-		if (position > nof || position < 1) {
+		if (position > nof || position < 1)
 			position = nof + 1;
-		}
 
-		if (formantType == kKlattGridFormantType::NASAL_ANTI || formantType == kKlattGridFormantType::TRACHEALANTI ||
-			formantType == kKlattGridFormantType::DELTA) {
+		if (formantType == kKlattGridFormantType::NASAL_ANTI || formantType == kKlattGridFormantType::TRACHEAL_ANTI ||
+			formantType == kKlattGridFormantType::DELTA)
+		{
 			FormantGrid_addFormantAndBandwidthTiers (fg->get(), position);
 			return;
 		}
@@ -2573,11 +2572,10 @@ void KlattGrid_addFormant (KlattGrid me, kKlattGridFormantType formantType, inte
 void KlattGrid_removeFormant (KlattGrid me, kKlattGridFormantType formantType, integer position) {
 	autoFormantGrid* fg = KlattGrid_getAddressOfFormantGrid (me, formantType);
 	const integer nof = (*fg) -> formants.size;
-	if (formantType == kKlattGridFormantType::NASAL_ANTI || formantType == kKlattGridFormantType::TRACHEALANTI ||
+	if (formantType == kKlattGridFormantType::NASAL_ANTI || formantType == kKlattGridFormantType::TRACHEAL_ANTI ||
         formantType == kKlattGridFormantType::DELTA) {
-		if (position < 1 || position > nof) {
+		if (position < 1 || position > nof)
 			return;
-		}
 		FormantGrid_removeFormantAndBandwidthTiers (fg->get(), position);
 	} else { 
 		// oral & nasal & tracheal formants can have amplitudes
@@ -2652,8 +2650,7 @@ autoFormantGrid KlattGrid_to_oralFormantGrid_openPhases (KlattGrid me, double fa
 		Melder_require (my vocalTract -> oral_formants -> formants.size > 0 || my vocalTract -> oral_formants -> bandwidths.size > 0,
 			U"Formant grid should not be empty.");
 		
-		if (fadeFraction < 0.0)
-			fadeFraction = 0.0;
+		Melder_clipLeft (0.0, & fadeFraction);
 		Melder_require (fadeFraction < 0.5,
 			U"Fade fraction should be smaller than 0.5");
 		
@@ -2785,7 +2782,7 @@ autoSound KlattGrid_to_Sound (KlattGrid me) {
 	}
 }
 
-void KlattGrid_playSpecial (KlattGrid me) {
+void KlattGrid_playSpecial (KlattGrid me, Sound_PlayCallback callback, Thing boss) {
 	try {
 		autoSound thee = KlattGrid_to_Sound (me);
 		const KlattGridPlayOptions him = my options.get();
@@ -2795,15 +2792,15 @@ void KlattGrid_playSpecial (KlattGrid me) {
 			his xmin = my xmin;
 			his xmax = my xmax;
 		}
-		Sound_playPart (thee.get(), his xmin, his xmax, nullptr, nullptr);
+		Sound_playPart (thee.get(), his xmin, his xmax, callback, boss);
 	} catch (MelderError) {
 		Melder_throw (me, U": not played.");
 	}
 }
 
-void KlattGrid_play (KlattGrid me) {
+void KlattGrid_play (KlattGrid me, Sound_PlayCallback callback, Thing boss) {
 	KlattGrid_setDefaultPlayOptions (me);
-	KlattGrid_playSpecial (me);
+	KlattGrid_playSpecial (me, callback, boss);
 }
 
 /************************* Sound(s) & KlattGrid **************************************************/
@@ -2854,11 +2851,11 @@ autoKlattGrid KlattTable_to_KlattGrid (KlattTable me, double frameDuration) {
 			const double t = (irow - 1) * frameDuration;
 
 			integer icol = 1;
-			double val = Table_getNumericValue_Assert (kt, irow, icol) / 10.0;   // F0hz10
+			double val = Table_getNumericValue_a (kt, irow, icol) / 10.0;   // F0hz10
 			const double f0 = val;
 			RealTier_addPoint (thy phonation -> pitch.get(), t, f0);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol); // AVdb
+			val = Table_getNumericValue_a (kt, irow, ++ icol); // AVdb
 			// dB values below 13 were put to zero in the DBtoLIN function
 			val -= 7.0;
 			if (val < 13.0)
@@ -2867,28 +2864,28 @@ autoKlattGrid KlattTable_to_KlattGrid (KlattTable me, double frameDuration) {
 			// RealTier_addPoint (thy source -> voicingAmplitude, t, val);
 
 			for (integer kf = 1; kf <= 6; kf ++) {
-				const double fk = val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // Fhz
+				const double fk = val = Table_getNumericValue_a (kt, irow, ++ icol);   // Fhz
 				RealTier_addPoint (thy vocalTract -> oral_formants -> formants.at [kf], t, val);
 				RealTier_addPoint (thy frication -> frication_formants -> formants.at [kf], t, val);   // only amplitudes and bandwidths in frication section
-				val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // Bhz
+				val = Table_getNumericValue_a (kt, irow, ++ icol);   // Bhz
 				if (val <= 0.0)
 					val = fk / 10.0;
 				RealTier_addPoint (thy vocalTract -> oral_formants -> bandwidths.at [kf], t, val);
 			}
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // FNZhz
+			val = Table_getNumericValue_a (kt, irow, ++ icol);   // FNZhz
 			RealTier_addPoint (thy vocalTract -> nasal_antiformants -> formants.at [1], t, val);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // BNZhz
+			val = Table_getNumericValue_a (kt, irow, ++ icol);   // BNZhz
 			RealTier_addPoint (thy vocalTract -> nasal_antiformants -> bandwidths.at [1], t, val);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // FNPhz
+			val = Table_getNumericValue_a (kt, irow, ++ icol);   // FNPhz
 			RealTier_addPoint (thy vocalTract -> nasal_formants -> formants.at [1], t, val);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // BNPhz
+			val = Table_getNumericValue_a (kt, irow, ++ icol);   // BNPhz
 			RealTier_addPoint (thy vocalTract -> nasal_formants -> bandwidths.at [1], t, val);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // ah
+			val = Table_getNumericValue_a (kt, irow, ++ icol);   // ah
 			if (val < 13.0)
 				val = dBNul;
 			else
@@ -2896,11 +2893,11 @@ autoKlattGrid KlattTable_to_KlattGrid (KlattTable me, double frameDuration) {
 
 			RealTier_addPoint (thy phonation -> aspirationAmplitude.get(), t, val);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // Kopen
+			val = Table_getNumericValue_a (kt, irow, ++ icol);   // Kopen
 			const double openPhase = ( f0 > 0.0 ? (val / 16000.0) * f0 : 0.7 );
 			RealTier_addPoint (thy phonation -> openPhase.get(), t, openPhase);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // Aturb breathinessAmplitude during voicing (max is 8192)
+			val = Table_getNumericValue_a (kt, irow, ++ icol);   // Aturb breathinessAmplitude during voicing (max is 8192)
 			if (val < 13.0)
 				val = dBNul;
 			else
@@ -2908,10 +2905,10 @@ autoKlattGrid KlattTable_to_KlattGrid (KlattTable me, double frameDuration) {
 
 			RealTier_addPoint (thy phonation -> breathinessAmplitude.get(), t, val);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // TLTdb
+			val = Table_getNumericValue_a (kt, irow, ++ icol);   // TLTdb
 			RealTier_addPoint (thy phonation -> spectralTilt.get(), t, val);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // AF
+			val = Table_getNumericValue_a (kt, irow, ++ icol);   // AF
 			if (val < 13.0)
 				val = dBNul;
 			else
@@ -2919,11 +2916,11 @@ autoKlattGrid KlattTable_to_KlattGrid (KlattTable me, double frameDuration) {
 
 			RealTier_addPoint (thy frication -> fricationAmplitude.get(), t, val);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // Kskew ???
+			val = Table_getNumericValue_a (kt, irow, ++ icol);   // Kskew ???
 			//RealTier_addPoint (, t, val);
 
 			for (integer kf = 1; kf <= 6; kf ++) {
-				val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // Ap
+				val = Table_getNumericValue_a (kt, irow, ++ icol);   // Ap
 				if (val < 13.0)
 					val = dBNul;
 				else
@@ -2931,11 +2928,11 @@ autoKlattGrid KlattTable_to_KlattGrid (KlattTable me, double frameDuration) {
 
 				RealTier_addPoint (thy vocalTract -> oral_formants_amplitudes.at [kf], t, val);
 				RealTier_addPoint (thy frication -> frication_formants_amplitudes.at [kf], t, val);
-				val = Table_getNumericValue_Assert (kt, irow, ++ icol); // Bhz
+				val = Table_getNumericValue_a (kt, irow, ++ icol); // Bhz
 				RealTier_addPoint (thy frication -> frication_formants -> bandwidths.at [kf], t, val);
 			}
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol);   // ANP
+			val = Table_getNumericValue_a (kt, irow, ++ icol);   // ANP
 			if (val < 13.0)
 				val = dBNul;
 			else
@@ -2943,7 +2940,7 @@ autoKlattGrid KlattTable_to_KlattGrid (KlattTable me, double frameDuration) {
 
 			RealTier_addPoint (thy vocalTract -> nasal_formants_amplitudes.at [1], t, val);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol); // AB
+			val = Table_getNumericValue_a (kt, irow, ++ icol); // AB
 			if (val < 13.0)
 				val = dBNul;
 			else
@@ -2951,10 +2948,10 @@ autoKlattGrid KlattTable_to_KlattGrid (KlattTable me, double frameDuration) {
 
 			RealTier_addPoint (thy frication -> bypass.get(), t, val);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol); // AVpdb
+			val = Table_getNumericValue_a (kt, irow, ++ icol); // AVpdb
 			RealTier_addPoint (thy phonation -> voicingAmplitude.get(), t, val + dB_offset_voicing);
 
-			val = Table_getNumericValue_Assert (kt, irow, ++ icol); // Gain0
+			val = Table_getNumericValue_a (kt, irow, ++ icol); // Gain0
 			val -= 3.0;
 			if (val <= 0.0)
 				val = 57.0;
@@ -2969,7 +2966,9 @@ autoKlattGrid KlattTable_to_KlattGrid (KlattTable me, double frameDuration) {
 	}
 }
 
-autoKlattGrid Sound_to_KlattGrid_simple (Sound me, double timeStep, integer maximumNumberOfFormants, double maximumFormantFrequency, double windowLength, double preEmphasisFrequency, double minimumPitch, double maximumPitch, double pitchFloorIntensity, int subtractMean) {
+autoKlattGrid Sound_to_KlattGrid_simple (Sound me, double timeStep, integer maximumNumberOfFormants, double maximumFormantFrequency,
+	double windowLength, double preEmphasisFrequency, double pitchFloor, double pitchCeiling, double pitchFloorForIntensity, int subtractMean)
+{
 	try {
 		const integer numberOfFormants = maximumNumberOfFormants;
 		const integer numberOfNasalFormants = 1;
@@ -2983,11 +2982,12 @@ autoKlattGrid Sound_to_KlattGrid_simple (Sound me, double timeStep, integer maxi
 		autoFormant f = Sound_to_Formant_burg (sound.get(), timeStep, maximumNumberOfFormants,
 		                                       maximumFormantFrequency, windowLength, preEmphasisFrequency);
 		autoFormantGrid fgrid = Formant_downto_FormantGrid (f.get());
-		autoPitch p = Sound_to_Pitch (sound.get(), timeStep, minimumPitch, maximumPitch);
+		autoPitch p = Sound_to_Pitch (sound.get(), timeStep, pitchFloor, pitchCeiling);
 		autoPitchTier ptier = Pitch_to_PitchTier (p.get());
-		autoIntensity i = Sound_to_Intensity (sound.get(), pitchFloorIntensity, timeStep, subtractMean);
+		autoIntensity i = Sound_to_Intensity (sound.get(), pitchFloorForIntensity, timeStep, subtractMean);
 		autoIntensityTier itier = Intensity_downto_IntensityTier (i.get());
-		autoKlattGrid thee = KlattGrid_create (my xmin, my xmax, numberOfFormants, numberOfNasalFormants,                            numberOfNasalAntiFormants, numberOfTrachealFormants, numberOfTrachealAntiFormants, numberOfFricationFormants, numberOfDeltaFormants);
+		autoKlattGrid thee = KlattGrid_create (my xmin, my xmax, numberOfFormants, numberOfNasalFormants, numberOfNasalAntiFormants,
+				numberOfTrachealFormants, numberOfTrachealAntiFormants, numberOfFricationFormants, numberOfDeltaFormants);
 		KlattGrid_replacePitchTier (thee.get(), ptier.get());
 		KlattGrid_replaceFormantGrid (thee.get(), kKlattGridFormantType::ORAL, fgrid.get());
 		KlattGrid_replaceVoicingAmplitudeTier (thee.get(), itier.get());
@@ -2997,7 +2997,9 @@ autoKlattGrid Sound_to_KlattGrid_simple (Sound me, double timeStep, integer maxi
 	}
 }
 
-autoKlattGrid KlattGrid_createFromVowel (double duration, double f0start, double f1, double b1, double f2, double b2, double f3, double b3, double f4, double bandWidthFraction, double formantFrequencyInterval) {
+autoKlattGrid KlattGrid_createFromVowel (double duration, double f0start, double f1, double b1, double f2, double b2, double f3, double b3, double f4,
+	double bandWidthFraction, double formantFrequencyInterval)
+{
 	const integer numberOfOralFormants = 15;
 	const double tstart = 0.0;
 	autoKlattGrid me = KlattGrid_create (0.0, duration, numberOfOralFormants, 0, 0, 0, 0, 0, 0);

@@ -1,6 +1,6 @@
 /* praat_gram.cpp
  *
- * Copyright (C) 1997-2022 Paul Boersma
+ * Copyright (C) 1997-2023 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "OTMultiEditor.h"
 #include "Net.h"
 #include "NoulliGridEditor.h"
+#include "CubeGridEditor.h"
 
 #include "praat_TableOfReal.h"
 #include "praat_TimeFunction.h"
@@ -260,7 +261,7 @@ DO
 }
 
 FORM (MODIFY_EACH__Network_setActivityClippingRule, U"Network: Set activity clipping rule", nullptr) {
-	RADIO_ENUM (kNetwork_activityClippingRule, activityClippingRule,
+	CHOICE_ENUM (kNetwork_activityClippingRule, activityClippingRule,
 			U"Activity clipping rule", kNetwork_activityClippingRule::DEFAULT)
 	OK
 DO
@@ -386,9 +387,9 @@ DIRECT (CREATE_ONE__Create_NPA_distribution) {
 }
 
 FORM (CREATE_ONE__Create_tongue_root_grammar, U"Create tongue-root grammar", U"Create tongue-root grammar...") {
-	RADIO_ENUM (kOTGrammar_createTongueRootGrammar_constraintSet, constraintSet,
+	CHOICE_ENUM (kOTGrammar_createTongueRootGrammar_constraintSet, constraintSet,
 			U"Constraint set", kOTGrammar_createTongueRootGrammar_constraintSet::DEFAULT)
-	RADIO_ENUM (kOTGrammar_createTongueRootGrammar_ranking, ranking,
+	CHOICE_ENUM (kOTGrammar_createTongueRootGrammar_ranking, ranking,
 			U"Ranking", kOTGrammar_createTongueRootGrammar_ranking::DEFAULT)
 	OK
 DO
@@ -798,7 +799,7 @@ DO
 // MARK: Modify behaviour
 
 FORM (MODIFY_EACH__OTGrammar_setDecisionStrategy, U"OTGrammar: Set decision strategy", nullptr) {
-	RADIO_ENUM (kOTGrammar_decisionStrategy, decisionStrategy,
+	CHOICE_ENUM (kOTGrammar_decisionStrategy, decisionStrategy,
 			U"Decision strategy", kOTGrammar_decisionStrategy::DEFAULT)
 OK
 	FIND_ONE (OTGrammar)
@@ -1342,7 +1343,7 @@ DO
 // MARK: Modify behaviour
 
 FORM (MODIFY_EACH__OTMulti_setDecisionStrategy, U"OTMulti: Set decision strategy", nullptr) {
-	RADIO_ENUM (kOTGrammar_decisionStrategy, decisionStrategy,
+	CHOICE_ENUM (kOTGrammar_decisionStrategy, decisionStrategy,
 			U"Decision strategy", kOTGrammar_decisionStrategy::DEFAULT)
 OK
 	FIND_ONE (OTMulti)
@@ -1441,7 +1442,7 @@ DO
 // MARK: Modify
 
 FORM (MODIFY_EACH__Net_spreadUp, U"Net: Spread up", nullptr) {
-	RADIO_ENUM (kLayer_activationType, activationType,
+	CHOICE_ENUM (kLayer_activationType, activationType,
 			U"Activation type", kLayer_activationType::STOCHASTIC)
 	OK
 DO
@@ -1451,7 +1452,7 @@ DO
 }
 
 FORM (MODIFY_EACH__Net_spreadDown, U"Net: Spread down", nullptr) {
-	RADIO_ENUM (kLayer_activationType, activationType,
+	CHOICE_ENUM (kLayer_activationType, activationType,
 			U"Activation type", kLayer_activationType::DETERMINISTIC)
 	OK
 DO
@@ -1603,7 +1604,7 @@ DO
 }
 
 FORM (CONVERT_ONE_AND_ONE_TO_ONE__Net_PatternList_to_ActivationList, U"Net & PatternList: To ActivationList", nullptr) {
-	RADIO_ENUM (kLayer_activationType, activationType,
+	CHOICE_ENUM (kLayer_activationType, activationType,
 			U"Activation type", kLayer_activationType::DETERMINISTIC)
 	OK
 DO
@@ -1625,7 +1626,7 @@ DIRECT (EDITOR_ONE_WITH_ONE__NoulliGrid_viewAndEdit) {
 FORM (QUERY_ONE_FOR_REAL_VECTOR__NoulliGrid_getAverageProbabilities, U"NoulliGrid: Get average probabilities", nullptr) {
 	NATURAL (tierNumber, U"Tier number", U"1")
 	REAL (fromTime, U"From time (s)", U"0")
-	REAL (toTime, U"To time (s)", U"0 (= all)")
+	REAL (toTime, U"To time (s)", U"10.0")
 	OK
 DO
 	QUERY_ONE_FOR_REAL_VECTOR (NoulliGrid)
@@ -1643,6 +1644,37 @@ DO
 	GRAPHICS_EACH_END
 }
 
+// MARK: - CUBEGRID
+
+// MARK: View & Edit
+
+DIRECT (EDITOR_ONE_WITH_ONE__CubeGrid_viewAndEdit) {
+	EDITOR_ONE_WITH_ONE (a,CubeGrid, Sound)   // Sound may be null
+		autoCubeGridEditor editor = CubeGridEditor_create (ID_AND_FULL_NAME, me, you);
+	EDITOR_ONE_WITH_ONE_END
+}
+
+FORM (QUERY_ONE_FOR_REAL_VECTOR__CubeGrid_getAverage, U"CubeGrid: Get average", nullptr) {
+	NATURAL (tierNumber, U"Tier number", U"1")
+	REAL (fromTime, U"From time (s)", U"0")
+	REAL (toTime, U"To time (s)", U"10.0")
+	OK
+DO
+	QUERY_ONE_FOR_REAL_VECTOR (CubeGrid)
+		autoVEC result = CubeGrid_getAverages (me, tierNumber, fromTime, toTime);
+	QUERY_ONE_FOR_REAL_VECTOR_END
+}
+
+FORM (GRAPHICS_CubeGrid_paint, U"CubeGrid: Paint", U"CubeGrid: Paint...") {
+	praat_TimeFunction_RANGE (fromTime, toTime)
+	BOOLEAN (garnish, U"Garnish", 1)
+	OK
+DO
+	GRAPHICS_EACH (CubeGrid)
+		CubeGrid_paint (me, GRAPHICS, fromTime, toTime, garnish);
+	GRAPHICS_EACH_END
+}
+
 // MARK: - buttons
 
 void praat_uvafon_gram_init ();
@@ -1650,12 +1682,13 @@ void praat_uvafon_gram_init () {
 	Thing_recognizeClassesByName (classNetwork,
 		classOTGrammar, classOTHistory, classOTMulti,
 		classRBMLayer, classFullyConnectedLayer, classNet,
-		classNoulliTier, classNoulliGrid,
+		classNoulliTier, classNoulliGrid, classCubeGrid,
 		nullptr
 	);
 	Thing_recognizeClassByOtherName (classOTGrammar, U"OTCase");
 
 	structNoulliGridEditor :: f_preferences ();
+	structCubeGridEditor :: f_preferences ();
 
 	praat_addMenuCommand (U"Objects", U"New", U"Constraint grammars", nullptr, 0, nullptr);
 		praat_addMenuCommand (U"Objects", U"New", U"OT learning tutorial", nullptr, GuiMenu_DEPTH_1 | GuiMenu_NO_API,
@@ -1673,10 +1706,8 @@ void praat_uvafon_gram_init () {
 				CREATE_ONE__Create_metrics_grammar);
 		praat_addMenuCommand (U"Objects", U"New", U"Create multi-level metrics grammar...", nullptr, 1,
 				CREATE_ONE__Create_multi_level_metrics_grammar);
-	praat_addAction1 (classOTGrammar, 1, U"Save as headerless spreadsheet file...", nullptr, 0,
-			SAVE_ONE__OTGrammar_writeToHeaderlessSpreadsheetFile);
-	praat_addAction1 (classOTGrammar, 1,   U"Write to headerless spreadsheet file...", U"*Save as headerless spreadsheet file...", GuiMenu_DEPRECATED_2011,
-			SAVE_ONE__OTGrammar_writeToHeaderlessSpreadsheetFile);
+	praat_addAction1 (classOTGrammar, 1, U"Save as headerless spreadsheet file... || Write to headerless spreadsheet file...", nullptr, 0,
+			SAVE_ONE__OTGrammar_writeToHeaderlessSpreadsheetFile);   // alternative COMPATIBILITY <= 2011
 
 	praat_addAction1 (classOTGrammar, 0, U"OTGrammar help", nullptr, 0,
 			HELP__OTGrammar_help);
@@ -1979,6 +2010,17 @@ void praat_uvafon_gram_init () {
 		praat_addAction1 (classNoulliGrid, 0, U"Paint...", nullptr, 1, GRAPHICS_NoulliGrid_paint);
 	praat_addAction2 (classNoulliGrid, 1, classSound, 1, U"View & Edit", nullptr, GuiMenu_ATTRACTIVE,
 			EDITOR_ONE_WITH_ONE__NoulliGrid_viewAndEdit);
+
+	praat_addAction1 (classCubeGrid, 1, U"View & Edit", nullptr, GuiMenu_ATTRACTIVE,
+			EDITOR_ONE_WITH_ONE__CubeGrid_viewAndEdit);
+	praat_addAction1 (classCubeGrid, 0, U"Query -", nullptr, 0, nullptr);
+		praat_TimeFunction_query_init (classCubeGrid);
+		praat_addAction1 (classCubeGrid, 1, U"Get average...", nullptr, 1,
+			QUERY_ONE_FOR_REAL_VECTOR__CubeGrid_getAverage);
+	praat_addAction1 (classCubeGrid, 0, U"Draw -", nullptr, 0, nullptr);
+		praat_addAction1 (classCubeGrid, 0, U"Paint...", nullptr, 1, GRAPHICS_CubeGrid_paint);
+	praat_addAction2 (classCubeGrid, 1, classSound, 1, U"View & Edit", nullptr, GuiMenu_ATTRACTIVE,
+			EDITOR_ONE_WITH_ONE__CubeGrid_viewAndEdit);
 }
 
 /* End of file praat_gram.cpp */

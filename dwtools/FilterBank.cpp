@@ -1,6 +1,6 @@
 /* FilterBank.cpp
  *
- * Copyright (C) 1993-2017 David Weenink, Paul Boersma 2017
+ * Copyright (C) 1993-2017, 2023 David Weenink, Paul Boersma 2017
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 /*
  djmw 20010718
  djmw 20020813 GPL header
- djmw 20030901 Added fiter function drawing and frequency scale drawing.
+ djmw 20030901 Added filter function drawing and frequency scale drawing.
  djmw 20050731 +FilterBank_and_PCA_drawComponent
  djmw 20071017 Melder_error<n>
  djmw 20071201 Melder_warning<n>
@@ -150,7 +150,7 @@ static void setDrawingLimits (double *a, integer n, double amin, double amax, in
 	}
 
 	(*ibegin) ++;
-	(*iend)--;
+	(*iend) --;
 }
 
 Thing_implement (FilterBank, Matrix, 2);
@@ -244,10 +244,7 @@ void FilterBank_paint (FilterBank me, Graphics g, double xmin, double xmax,
 	double ymin, double ymax, double minimum, double maximum, bool garnish)
 {
 	Function_unidirectionalAutowindow (me, & xmin, & xmax);
-	if (ymax <= ymin) {
-		ymin = my ymin;
-		ymax = my ymax;
-	}
+	SampledXY_unidirectionalAutowindowY (me, & ymin, & ymax);
 	integer ixmin, ixmax, iymin, iymax;
 	(void) Matrix_getWindowSamplesX (me, xmin - 0.49999 * my dx, xmax + 0.49999 * my dx, & ixmin, & ixmax);
 	(void) Matrix_getWindowSamplesY (me, ymin - 0.49999 * my dy, ymax + 0.49999 * my dy, & iymin, & iymax);
@@ -941,21 +938,12 @@ static int Sound_into_FormantFilter_frame (Sound me, FormantFilter thee, integer
 	return 1;
 }
 
-autoFormantFilter Sound_to_FormantFilter (Sound me, double analysisWidth, double dt, double f1_hz, double fmax_hz, double df_hz, double relative_bw, double minimumPitch, double maximumPitch) {
+autoFormantFilter Sound_to_FormantFilter (Sound me, double analysisWidth, double dt, double f1_hz, double fmax_hz, double df_hz, double relative_bw,
+	double pitchFloor, double pitchCeiling)
+{
 	try {
-		const double floor = 80.0, ceiling = 600.0;
-		if (minimumPitch >= maximumPitch) {
-			minimumPitch = floor;
-			maximumPitch = ceiling;
-		}
-		if (minimumPitch <= 0.0)
-			minimumPitch = floor;
-		if (maximumPitch <= 0.0)
-			maximumPitch = ceiling;
-
-		autoPitch thee = Sound_to_Pitch (me, dt, minimumPitch, maximumPitch);
-		autoFormantFilter ff = Sound_Pitch_to_FormantFilter (me, thee.get(), analysisWidth, dt, f1_hz, fmax_hz, df_hz, relative_bw);
-		return ff;
+		autoPitch thee = Sound_to_Pitch (me, dt, pitchFloor, pitchCeiling);
+		return Sound_Pitch_to_FormantFilter (me, thee.get(), analysisWidth, dt, f1_hz, fmax_hz, df_hz, relative_bw);
 	} catch (MelderError) {
 		Melder_throw (me, U": no FormantFilter created.");
 	}

@@ -1386,9 +1386,11 @@ void DataModeler_drawModel_inside (DataModeler me, Graphics g, double xmin, doub
 		y [ipoint] = my f_evaluate (me, x [ipoint], my parameters.get());
 	}
 	if (ymin == 0.0 && ymax == 0.0) {
-		ymin = NUMmin (y.get());
-		ymax = NUMmax (y.get());
+		ymin = NUMmin_u (y.get());
+		ymax = NUMmax_u (y.get());
 	}
+	if (isundef (ymin) || isundef (ymax))
+		return;
 	Graphics_setWindow (g, xmin, xmax, ymin, ymax);
 	for (integer ipoint = 2; ipoint <= numberOfPoints; ipoint ++) {
 		double segment_x1, segment_y1, segment_x2, segment_y2;
@@ -1615,7 +1617,7 @@ autoDataModeler Table_to_DataModeler (Table me, double xmin, double xmax, intege
 		autoVEC y = raw_VEC (numberOfRows);
 		autoVEC sy = raw_VEC (numberOfRows);
 		for (integer i = 1; i <= numberOfRows; i ++) {
-			const double val = Table_getNumericValue_Assert (me, i, xcolumn);
+			const double val = Table_getNumericValue_a (me, i, xcolumn);
 			if (isdefined (val)) {
 				x [++ numberOfData] = val;
 				if (numberOfData > 1) {
@@ -1625,12 +1627,12 @@ autoDataModeler Table_to_DataModeler (Table me, double xmin, double xmax, intege
 						Melder_throw (U"All x-values should be different.");
 					}
 				}
-				y [numberOfData] = Table_getNumericValue_Assert (me, i, ycolumn);
-				sy [numberOfData] = ( hasSigmaColumn ? Table_getNumericValue_Assert (me, i, sigmacolumn) : undefined );
+				y [numberOfData] = Table_getNumericValue_a (me, i, ycolumn);
+				sy [numberOfData] = ( hasSigmaColumn ? Table_getNumericValue_a (me, i, sigmacolumn) : undefined );
 			}
 		}
 		if (xmax <= xmin)
-			NUMextrema (x.part (1, numberOfData), & xmin, & xmax);
+			NUMextrema_e (x.part (1, numberOfData), & xmin, & xmax);
 		Melder_require (xmin < xmax,
 			U"The range of the x-values is too small.");
 		

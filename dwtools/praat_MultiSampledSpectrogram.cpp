@@ -1,6 +1,6 @@
 /* praat_MultiSampledSpectrogram.cpp
  *
- * Copyright (C) 2021-2022 David Weenink
+ * Copyright (C) 2021-2023 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ FORM (MODIFY_EACH_WEAK__MultiSampledSpectrogram_formula_part, U"MultiSampledSpec
 	REAL (fromTime, U"From time", U"0.0")
 	REAL (toTime, U"To time", U"0.0 (= all)")
 	REAL (fromFrequency, U"From frequency (Hz)", U"100.0")
-	REAL (toFrequency, U"To Frequncy (Hz)", U"200.0")
+	REAL (toFrequency, U"To Frequency (Hz)", U"200.0")
 	FORMULA (formula, U"Formula", U"2 * self")
 	OK
 DO
@@ -60,9 +60,9 @@ DO
 
 FORM (GRAPHICS_EACH__ConstantQLog2FSpectrogram_paint, U"ConstantQLog2FSpectrogram: Paint", nullptr) {
 	REAL (xmin, U"left Time range (s)", U"0.0")
-	REAL (xmax, U"right Time range (s)", U"0.0 (=all)")
+	REAL (xmax, U"right Time range (s)", U"0.0 (= all)")
 	REAL (ymin, U"left Frequency range (Hz)", U"0.0")
-	REAL (ymax, U"right Frequency range (Hz)", U"0.0 (=auto)")
+	REAL (ymax, U"right Frequency range (Hz)", U"0.0 (= auto)")
 	POSITIVE (dBRange, U"Dynamic range (dB)", U"50.0")
 	BOOLEAN (garnish, U"Garnish", true);
 	OK
@@ -107,11 +107,11 @@ DO
 
 FORM (CONVERT_EACH_TO_ONE__Sound_to_ConstantQLog2FSpectrogram, U"Sound: To ConstantQLog2FSpectrogram", U"Sound: To ConstantQLog2FSpectrogram...") {
 	POSITIVE (f1, U"Lowest frequency (Hz)", U"110.0 (=440*2^(-2))")
-	REAL (fmax, U"Maximum frequency (Hz)", U"0.0 (=nyquist)")
+	REAL (fmax, U"Maximum frequency (Hz)", U"0.0 (= Nyquist)")
 	NATURAL (numberOfFrequencyBinsPerOctave, U"Number of frequency bins / octave", U"24")
 	POSITIVE (frequencyResolutionInBins, U"Frequency resolution (bins)", U"1.0")
 	POSITIVE (timeOversamplingFactor, U"Time oversampling factor", U"1.0")
-	RADIO_ENUM (kSound_windowShape, filterShape,
+	CHOICE_ENUM (kSound_windowShape, filterShape,
 			U"Filter shape", kSound_windowShape::DEFAULT)
 	OK
 DO
@@ -130,9 +130,9 @@ DIRECT (CONVERT_EACH_TO_ONE__Sound_to_AnalyticSound) {
 
 FORM (GRAPHICS_EACH__GaborSpectrogram_paint, U"GaborSpectrogram: Paint", nullptr) {
 	REAL (xmin, U"left Time range (s)", U"0.0")
-	REAL (xmax, U"right Time range (s)", U"0.0 (=all)")
+	REAL (xmax, U"right Time range (s)", U"0.0 (= all)")
 	REAL (ymin, U"left Frequency range (Hz)", U"0.0")
-	REAL (ymax, U"right Frequency range (Hz)", U"0.0 (=auto)")
+	REAL (ymax, U"right Frequency range (Hz)", U"0.0 (= auto)")
 	POSITIVE (dBRange, U"Dynamic range (dB)", U"50.0")
 	BOOLEAN (garnish, U"Garnish", true);
 	OK
@@ -143,11 +143,11 @@ DO
 }
 
 FORM (CONVERT_EACH_TO_ONE__Sound_to_GaborSpectrogram, U"Sound: To GaborSpectrogram", U"Sound: To ConstantQLog2FSpectrogram...") {
-	REAL (fmax, U"Maximum frequency (Hz)", U"0.0 (=nyquist)")
+	REAL (fmax, U"Maximum frequency (Hz)", U"0.0 (= Nyquist)")
 	POSITIVE (filterBandwidth, U"Filter bandwidth (Hz)", U"40.0")
 	POSITIVE (frequencyStep, U"Frequency step (hz)", U"20.0")
 	POSITIVE (timeOversamplingFactor, U"Time oversampling factor", U"1.0")
-	RADIO_ENUM (kSound_windowShape, filterShape,
+	CHOICE_ENUM (kSound_windowShape, filterShape,
 			U"Filter shape", kSound_windowShape::DEFAULT)
 	OK
 DO

@@ -1,6 +1,6 @@
 /* Editor.cpp
  *
- * Copyright (C) 1992-2022 Paul Boersma, 2008 Stefan de Konink, 2010 Franz Brausse
+ * Copyright (C) 1992-2023 Paul Boersma, 2008 Stefan de Konink, 2010 Franz Brausse
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ static void commonCallback (EditorCommand me, GuiMenuItemEvent /* event */) {
 		my commandCallback (my sender, me, nullptr, 0, nullptr, nullptr, nullptr);
 	} catch (MelderError) {
 		if (! Melder_hasError (U"Script exited."))
-			Melder_appendError (U"Menu command \"", my itemTitle.get(), U"\" not completed.");
+			Melder_appendError (U"Menu command “", my itemTitle.get(), U"” not completed.");
 		Melder_flushError ();
 	}
 }
@@ -63,7 +63,7 @@ static GuiMenuItem DataGuiMenu_addCommand_ (EditorMenu me, conststring32 itemTit
 	thy d_editor = my d_editor;
 	thy sender = ( optionalSender ? optionalSender : thy d_editor );
 	thy menu = me;
-	const bool titleIsHeader = Melder_stringMatchesCriterion (itemTitle, kMelder_string::ENDS_WITH, U":", true);
+	const bool titleIsHeader = Melder_endsWith (itemTitle, U":");
 	if (titleIsHeader) {
 		flags |= GuiMenu_UNDERLINED;
 		if (itemTitle [0] == U'-' && itemTitle [1] == U' ') {
@@ -71,13 +71,28 @@ static GuiMenuItem DataGuiMenu_addCommand_ (EditorMenu me, conststring32 itemTit
 			itemTitle += 2;
 		}
 	}
-	thy itemTitle = Melder_dup (itemTitle);   // after the potential shift by 2
+	const int depth = (flags & GuiMenu_DEPTH_3) >> 16;   // the maximum depth in editor windows is 3
+	thy itemTitle = Melder_dup (itemTitle);
+	if (depth > 0) {
+		/*
+			bikeshed choices for indented menu items
+		*/
+		[[maybe_unused]] constexpr conststring32 space = U"      ";   // minimalist
+		[[maybe_unused]] constexpr conststring32 fourDots = U"\u205E   ";   // not evenly dispersed
+		[[maybe_unused]] constexpr conststring32 twoDots = U"\u205A   ";   // dispersion OKish
+		[[maybe_unused]] constexpr conststring32 oneDot = U"·   ";   // dispersion good, not too prominent, not really thin
+		[[maybe_unused]] constexpr conststring32 hyphenationPoint = U"\u2027   ";   // xx
+		[[maybe_unused]] constexpr conststring32 pipe = U"|   ";   // not long enough, prominent
+		[[maybe_unused]] constexpr conststring32 boxDrawingLightVertical = U"\u2502   ";   // not long enough, prominent
+		[[maybe_unused]] constexpr conststring32 boxDrawingLightQuadrupleDashVertical = U"\u250A   ";   // not long enough, but nicely thin
+		itemTitle = Melder_cat (space, itemTitle);
+	}
 	if (! commandCallback)
 		flags |= GuiMenu_INSENSITIVE;
 	thy itemWidget =
 		titleIsHeader ? GuiMenu_addItem (my menuWidget, itemTitle, flags, nullptr, nullptr) :
 		! commandCallback ? GuiMenu_addSeparator (my menuWidget) :
-		flags & Editor_HIDDEN ? nullptr :
+		flags & GuiMenu_HIDDEN ? nullptr :
 		GuiMenu_addItem (my menuWidget, itemTitle, flags, commonCallback, thee.get())
 	;   // DANGLE BUG: me can be killed by Collection_addItem(), but EditorCommand::destroy doesn't remove the item
 	thy commandCallback = commandCallback;
@@ -88,11 +103,11 @@ static GuiMenuItem DataGuiMenu_addCommand_ (EditorMenu me, conststring32 itemTit
 GuiMenuItem DataGuiMenu_addCommand (EditorMenu me, conststring32 itemTitle /* cattable */, uint32 flags,
 	DataGuiCommandCallback commandCallback, DataGui optionalSender)
 {
+	if (flags < 3)   // the maximum depth in editor windows is 3
+		flags *= GuiMenu_DEPTH_1;   // turn 1..3 into GuiMenu_DEPTH_1..GuiMenu_DEPTH_3, because the flags are ORed below
 	const char32 *pSeparator = str32str (itemTitle, U" || ");
 	if (! pSeparator)
 		return DataGuiMenu_addCommand_ (me, itemTitle, flags, commandCallback, optionalSender);
-	if (flags < 8)
-		flags *= GuiMenu_DEPTH_1;   // turn 1..7 into GuiMenu_DEPTH_1..GuiMenu_DEPTH_7, because the flags are ORed below
 	integer positionOfSeparator = pSeparator - itemTitle;
 	static MelderString string;
 	MelderString_copy (& string, itemTitle);
@@ -139,16 +154,16 @@ GuiMenuItem Editor_addCommand (Editor me, conststring32 menuTitle, conststring32
 			if (str32equ (menuTitle, menu -> menuTitle.get()))
 				return EditorMenu_addCommand (menu, itemTitle, flags, commandCallback);
 		}
-		Melder_throw (U"Menu \"", menuTitle, U"\" does not exist.");
+		Melder_throw (U"Menu “", menuTitle, U"” does not exist.");
 	} catch (MelderError) {
-		Melder_throw (U"Command \"", itemTitle, U"\" not inserted in menu \"", menuTitle, U".");
+		Melder_throw (U"Command “", itemTitle, U"” not inserted in menu “", menuTitle, U"”.");
 	}
 }
 
 static void Editor_scriptCallback (Editor me, EditorCommand cmd, UiForm /* sendingForm */,
 	integer /* narg */, Stackel /* args */, conststring32 /* sendingString */, Interpreter /* interpreter */)
 {
-	DO_RunTheScriptFromAnyAddedEditorCommand (me, cmd -> script.get());
+	praat_executeScriptFromEditorCommand (me, cmd, cmd -> script.get());
 }
 
 static EditorMenu findMenu (Editor me, conststring32 menuTitle) {
@@ -165,10 +180,37 @@ static GuiMenuItem EditorMenu_addCommandScript (EditorMenu me, conststring32 ite
 	cmd -> d_editor = my d_editor;
 	cmd -> sender = my d_editor;
 	cmd -> menu = me;
+	const bool titleIsHeader = Melder_endsWith (itemTitle, U":");
+	if (titleIsHeader) {
+		if (itemTitle [0] == U'-' && itemTitle [1] == U' ') {
+			flags |= GuiMenu_UNDERLINED;
+			GuiMenu_addSeparator (my menuWidget);
+			itemTitle += 2;
+		}
+		cmd -> commandCallback = nullptr;
+		flags |= GuiMenu_INSENSITIVE;
+	} else
+		cmd -> commandCallback = Editor_scriptCallback;
+	const int depth = (flags & GuiMenu_DEPTH_3) >> 16;   // the maximum depth in editor windows is 3
+	if (depth > 0) {
+		/*
+			bikeshed choices for indented menu items
+		*/
+		[[maybe_unused]] constexpr conststring32 space = U"      ";   // minimalist
+		[[maybe_unused]] constexpr conststring32 fourDots = U"\u205E   ";   // not evenly dispersed
+		[[maybe_unused]] constexpr conststring32 twoDots = U"\u205A   ";   // dispersion OKish
+		[[maybe_unused]] constexpr conststring32 oneDot = U"·   ";   // dispersion good, not too prominent, not really thin
+		[[maybe_unused]] constexpr conststring32 hyphenationPoint = U"\u2027   ";   // xx
+		[[maybe_unused]] constexpr conststring32 pipe = U"|   ";   // not long enough, prominent
+		[[maybe_unused]] constexpr conststring32 boxDrawingLightVertical = U"\u2502   ";   // not long enough, prominent
+		[[maybe_unused]] constexpr conststring32 boxDrawingLightQuadrupleDashVertical = U"\u250A   ";   // not long enough, but nicely thin
+		itemTitle = Melder_cat (space, itemTitle);
+	}
 	cmd -> itemTitle = Melder_dup (itemTitle);
-	cmd -> itemWidget = script == nullptr ? GuiMenu_addSeparator (my menuWidget) :
-		GuiMenu_addItem (my menuWidget, itemTitle, flags, commonCallback, cmd.get());   // DANGLE BUG
-	cmd -> commandCallback = Editor_scriptCallback;
+	cmd -> itemWidget = ( script == nullptr || ! itemTitle || itemTitle [0] == U'-' ? GuiMenu_addSeparator (my menuWidget) :
+		titleIsHeader ?
+		GuiMenu_addItem (my menuWidget, itemTitle, flags, nullptr, nullptr) :
+		GuiMenu_addItem (my menuWidget, itemTitle, flags, commonCallback, cmd.get()) );   // DANGLE BUG
 	if (script [0] == U'\0') {
 		cmd -> script = Melder_dup (U"");
 	} else {
@@ -202,17 +244,20 @@ GuiMenuItem Editor_addCommandScript (Editor me, conststring32 menuTitle, constst
 			static bool warningGiven = false;
 			if (! warningGiven) {
 				warningGiven = true;
-				Melder_warning (U"The menu \"", menuTitle, U"\" no longer exists. The command \"", itemTitle,
-						U"\" has been installed in the menu \"", alternativeMenuTitle, U"\" instead. You could consider updating the script \"", script, U"\".");
+				Melder_warning (U"The menu “", menuTitle, U"” no longer exists. The command “", itemTitle,
+					U"” has been installed in the menu “", alternativeMenuTitle, U"” instead. "
+					U"You could consider updating the script that installed “", script, U"”, "
+					U"which is either the buttons file or a plug-in."
+				);
 			}
 			return menuItem;
 		} // else issue the original warning
 	}
 	Melder_warning (
-		U"Menu \"", menuTitle, U"\" does not exist.\n"
-		U"Command \"", itemTitle, U"\" not inserted in menu \"", menuTitle, U"\".\n"
+		U"Menu “", menuTitle, U"” does not exist.\n"
+		U"Command “", itemTitle, U"” not inserted in menu “", menuTitle, U"”.\n"
 		U"To fix this, go to Praat->Preferences->Buttons->Editors, and remove the script from this menu.\n"
-		U"You may want to install the script in a different menu."
+		U"You may then want to install the script in a different menu."
 	);
 	return nullptr;
 }
@@ -241,10 +286,11 @@ EditorCommand Editor_getMenuCommand (Editor me, conststring32 menuTitle, constst
 			}
 		}
 	}
-	Melder_throw (U"Command \"", itemTitle, U"\" not found in menu \"", menuTitle, U"\".");
+	Melder_throw (U"Command “", itemTitle, U"” not found in menu “", menuTitle, U"”.");
 }
 
 void Editor_doMenuCommand (Editor me, conststring32 commandTitle, integer narg, Stackel args, conststring32 arguments, Interpreter interpreter) {
+	Melder_assert (me);
 	integer numberOfMenus = my menus.size;
 	for (int imenu = 1; imenu <= numberOfMenus; imenu ++) {
 		EditorMenu menu = my menus.at [imenu];
@@ -257,19 +303,33 @@ void Editor_doMenuCommand (Editor me, conststring32 commandTitle, integer narg, 
 			}
 		}
 	}
+	Melder_assert (my classInfo);
 	Melder_throw (U"Command not available in ", my classInfo -> className, U".");
 }
 
 /********** class Editor **********/
 
 void structEditor :: v9_destroy () noexcept {
-	trace (U"enter");
 	MelderAudio_stopPlaying (MelderAudio_IMPLICIT);
 	/*
 		The following command must be performed before the shell is destroyed.
 		Otherwise, we would be forgetting dangling command dialogs here.
 	*/
 	our menus.removeAllItems();
+	for (integer i = theReferencesToAllOpenScriptEditors.size; i >= 1; i --) {
+		ScriptEditor scriptEditor = theReferencesToAllOpenScriptEditors.at [i];
+		if (scriptEditor -> optionalReferenceToOwningEditor != this)
+			continue;
+		if (scriptEditor -> dirty || scriptEditor -> interpreter && scriptEditor -> interpreter -> running) {
+			scriptEditor -> optionalReferenceToOwningEditor = nullptr;   // undangle
+			if (scriptEditor -> interpreter)
+				scriptEditor -> interpreter -> undangleEditorEnvironments();
+			Thing_setName (scriptEditor, nullptr);
+			Editor_setMenuSensitive (scriptEditor, U"Run", false);
+		} else
+			forget (scriptEditor);
+	}
+	Interpreters_undangleEnvironment (this);
 
 	Editor_broadcastDestruction (this);
 	if (our windowForm) {
@@ -311,22 +371,17 @@ void structEditor :: v1_info () {
 }
 
 void structEditor :: v_nameChanged () {
-	if (our name)
+	if (our name) {
 		GuiShell_setTitle (our windowForm, our name.get());
+		for (integer i = 1; i <= theReferencesToAllOpenScriptEditors.size; i ++) {
+			ScriptEditor scriptEditor = theReferencesToAllOpenScriptEditors.at [i];
+			if (scriptEditor -> optionalReferenceToOwningEditor == this)
+				Thing_setName (theReferencesToAllOpenScriptEditors.at [i], nullptr);
+		}
+	}
 }
 
-void structEditor :: v_saveData () {
-	if (! our data())
-		return;
-	our previousData = Data_copy (our data());
-}
-
-void structEditor :: v_restoreData () {
-	if (our data() && our previousData)
-		Thing_swap (our data(), our previousData.get());
-}
-
-static void menu_cb_sendBackToCallingProgram (Editor me, EDITOR_ARGS_DIRECT) {
+static void menu_cb_sendBackToCallingProgram (Editor me, EDITOR_ARGS) {
 	if (my data()) {
 		structMelderFile file { };
 		MelderDir_getFile (& Melder_preferencesFolder, U"praat_backToCaller.Data", & file);
@@ -336,53 +391,121 @@ static void menu_cb_sendBackToCallingProgram (Editor me, EDITOR_ARGS_DIRECT) {
 	my v_goAway ();
 }
 
-static void menu_cb_close (Editor me, EDITOR_ARGS_DIRECT) {
+static void menu_cb_close (Editor me, EDITOR_ARGS) {
 	my v_goAway ();
+	if (optionalInterpreter && (optionalInterpreter -> optionalOwningEnvironmentEditor() == me || optionalInterpreter -> optionalDynamicEnvironmentEditor() == me))
+		optionalInterpreter -> undangleEditorEnvironments();
 }
 
-static void menu_cb_undo (Editor me, EDITOR_ARGS_DIRECT) {
-	my v_restoreData ();
-	if (str32nequ (my undoText, U"Undo", 4)) my undoText [0] = U'R', my undoText [1] = U'e';
-	else if (str32nequ (my undoText, U"Redo", 4)) my undoText [0] = U'U', my undoText [1] = U'n';
-	else str32cpy (my undoText, U"Undo?");
-	#if gtk
-		gtk_label_set_label (GTK_LABEL (gtk_bin_get_child (GTK_BIN (my undoButton -> d_widget))), Melder_peek32to8 (my undoText));
-	#elif motif
-		conststring8 text_utf8 = Melder_peek32to8 (my undoText);
-		XtVaSetValues (my undoButton -> d_widget, XmNlabelString, text_utf8, nullptr);
-	#elif cocoa
-		[(GuiCocoaMenuItem *) my undoButton -> d_widget   setTitle: (NSString *) Melder_peek32toCfstring (my undoText)];
-	#endif
+static void menu_cb_undo (Editor me, EDITOR_ARGS) {
+	if (! my data())
+		return;   // apparently we aren't *meant* to have data
+	if (my undo.position == 0)
+		return;   // nothing to restore (just in case the Undo button is inappropriately active)
+	Daata savedData = my undo.data [my undo.position].get();
+	conststring32 savedDescription = my undo.description [my undo.position].get();
+	my undo.position -= 1;
+	if (! savedData)
+		return;
+	my v_restoreDataFromUndo (savedData);
+	/*
+		The new text on the Undo button will be the description of the next-lower saved commmand.
+	*/
+	char32 buttonText [100];
+	if (my undo.position == 0) {
+		GuiThing_setSensitive (my undoButton, false);
+		GuiMenuItem_setText (my undoButton, U"Can't undo");
+	} else {
+		conststring32 nextLowerSavedDescription = my undo.description [my undo.position].get();
+		Melder_sprint (buttonText,100, U"Undo ", nextLowerSavedDescription);
+		GuiMenuItem_setText (my undoButton, buttonText);
+	}
+	/*
+		The new text on the Redo button will be the description of the commmand just undone.
+	*/
+	GuiThing_setSensitive (my redoButton, true);
+	Melder_sprint (buttonText,100, U"Redo ", savedDescription);
+	GuiMenuItem_setText (my redoButton, buttonText);
+
 	Editor_broadcastDataChanged (me);
 }
 
-static void menu_cb_searchManual (Editor /* me */, EDITOR_ARGS_DIRECT) {
+static void menu_cb_redo (Editor me, EDITOR_ARGS) {
+	if (! my data())
+		return;   // apparently we aren't *meant* to have data
+	if (my undo.position == my undo.MAX_DEPTH)
+		return;   // nothing to restore (just in case the Redo button is inappropriately active)
+	my undo.position += 1;
+	Daata savedData = my undo.data [my undo.position].get();
+	conststring32 savedDescription = my undo.description [my undo.position].get();
+	if (! savedData)
+		return;
+	my v_restoreDataFromUndo (savedData);
+	/*
+		The new text on the Redo button will be the description of the next-higher saved commmand.
+	*/
+	char32 buttonText [100];
+	if (my undo.position == my undo.MAX_DEPTH || ! my undo.data [my undo.position + 1]) {
+		GuiThing_setSensitive (my redoButton, false);
+		GuiMenuItem_setText (my redoButton, U"Can't redo");
+	} else {
+		conststring32 nextHigherSavedDescription = my undo.description [my undo.position + 1].get();
+		Melder_sprint (buttonText,100, U"Redo ", nextHigherSavedDescription);
+		GuiMenuItem_setText (my redoButton, buttonText);
+	}
+	/*
+		The new text on the Undo button will be the description of the commmand just redone.
+	*/
+	GuiThing_setSensitive (my undoButton, true);
+	Melder_sprint (buttonText,100, U"Undo ", savedDescription);
+	GuiMenuItem_setText (my undoButton, buttonText);
+
+	Editor_broadcastDataChanged (me);
+}
+
+static void menu_cb_clearUndoHistory (Editor me, EDITOR_ARGS) {
+	for (integer i = 1; i <= my undo.MAX_DEPTH; i ++) {
+		my undo.data [i]. reset();
+		my undo.description [i]. reset();
+	}
+	my undo.position = 0;
+	GuiThing_setSensitive (my undoButton, false);
+	GuiThing_setSensitive (my redoButton, false);
+	GuiThing_setSensitive (my clearUndoHistoryButton, false);
+	GuiMenuItem_setText (my undoButton, U"Can't undo");
+	GuiMenuItem_setText (my redoButton, U"Can't redo");
+}
+
+static void menu_cb_searchManual (Editor /* me */, EDITOR_ARGS) {
 	Melder_search ();
 }
 
-static void menu_cb_newScript (Editor me, EDITOR_ARGS_DIRECT) {
+static void menu_cb_newScript (Editor me, EDITOR_ARGS) {
 	autoScriptEditor scriptEditor = ScriptEditor_createFromText (me, nullptr);
 	scriptEditor.releaseToUser();
 }
 
-static void menu_cb_openScript (Editor me, EDITOR_ARGS_DIRECT) {
+static void menu_cb_openScript (Editor me, EDITOR_ARGS) {
 	autoScriptEditor scriptEditor = ScriptEditor_createFromText (me, nullptr);
 	TextEditor_showOpen (scriptEditor.get());
 	scriptEditor.releaseToUser();
 }
 
 void structEditor :: v_createMenuItems_edit (EditorMenu menu) {
-	if (our data())
-		our undoButton = EditorMenu_addCommand (menu, U"Cannot undo", GuiMenu_INSENSITIVE + 'Z', menu_cb_undo);
+	if (our data()) {
+		our undoButton = EditorMenu_addCommand (menu, U"Can't undo", GuiMenu_INSENSITIVE + 'Z', menu_cb_undo);
+		our redoButton = EditorMenu_addCommand (menu, U"Can't redo", GuiMenu_INSENSITIVE + 'Y', menu_cb_redo);
+		our clearUndoHistoryButton = EditorMenu_addCommand (menu, U"Clear undo history", GuiMenu_INSENSITIVE, menu_cb_clearUndoHistory);
+	}
 }
 
-static void INFO_EDITOR__settingsReport (Editor me, EDITOR_ARGS_DIRECT_WITH_OUTPUT) {
+static void INFO_EDITOR__settingsReport (Editor me, EDITOR_ARGS) {
 	INFO_EDITOR
 		Thing_info (me);
 	INFO_EDITOR_END
 }
 
-static void INFO_DATA__info (Editor me, EDITOR_ARGS_DIRECT_WITH_OUTPUT) {
+static void INFO_DATA__info (Editor me, EDITOR_ARGS) {
 	INFO_DATA
 		if (my data())
 			Thing_info (my data());
@@ -483,7 +606,8 @@ void Editor_init (Editor me, int x, int y, int width, int height, conststring32 
 		top += Machine_getTitleBarHeight ();
 		bottom += Machine_getTitleBarHeight ();
 	#endif
-	my windowForm = GuiWindow_create (left, top, width, height, 450, 350, title, gui_window_cb_goAway, me, my v_canFullScreen () ? GuiWindow_FULLSCREEN : 0);
+	my windowForm = GuiWindow_create (left, top, width, height, 450, 350, title,
+			gui_window_cb_goAway, me, my v_canFullScreen () ? GuiWindow_FULLSCREEN : 0);
 	Thing_setName (me, title);
 
 	/*
@@ -498,8 +622,7 @@ void Editor_init (Editor me, int x, int y, int width, int height, conststring32 
 	if (my v_hasMenuBar ()) {
 		my fileMenu = Editor_addMenu (me, U"File", 0);
 		if (my v_canReportSettings ()) {
-			EditorMenu_addCommand (my fileMenu, U"Editor info", 0, INFO_EDITOR__settingsReport);
-			EditorMenu_addCommand (my fileMenu, U"Settings report", Editor_HIDDEN, INFO_EDITOR__settingsReport);
+			EditorMenu_addCommand (my fileMenu, U"Editor info || Settings report", 0, INFO_EDITOR__settingsReport);
 			if (my data())
 				EditorMenu_addCommand (my fileMenu, Melder_cat (Thing_className (my data()), U" info"), 0, INFO_DATA__info);
 		}
@@ -525,41 +648,40 @@ void Editor_init (Editor me, int x, int y, int width, int height, conststring32 
 	GuiThing_show (my windowForm);
 }
 
-void Editor_save (Editor me, conststring32 cattableText) {
-	Melder_sprint (my undoText,100, U"Undo ", cattableText);
-	my v_saveData ();
+void Editor_save (Editor me, conststring32 cattableDescription) {
+	/*
+		Construct the text for the Undo button before `cattableDescription` goes invalid.
+	*/
+	char32 undoText [100];
+	Melder_sprint (undoText,100, U"Undo ", cattableDescription);
+	/*
+		Save the data and description into the undo buffer.
+	*/
+	autostring32 descriptionToSaveForUndo = Melder_dup (cattableDescription);   // uncat before calling any virtual function
+	autoDaata dataToSaveForUndo = my v_dataToSaveForUndo();
+	if (! dataToSaveForUndo)
+		return;
+	if (my undo.position == my undo.MAX_DEPTH)
+		for (integer i = 1; i < my undo.MAX_DEPTH; i ++) {
+			my undo.data [i] = my undo.data [i + 1].move();
+			my undo.description [i] = my undo.description [i + 1].move();
+		}
+	else
+		my undo.position += 1;
+	my undo.data [my undo.position] = dataToSaveForUndo.move();
+	my undo.description [my undo.position] = descriptionToSaveForUndo.move();
+	for (integer i = my undo.position + 1; i < my undo.MAX_DEPTH; i ++) {
+		my undo.data [i]. reset();
+		my undo.description [i]. reset();
+	}
+	/*
+		Update some Undo buttons.
+	*/
 	if (! my undoButton)
 		return;
 	GuiThing_setSensitive (my undoButton, true);
-	#if gtk
-		gtk_label_set_label (GTK_LABEL (gtk_bin_get_child (GTK_BIN (my undoButton -> d_widget))), Melder_peek32to8 (my undoText));
-	#elif motif
-		conststring8 text_utf8 = Melder_peek32to8 (my undoText);
-		XtVaSetValues (my undoButton -> d_widget, XmNlabelString, text_utf8, nullptr);
-	#elif cocoa
-		[(GuiCocoaMenuItem *) my undoButton -> d_widget   setTitle: (NSString *) Melder_peek32toCfstring (my undoText)];
-	#endif
-}
-
-void Editor_openPraatPicture (Editor me) {
-	my pictureGraphics = praat_picture_editor_open (my instancePref_picture_eraseFirst());
-}
-void Editor_closePraatPicture (Editor me) {
-	if (my data() && my classPref_picture_writeNameAtTop() != kDataGui_writeNameAtTop::NO_) {
-		Graphics_setNumberSignIsBold (my pictureGraphics, false);
-		Graphics_setPercentSignIsItalic (my pictureGraphics, false);
-		Graphics_setCircumflexIsSuperscript (my pictureGraphics, false);
-		Graphics_setUnderscoreIsSubscript (my pictureGraphics, false);
-		Graphics_textTop (my pictureGraphics,
-			my classPref_picture_writeNameAtTop() == kDataGui_writeNameAtTop::FAR_,
-			my data() -> name.get()
-		);
-		Graphics_setNumberSignIsBold (my pictureGraphics, true);
-		Graphics_setPercentSignIsItalic (my pictureGraphics, true);
-		Graphics_setCircumflexIsSuperscript (my pictureGraphics, true);
-		Graphics_setUnderscoreIsSubscript (my pictureGraphics, true);
-	}
-	praat_picture_editor_close ();
+	GuiMenuItem_setText (my undoButton, undoText);
+	GuiThing_setSensitive (my clearUndoHistoryButton, true);
 }
 
 /* End of file Editor.cpp */

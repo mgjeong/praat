@@ -29,6 +29,12 @@ Thing_declare (Interpreter);
 
 int Sound_writeToNistAudioFile (Sound me, MelderFile file);
 
+void Sound_saveAsMP3File_VBR (Sound me, MelderFile file, double inverseQuality);
+/*
+	0 <= inverseQuality < 10
+	0 is highest quality, 9.99 is lowest quality
+*/
+
 autoSound Sound_readFromCmuAudioFile (MelderFile file);
 
 /* only 16 bit signed has been tested !! */
@@ -52,8 +58,6 @@ autoSound Sound_readFromDialogicADPCMFile (MelderFile file, double sampleRate);
 autoSound Sound_readFromOggVorbisFile (MelderFile file);
 autoSound Sound_readFromOggOpusFile (MelderFile file);
 
-void Sound_writeToRawFile (Sound me, MelderFile file, const char *format, bool littleEndian, int nBitsCoding, bool unSigned);
-
 void Sound_into_Sound (Sound me, Sound to, double startTime);
 /* precondition: my dx == to->dx (equal sampling times */
 
@@ -63,9 +67,17 @@ void Sound_overwritePart (Sound me, double t1, double t2, Sound thee, double t3)
 	starting at t3 in thee.
 */
 
+autoSound Sound_derivative (Sound me, double lowPassFrequency, double smoothing, double peakAmplitude);
+/*
+	The real derivative
+*/
+
 void Sound_preEmphasis (Sound me, double preEmphasisFrequency);
-/* deEmphasis = exp(- 2 * NUMpi * deEmphasisFrequency * my dx); */
-/* for (i=my nx; i >=2; i-- ) my z [1] [i] -= preEmphasis * my z [1] [i-1]; */
+/*
+	Approximation of derivative by first order difference.
+	deEmphasis = exp(- 2 * NUMpi * deEmphasisFrequency * my dx);
+	for (i=my nx; i >=2; i-- ) my z [1] [i] -= preEmphasis * my z [1] [i-1];
+*/
 
 void Sound_deEmphasis (Sound me, double preEmphasisFrequency);
 /*	for (i=2; i <= my nx; i++ ) my z [1] [i] += deEmphasis * my z [1] [i-1]; */
@@ -128,8 +140,8 @@ void Sound_scale_dB (Sound me, double level_dB);
 */
 
 void Sound_fade (Sound me, int channel, double t, double fadeTime, bool fadeOut, bool fadeGlobal);
-/* if inout <= 0 fade in with (1-cos)/2  else fade out with (1+cos)/2
-	channel = 0 (all), 1 (left), 2 (right).
+/* if !fadeOut fade in with (1-cos)/2  else fade out with (1+cos)/2
+	channel = 0 (all).
 */
 
 void Sound_draw_btlr (Sound me, Graphics g, double tmin, double tmax, double amin, double amax, kSoundDrawingDirection drawingDirection, bool garnish);

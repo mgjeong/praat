@@ -1,6 +1,6 @@
 /* TableOfReal.cpp
  *
- * Copyright (C) 1992-2022 Paul Boersma
+ * Copyright (C) 1992-2023 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,23 +92,27 @@ void structTableOfReal :: v1_info () {
 	MelderInfo_writeLine (U"Number of columns: ", our numberOfColumns);
 }
 
-conststring32 structTableOfReal :: v_getRowStr (integer irow) {
-	if (irow < 1 || irow > our numberOfRows) return nullptr;
+conststring32 structTableOfReal :: v_getRowStr (const integer irow) const {
+	if (irow < 1 || irow > our numberOfRows)
+		return nullptr;
 	return our rowLabels [irow] ? our rowLabels [irow].get() : U"";
 }
-conststring32 structTableOfReal :: v_getColStr (integer icol) {
-	if (icol < 1 || icol > our numberOfColumns) return nullptr;
+conststring32 structTableOfReal :: v_getColStr (const integer icol) const {
+	if (icol < 1 || icol > our numberOfColumns)
+		return nullptr;
 	return our columnLabels [icol] ? our columnLabels [icol].get() : U"";
 }
-double structTableOfReal :: v_getMatrix (integer irow, integer icol) {
-	if (irow < 1 || irow > our numberOfRows) return undefined;
-	if (icol < 1 || icol > our numberOfColumns) return undefined;
+double structTableOfReal :: v_getMatrix (const integer irow, const integer icol) const {
+	if (irow < 1 || irow > our numberOfRows)
+		return undefined;
+	if (icol < 1 || icol > our numberOfColumns)
+		return undefined;
 	return our data [irow] [icol];
 }
-double structTableOfReal :: v_getRowIndex (conststring32 rowLabel) {
+double structTableOfReal :: v_getRowIndex (const conststring32 rowLabel) const {
 	return TableOfReal_rowLabelToIndex (this, rowLabel);
 }
-double structTableOfReal :: v_getColIndex (conststring32 columnLabel) {
+double structTableOfReal :: v_getColIndex (const conststring32 columnLabel) const {
 	return TableOfReal_columnLabelToIndex (this, columnLabel);
 }
 
@@ -135,14 +139,14 @@ autoTableOfReal TableOfReal_create (integer numberOfRows, integer numberOfColumn
 
 /***** QUERY *****/
 
-integer TableOfReal_rowLabelToIndex (TableOfReal me, conststring32 label) {
+integer TableOfReal_rowLabelToIndex (const constTableOfReal me, const conststring32 label) {
 	for (integer irow = 1; irow <= my numberOfRows; irow ++)
 		if (my rowLabels [irow] && str32equ (my rowLabels [irow].get(), label))
 			return irow;
 	return 0;
 }
 
-integer TableOfReal_columnLabelToIndex (TableOfReal me, conststring32 label) {
+integer TableOfReal_columnLabelToIndex (const constTableOfReal me, const conststring32 label) {
 	for (integer icol = 1; icol <= my numberOfColumns; icol ++)
 		if (my columnLabels [icol] && str32equ (my columnLabels [icol].get(), label))
 			return icol;
@@ -594,7 +598,7 @@ autoStrings TableOfReal_extractColumnLabelsAsStrings (TableOfReal me) {
 /***** DRAW *****/
 
 static void NUMrationalize (double x, integer *numerator, integer *denominator) {
-	double epsilon = 1e-6;
+	constexpr double epsilon = 1e-6;
 	*numerator = 1;
 	for (*denominator = 1; *denominator <= 100000; (*denominator) ++) {
 		double numerator_d = x * *denominator;
@@ -664,17 +668,17 @@ void TableOfReal_drawAsNumbers (TableOfReal me, Graphics graphics, integer rowmi
 	fixRows (me, & rowmin, & rowmax);
 	Graphics_setInner (graphics);
 	Graphics_setWindow (graphics, 0.5, my numberOfColumns + 0.5, 0.0, 1.0);
-	double leftMargin = getLeftMargin (graphics);   // not earlier!
-	double lineSpacing = getLineSpacing (graphics);   // not earlier!
-	double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
-	double maxTextHeight = getMaxColumnLabelHeight (me, graphics, 1, my numberOfColumns);
+	const double leftMargin = getLeftMargin (graphics);   // not earlier!
+	const double lineSpacing = getLineSpacing (graphics);   // not earlier!
+	const double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
+	const double maxTextHeight = getMaxColumnLabelHeight (me, graphics, 1, my numberOfColumns);
 
 	Graphics_setTextAlignment (graphics, Graphics_CENTRE, Graphics_BOTTOM);
 	for (integer icol = 1; icol <= my numberOfColumns; icol ++)
 		if (my columnLabels && my columnLabels [icol] && my columnLabels [icol] [0])
 			Graphics_text (graphics, icol, 1, my columnLabels [icol].get());
 	for (integer irow = rowmin; irow <= rowmax; irow ++) {
-		double y = 1.0 - lineSpacing * (irow - rowmin + 0.6);
+		const double y = 1.0 - lineSpacing * (irow - rowmin + 0.6);
 		Graphics_setTextAlignment (graphics, Graphics_RIGHT, Graphics_HALF);
 		if (my rowLabels && my rowLabels [irow] && my rowLabels [irow] [0])
 			Graphics_text (graphics, 0.5 - leftMargin, y, my rowLabels [irow].get());
@@ -703,10 +707,10 @@ void TableOfReal_drawAsNumbers_if (TableOfReal me, Graphics graphics, integer ro
 		fixRows (me, & rowmin, & rowmax);
 		Graphics_setInner (graphics);
 		Graphics_setWindow (graphics, 0.5, my numberOfColumns + 0.5, 0.0, 1.0);
-		double leftMargin = getLeftMargin (graphics);   // not earlier!
-		double lineSpacing = getLineSpacing (graphics);   // not earlier!
-		double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
-		double maxTextHeight = getMaxColumnLabelHeight (me, graphics, 1, my numberOfColumns);
+		const double leftMargin = getLeftMargin (graphics);   // not earlier!
+		const double lineSpacing = getLineSpacing (graphics);   // not earlier!
+		const double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
+		const double maxTextHeight = getMaxColumnLabelHeight (me, graphics, 1, my numberOfColumns);
 		Matrix_formula (original.get(), conditionFormula, interpreter, conditions.get());
 
 		Graphics_setTextAlignment (graphics, Graphics_CENTRE, Graphics_BOTTOM);
@@ -742,11 +746,12 @@ void TableOfReal_drawVerticalLines (TableOfReal me, Graphics graphics, integer r
 	fixRows (me, & rowmin, & rowmax);
 	Graphics_setInner (graphics);
 	Graphics_setWindow (graphics, colmin - 0.5, colmax + 0.5, 0, 1);
-	double lineSpacing = getLineSpacing (graphics);   // not earlier!
-	double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
-	double maxTextHeight = getMaxColumnLabelHeight (me, graphics, 1, my numberOfColumns);
+	const double lineSpacing = getLineSpacing (graphics);   // not earlier!
+	const double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
+	const double maxTextHeight = getMaxColumnLabelHeight (me, graphics, 1, my numberOfColumns);
 
-	if (maxTextWidth > 0.0) colmin -= 1;
+	if (maxTextWidth > 0.0)
+		colmin -= 1;
 	for (integer col = colmin + 1; col <= colmax; col ++)
 		Graphics_line (graphics, col - 0.5, 1.0 + maxTextHeight, col - 0.5, 1.0 - lineSpacing * (rowmax - rowmin + 1));
 	Graphics_unsetInner (graphics);
@@ -757,15 +762,16 @@ void TableOfReal_drawLeftAndRightLines (TableOfReal me, Graphics graphics, integ
 	fixRows (me, & rowmin, & rowmax);
 	Graphics_setInner (graphics);
 	Graphics_setWindow (graphics, colmin - 0.5, colmax + 0.5, 0.0, 1.0);
-	double lineSpacing = getLineSpacing (graphics);
-	double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
-	double maxTextHeight = getMaxColumnLabelHeight (me, graphics, 1, my numberOfColumns);
+	const double lineSpacing = getLineSpacing (graphics);
+	const double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
+	const double maxTextHeight = getMaxColumnLabelHeight (me, graphics, 1, my numberOfColumns);
 
 	double left = 0.5;
-	if (maxTextWidth > 0.0) left -= maxTextWidth + 2.0 * lineSpacing;
-	double right = colmax + 0.5;
-	double top = 1.0 + maxTextHeight;
-	double bottom = 1.0 - lineSpacing * (rowmax - rowmin + 1);
+	if (maxTextWidth > 0.0)
+		left -= maxTextWidth + 2.0 * lineSpacing;
+	const double right = colmax + 0.5;
+	const double top = 1.0 + maxTextHeight;
+	const double bottom = 1.0 - lineSpacing * (rowmax - rowmin + 1);
 	Graphics_line (graphics, left, top, left, bottom);
 	Graphics_line (graphics, right, top, right, bottom);
 	Graphics_unsetInner (graphics);
@@ -776,17 +782,19 @@ void TableOfReal_drawHorizontalLines (TableOfReal me, Graphics graphics, integer
 	fixRows (me, & rowmin, & rowmax);
 	Graphics_setInner (graphics);
 	Graphics_setWindow (graphics, colmin - 0.5, colmax + 0.5, 0, 1);
-	double lineSpacing = getLineSpacing (graphics);
-	double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
-	double maxTextHeight = getMaxColumnLabelHeight (me, graphics, 1, my numberOfColumns);
+	const double lineSpacing = getLineSpacing (graphics);
+	const double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
+	const double maxTextHeight = getMaxColumnLabelHeight (me, graphics, 1, my numberOfColumns);
 
 	double left = 0.5;
-	double top = rowmin;
-	if (maxTextWidth > 0.0) left -= maxTextWidth + 2.0 * lineSpacing;
-	if (maxTextHeight > 0.0) rowmin -= 1;
-	double right = colmax + 0.5;
+	const double top = rowmin;
+	if (maxTextWidth > 0.0)
+		left -= maxTextWidth + 2.0 * lineSpacing;
+	if (maxTextHeight > 0.0)
+		rowmin -= 1;
+	const double right = colmax + 0.5;
 	for (integer irow = rowmin; irow < rowmax; irow ++) {
-		double y = 1.0 - lineSpacing * (irow - top + 1);
+		const double y = 1.0 - lineSpacing * (irow - top + 1);
 		Graphics_line (graphics, left, y, right, y);
 	}
 	Graphics_unsetInner (graphics);
@@ -797,15 +805,16 @@ void TableOfReal_drawTopAndBottomLines (TableOfReal me, Graphics graphics, integ
 	fixRows (me, & rowmin, & rowmax);
 	Graphics_setInner (graphics);
 	Graphics_setWindow (graphics, colmin - 0.5, colmax + 0.5, 0.0, 1.0);
-	double lineSpacing = getLineSpacing (graphics);
-	double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
-	double maxTextHeight = getMaxColumnLabelHeight (me, graphics, 1, my numberOfColumns);
+	const double lineSpacing = getLineSpacing (graphics);
+	const double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
+	const double maxTextHeight = getMaxColumnLabelHeight (me, graphics, 1, my numberOfColumns);
 
 	double left = 0.5;
-	if (maxTextWidth > 0.0) left -= maxTextWidth + 2 * lineSpacing;
-	double right = colmax + 0.5;
-	double top = 1.0 + maxTextHeight;
-	double bottom = 1.0 - lineSpacing * (rowmax - rowmin + 1);
+	if (maxTextWidth > 0.0)
+		left -= maxTextWidth + 2 * lineSpacing;
+	const double right = colmax + 0.5;
+	const double top = 1.0 + maxTextHeight;
+	const double bottom = 1.0 - lineSpacing * (rowmax - rowmin + 1);
 	Graphics_line (graphics, left, top, right, top);
 	Graphics_line (graphics, left, bottom, right, bottom);
 	Graphics_unsetInner (graphics);
@@ -831,11 +840,11 @@ void TableOfReal_drawAsSquares (TableOfReal me, Graphics graphics, integer rowmi
 	for (integer irow = rowmin; irow <= rowmax; irow ++) {
 		double y = rowmax + rowmin - irow;
 		for (integer icol = colmin; icol <= colmax; icol ++) {
-			double x = icol;
+			const double x = icol;
 			/* two neighbouring squares should not touch -> 0.95 */
-			double d = 0.95 * sqrt (fabs (my data [irow] [icol]) / datamax);
-			double x1WC = x - d * dx / 2.0, x2WC = x + d * dx / 2.0;
-			double y1WC = y - d * dy / 2.0, y2WC = y + d * dy / 2.0;
+			const double d = 0.95 * sqrt (fabs (my data [irow] [icol]) / datamax);
+			const double x1WC = x - d * dx / 2.0, x2WC = x + d * dx / 2.0;
+			const double y1WC = y - d * dy / 2.0, y2WC = y + d * dy / 2.0;
 			if (my data [irow] [icol] > 0.0)
 				Graphics_setColour (graphics, Melder_WHITE);
 			Graphics_fillRectangle (graphics, x1WC, x2WC, y1WC, y2WC);
@@ -860,9 +869,8 @@ autoTableOfReal TablesOfReal_append (TableOfReal me, TableOfReal thee) {
 		autoTableOfReal him = Thing_newFromClass (my classInfo).static_cast_move <structTableOfReal> ();
 		TableOfReal_init (him.get(), my numberOfRows + thy numberOfRows, my numberOfColumns);
 		/* Unsafe: new attributes not initialized. */
-		for (integer icol = 1; icol <= my numberOfColumns; icol ++) {
+		for (integer icol = 1; icol <= my numberOfColumns; icol ++)
 			TableOfReal_setColumnLabel (him.get(), icol, my columnLabels [icol].get());
-		}
 		for (integer irow = 1; irow <= my numberOfRows; irow ++) {
 			TableOfReal_setRowLabel (him.get(), irow, my rowLabels [irow].get());
 			for (integer icol = 1; icol <= my numberOfColumns; icol ++)
@@ -890,14 +898,14 @@ autoTableOfReal TablesOfReal_appendMany (OrderedOf<structTableOfReal>* me) {
 		for (integer itab = 2; itab <= my size; itab ++) {
 			thee = my at [itab];
 			totalNumberOfRows += thy numberOfRows;
-			if (thy numberOfColumns != numberOfColumns) Melder_throw (U"Numbers of columns do not match.");
+			if (thy numberOfColumns != numberOfColumns)
+				Melder_throw (U"Numbers of columns do not match.");
 		}
 		autoTableOfReal him = Thing_newFromClass (thy classInfo).static_cast_move <structTableOfReal> ();
 		TableOfReal_init (him.get(), totalNumberOfRows, numberOfColumns);
 		/* Unsafe: new attributes not initialized. */
-		for (integer icol = 1; icol <= numberOfColumns; icol ++) {
+		for (integer icol = 1; icol <= numberOfColumns; icol ++)
 			TableOfReal_setColumnLabel (him.get(), icol, thy columnLabels [icol].get());
-		}
 		totalNumberOfRows = 0;
 		for (integer itab = 1; itab <= my size; itab ++) {
 			thee = my at [itab];
@@ -969,11 +977,11 @@ void TableOfReal_sortByColumn (TableOfReal me, integer column1, integer column2)
 
 autoTableOfReal Table_to_TableOfReal (Table me, integer labelColumn) {
 	try {
-		if (labelColumn < 1 || labelColumn > my numberOfColumns) labelColumn = 0;
+		if (labelColumn < 1 || labelColumn > my numberOfColumns)
+			labelColumn = 0;
 		autoTableOfReal thee = TableOfReal_create (my rows.size, labelColumn ? my numberOfColumns - 1 : my numberOfColumns);
-		for (integer icol = 1; icol <= my numberOfColumns; icol ++) {
-			Table_numericize_Assert (me, icol);
-		}
+		for (integer icol = 1; icol <= my numberOfColumns; icol ++)
+			Table_numericize_a (me, icol);
 		if (labelColumn) {
 			for (integer icol = 1; icol < labelColumn; icol ++)
 				TableOfReal_setColumnLabel (thee.get(), icol, my columnHeaders [icol]. label.get());
@@ -983,14 +991,12 @@ autoTableOfReal Table_to_TableOfReal (Table me, integer labelColumn) {
 				TableRow row = my rows.at [irow];
 				char32 *string = row -> cells [labelColumn]. string.get();
 				TableOfReal_setRowLabel (thee.get(), irow, string ? string : U"");
-				for (integer icol = 1; icol < labelColumn; icol ++) {
+				for (integer icol = 1; icol < labelColumn; icol ++)
 					thy data [irow] [icol] = row -> cells [icol]. number;   // Optimization.
-					//thy data [irow] [icol] = Table_getNumericValue_Assert (me, irow, icol);
-				}
-				for (integer icol = labelColumn + 1; icol <= my numberOfColumns; icol ++) {
+							//thy data [irow] [icol] = Table_getNumericValue_a (me, irow, icol);
+				for (integer icol = labelColumn + 1; icol <= my numberOfColumns; icol ++)
 					thy data [irow] [icol - 1] = row -> cells [icol]. number;   // Optimization.
-					//thy data [irow] [icol - 1] = Table_getNumericValue_Assert (me, irow, icol);
-				}
+							//thy data [irow] [icol - 1] = Table_getNumericValue_a (me, irow, icol);
 			}
 		} else {
 			for (integer icol = 1; icol <= my numberOfColumns; icol ++) {
@@ -1000,7 +1006,7 @@ autoTableOfReal Table_to_TableOfReal (Table me, integer labelColumn) {
 				TableRow row = my rows.at [irow];
 				for (integer icol = 1; icol <= my numberOfColumns; icol ++) {
 					thy data [irow] [icol] = row -> cells [icol]. number;   // Optimization.
-					//thy data [irow] [icol] = Table_getNumericValue_Assert (me, irow, icol);
+					//thy data [irow] [icol] = Table_getNumericValue_a (me, irow, icol);
 				}
 			}
 		}
@@ -1010,10 +1016,10 @@ autoTableOfReal Table_to_TableOfReal (Table me, integer labelColumn) {
 	}
 }
 
-autoTable TableOfReal_to_Table (TableOfReal me, conststring32 labelOfFirstColumn) {
+autoTable TableOfReal_to_Table (TableOfReal me, conststring32 nameOfFirstColumn) {
 	try {
 		autoTable thee = Table_createWithoutColumnNames (my numberOfRows, my numberOfColumns + 1);
-		Table_setColumnLabel (thee.get(), 1, labelOfFirstColumn);
+		Table_renameColumn_e (thee.get(), 1, nameOfFirstColumn);
 		for (integer icol = 1; icol <= my numberOfColumns; icol ++) {
 			conststring32 columnLabel = my columnLabels [icol].get();
 			thy columnHeaders [icol + 1]. label = Melder_dup (columnLabel && columnLabel [0] ? columnLabel : U"?");

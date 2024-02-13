@@ -2,7 +2,7 @@
 #define _SoundRecorder_h_
 /* SoundRecorder.h
  *
- * Copyright (C) 1992-2005,2008-2013,2015-2017,2020,2022 Paul Boersma
+ * Copyright (C) 1992-2005,2008-2013,2015-2017,2020,2022,2023 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 /* An editor-like object that allows the user to record sounds. */
 
-#include "Editor.h"
+#include "ScriptEditor.h"
 #include "Sound.h"
 
 #include "SoundRecorder_enums.h"
@@ -55,7 +55,7 @@ struct SoundRecorder_Fsamp {
 	GuiRadioButton button;
 };
 
-#define SoundRecorder_IDEVICE_MAX  8
+#define SoundRecorder_IDEVICE_MAX  20
 
 #define SoundRecorder_IFSAMP_8000  1
 #define SoundRecorder_IFSAMP_9800  2

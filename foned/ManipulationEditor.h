@@ -2,7 +2,7 @@
 #define _ManipulationEditor_h_
 /* ManipulationEditor.h
  *
- * Copyright (C) 1992-2005,2007,2009-2013,2015,2016,2018,2020-2022 Paul Boersma
+ * Copyright (C) 1992-2005,2007,2009-2013,2015,2016,2018,2020-2023 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,8 +67,8 @@ Thing_define (ManipulationEditor, FunctionEditor) {
 
 	Manipulation manipulation() { return static_cast <Manipulation> (our data()); }
 
-	void v1_dataChanged () override {
-		ManipulationEditor_Parent :: v1_dataChanged ();
+	void v1_dataChanged (Editor sender) override {
+		ManipulationEditor_Parent :: v1_dataChanged (sender);
 		our soundArea() -> functionChanged (our manipulation() -> sound.get());
 		our pitchTierArea() -> functionChanged (our manipulation() -> pitch.get());
 		if (! our manipulation() -> duration)   // repair an old-fashioned Manipulation that has a PitchTier only
@@ -94,10 +94,6 @@ Thing_define (ManipulationEditor, FunctionEditor) {
 		override;
 	void v_createMenuItems_help (EditorMenu menu)
 		override;
-	void v_saveData ()
-		override;
-	void v_restoreData ()
-		override;
 	void v_distributeAreas () override {
 		our pulsesArea() -> setGlobalYRange_fraction (0.67, 1.00);
 		our soundArea() -> setGlobalYRange_fraction (0.67, 1.00);
@@ -115,15 +111,20 @@ Thing_define (ManipulationEditor, FunctionEditor) {
 		override;
 	void v_drawLegends () override {
 		FunctionArea_drawLegend (our soundArea().get(),
-			FunctionArea_legend_WAVEFORM U" %%non-modifiable mono copy of sound", DataGui_defaultForegroundColour (our soundArea().get()),
-			FunctionArea_legend_POLES U" ##modifiable pulses", DataGui_defaultForegroundColour (our pulsesArea().get())
+			FunctionArea_legend_WAVEFORM U" %%non-modifiable mono copy of sound",
+			DataGui_defaultForegroundColour (our soundArea().get(), false),
+			FunctionArea_legend_POLES U" ##modifiable pulses",
+			DataGui_defaultForegroundColour (our pulsesArea().get(), false)
 		);
 		FunctionArea_drawLegend (our pitchTierArea().get(),
-			FunctionArea_legend_SPECKLES U" %%pitch derived from pulses", Melder_GREY,
-			FunctionArea_legend_LINES_SPECKLES U" ##manipulatable pitch", DataGui_defaultForegroundColour (our pitchTierArea().get())
+			FunctionArea_legend_SPECKLES U" %%pitch derived from pulses",
+			Melder_GREY,
+			FunctionArea_legend_LINES_SPECKLES U" ##manipulatable pitch",
+			DataGui_defaultForegroundColour (our pitchTierArea().get(), false)
 		);
 		FunctionArea_drawLegend (our durationTierArea().get(),
-			FunctionArea_legend_LINES_SPECKLES U" ##manipulatable duration", DataGui_defaultForegroundColour (our durationTierArea().get())
+			FunctionArea_legend_LINES_SPECKLES U" ##manipulatable duration",
+			DataGui_defaultForegroundColour (our durationTierArea().get(), false)
 		);
 	}
 };

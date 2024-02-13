@@ -2,7 +2,7 @@
 #define _Spectrogram_extensions_h_
 /* Spectrogram_extensions.h
  *
- * Copyright (C) 2014-2021 David Weenink
+ * Copyright (C) 2014-2023 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 Thing_define (BandFilterSpectrogram, Matrix) {
 	void v1_info ()
 		override;
-	double v_getValueAtSample (integer icol, integer irow, int units)
+	double v_getValueAtSample (integer icol, integer irow, int units) const
 		override;
 
 	virtual double v_frequencyToHertz (double f) { return f; }
@@ -146,6 +146,9 @@ void CC_into_BandFilterSpectrogram (CC me, BandFilterSpectrogram thee, integer f
 	Implementation of Yanna Ma & Akinori Nishihara (2013), Efficient voice activity detection algorithm
 		using long-term spectral flatness measure,  EURASIP Journal on Audio, Speech, and Music Processing.
 */
-autoMatrix Spectrogram_getLongtermSpectralFlatnessMeasure (Spectrogram me, double longtermWindow, double shorttermWindow, double fmin, double fmax);
+autoMatrix Spectrogram_getLongtermSpectralFlatness (Spectrogram me, double longtimeWindow, double shorttimeWindow, double fmin, double fmax);
+
+void Spectrogram_drawLongTermFlatness (Spectrogram me, Graphics g, double tmin, double tmax, double minimumFlatness_db,
+	double longtimeWindow, double shorttimeWindow, double fmin, double fmax, bool garnish);
 
 #endif /* _Spectrogram_extensions_h_ */

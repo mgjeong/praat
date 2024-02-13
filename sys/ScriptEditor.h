@@ -2,7 +2,7 @@
 #define _ScriptEditor_h_
 /* ScriptEditor.h
  *
- * Copyright (C) 1997-2011,2012,2015,2016,2018,2022 Paul Boersma
+ * Copyright (C) 1997-2011,2012,2015,2016,2018,2022,2023 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,15 @@
 #include "Interpreter.h"
 
 Thing_define (ScriptEditor, TextEditor) {
-	autostring32 environmentName;
-	ClassInfo editorClass;
+	/*
+		Who owns me?
+	*/
+	autostring32 optionalOwningEditorClassName;   // set at creation, and never changed after that (last checked 2023-02-25)
+	Editor optionalReferenceToOwningEditor;   // set at creation, and may be set to null later on
+	bool wasCreatedInAnEditor () const noexcept {
+		return !! our optionalOwningEditorClassName;
+	}
+
 	autoInterpreter interpreter;
 	autoUiForm argsDialog;
 
@@ -40,25 +47,29 @@ Thing_define (ScriptEditor, TextEditor) {
 		override;
 	void v_createMenuItems_help (EditorMenu menu)
 		override;
+	conststring32 v_extension () const
+		override { return U".praat"; }
 };
 
 void ScriptEditor_init (ScriptEditor me,
-	Editor editor,
+	Editor optionalEditor,
 	conststring32 initialText
 );
 autoScriptEditor ScriptEditor_createFromText (
-	Editor editor,   // the scripting environment; if null, the scripting environment consists of the global windows
+	Editor optionalEditor,   // the scripting environment; if null, the scripting environment consists of the global windows
 	conststring32 initialText   // may be null
 );
 
 autoScriptEditor ScriptEditor_createFromScript_canBeNull (
-	Editor editor,
+	Editor optionalEditor,
 	Script script
 );
 
 bool ScriptEditors_dirty ();   // are there any modified and unsaved scripts? Ask before quitting the program.
 
 void ScriptEditor_debug_printAllOpenScriptEditors ();
+
+extern CollectionOf <structScriptEditor> theReferencesToAllOpenScriptEditors;
 
 /* End of file ScriptEditor.h */
 #endif

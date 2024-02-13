@@ -40,7 +40,7 @@ void praat_addMenuCommandScript (conststring32 window, conststring32 menu, const
 
 /*
 	For the Praat objects window:
-	'window' is "Objects", 'menu' is "Praat", "New", "Open", "Help", "Preferences", "Goodies", or "Technical".
+	'window' is "Objects", 'menu' is "Praat", "New", "Open", "Help", "Settings", "Goodies", or "Technical".
 	For the Praat picture window:
 	'window' is "Picture", 'menu' is "File", "Edit", "Margins", "World", "Select", "Pen", "Font", or "Help".
 */
@@ -68,7 +68,7 @@ Thing_define (Praat_Command, Thing) {
 			and you should execute the command. */
 		/* If sendingString exists (apparently from a command file),
 			UiForm_parseString should be called, which will call this routine again with sendingForm. */
-		/* All of these things are normally taken care of by the macros defined in praat.h. */
+		/* All of these things are normally taken care of by the macros defined in praatM.h. */
 	conststring32 nameOfCallback;
 	signed char
 		visible,   // do the selected classes match class1, class2, class3 and class4?
@@ -98,6 +98,7 @@ integer praat_numberOfSelected (ClassInfo klas);
 integer praat_idOfSelected (ClassInfo klas, integer inplace);
 autoVEC praat_idsOfAllSelected (ClassInfo klas);
 char32 * praat_nameOfSelected (ClassInfo klas, integer inplace);
+autoSTRVEC praat_namesOfAllSelected (ClassInfo klas);
 
 /* Used by praat.cpp; defined in praat_picture.cpp.
 */
@@ -194,7 +195,6 @@ inline struct PraatP {
 	autostring32 title;
 	GuiWindow menuBar;
 	int phase;
-	Editor editor;   // scripting environment
 } praatP;
 
 struct autoPraatBackground {

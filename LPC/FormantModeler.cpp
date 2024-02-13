@@ -310,7 +310,9 @@ void FormantModeler_drawVariancesOfShiftedTracks (FormantModeler me, Graphics g,
 				var [ipoint] -= varShifted [ipoint];
 		}
 		if (ymax <= ymin)
-			NUMextrema (var.part (ixmin, ixmax), & ymin, & ymax);
+			NUMextrema_u (var.part (ixmin, ixmax), & ymin, & ymax);
+		if (isundef (ymin) || isundef (ymax))
+			return;
 		if (ymin == ymax) {
 			ymin -= 0.5;
 			ymax += 0.5;
@@ -349,7 +351,9 @@ void FormantModeler_drawCumulativeChiScores (FormantModeler me, Graphics g, doub
 		autoVEC chisq = zero_VEC (numberOfDataPoints);
 		FormantModeler_getCumulativeChiScores (me, chisq.get());
 		if (ymax <= ymin)
-			NUMextrema (chisq.part (ixmin, ixmax), & ymin, & ymax);
+			NUMextrema_u (chisq.part (ixmin, ixmax), & ymin, & ymax);
+		if (isundef (ymin) || isundef (ymax))
+			return;
 		Graphics_setInner (g);
 		Graphics_setWindow (g, xmin, xmax, ymin, ymax);
 		DataModeler thee = my trackmodelers.at [1];
@@ -402,7 +406,7 @@ void FormantModeler_drawModel_inside (FormantModeler me, Graphics g, double tmin
 	checkTrackAutoRange (me, & fromTrack, & toTrack);
 	for (integer itrack = fromTrack; itrack <= toTrack; itrack ++) {
 		DataModeler ffi = my trackmodelers.at [itrack];
-		Graphics_setColour (g, itrack % 2 == 1 ? oddTracks : evenTracks );
+		Graphics_setColour (g, Melder_BLUE); //itrack % 2 == 1 ? oddTracks : evenTracks );
 		DataModeler_drawModel_inside (ffi, g, tmin, tmax, 0.0, fmax, numberOfPoints);
 	}
 }
@@ -605,10 +609,10 @@ autoTable FormantModeler_to_Table_zscores (FormantModeler me) {
 		const integer icolt = 1, numberOfFormants = my trackmodelers.size;
 		const integer numberOfDataPoints = FormantModeler_getNumberOfDataPoints (me);
 		autoTable ztable = Table_createWithoutColumnNames (numberOfDataPoints, numberOfFormants + 1);
-		Table_setColumnLabel (ztable.get(), icolt, U"time");
+		Table_renameColumn_e (ztable.get(), icolt, U"time");
 		for (integer itrack = 1; itrack <= numberOfFormants; itrack ++) {
 			const integer icolz = itrack + 1;
-			Table_setColumnLabel (ztable.get(), icolz, Melder_cat (U"z", itrack));
+			Table_renameColumn_e (ztable.get(), icolz, Melder_cat (U"z", itrack));
 			DataModeler ffi = my trackmodelers.at [itrack];
 			if (itrack == 1) {
 				for (integer i = 1; i <= numberOfDataPoints; i ++)   // only once all tracks have same x-values

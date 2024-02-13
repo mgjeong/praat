@@ -1,6 +1,6 @@
 /* TableEditor.cpp
  *
- * Copyright (C) 2006-2013,2015-2022 Paul Boersma
+ * Copyright (C) 2006-2013,2015-2023 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ static void updateHorizontalScrollBar (TableEditor me) {
 	GuiScrollBar_set (my horizontalScrollBar, undefined, my table() -> numberOfColumns + 1, my leftColumn, undefined, undefined, undefined);
 }
 
-void structTableEditor :: v1_dataChanged () {
+void structTableEditor :: v1_dataChanged (Editor /* sender */) {
 	Melder_clipRight (& our topRow, our table() -> rows.size);
 	Melder_clipRight (& our leftColumn, our table() -> numberOfColumns);
 	updateVerticalScrollBar (this);
@@ -57,8 +57,8 @@ void structTableEditor :: v1_dataChanged () {
 
 /********** FILE MENU **********/
 
-static void menu_cb_preferences (TableEditor me, EDITOR_ARGS_FORM) {
-	EDITOR_FORM (U"TableEditor preferences", nullptr);
+static void menu_cb_preferences (TableEditor me, EDITOR_ARGS) {
+	EDITOR_FORM (U"TableEditor settings", nullptr);
 		OPTIONMENU (useTextStyles, U"The symbols %#_^ in labels", my default_useTextStyles() + 1)
 			OPTION (U"are shown as typed")
 			OPTION (U"mean italic/bold/sub/super")
@@ -76,16 +76,16 @@ static void menu_cb_preferences (TableEditor me, EDITOR_ARGS_FORM) {
 /*
 	On macOS, Cut/Copy/Paste are already available in the Praat:Edit menu.
 */
-static void menu_cb_CutText (TableEditor me, EDITOR_ARGS_DIRECT) {
+static void menu_cb_CutText (TableEditor me, EDITOR_ARGS) {
 	GuiText_cut (my text);
 }
-static void menu_cb_CopyText (TableEditor me, EDITOR_ARGS_DIRECT) {
+static void menu_cb_CopyText (TableEditor me, EDITOR_ARGS) {
 	GuiText_copy (my text);
 }
-static void menu_cb_PasteText (TableEditor me, EDITOR_ARGS_DIRECT) {
+static void menu_cb_PasteText (TableEditor me, EDITOR_ARGS) {
 	GuiText_paste (my text);
 }
-static void menu_cb_EraseText (TableEditor me, EDITOR_ARGS_DIRECT) {
+static void menu_cb_EraseText (TableEditor me, EDITOR_ARGS) {
 	GuiText_remove (my text);
 }
 #endif
@@ -94,7 +94,7 @@ static void menu_cb_EraseText (TableEditor me, EDITOR_ARGS_DIRECT) {
 
 /********** HELP MENU **********/
 
-static void menu_cb_TableEditorHelp (TableEditor, EDITOR_ARGS_DIRECT) {
+static void menu_cb_TableEditorHelp (TableEditor, EDITOR_ARGS) {
 	Melder_help (U"TableEditor");
 }
 
@@ -144,7 +144,7 @@ void structTableEditor :: v_draw () {
 		if (cellWidth > columnWidth)
 			columnWidth = cellWidth;
 		for (integer irow = rowmin; irow <= rowmax; irow ++) {
-			conststring32 cell = Table_getStringValue_Assert (our table(), irow, icol);
+			conststring32 cell = Table_getStringValue_a (our table(), irow, icol);
 			Melder_assert (cell);
 			if (cell [0] == U'\0')
 				cell = U"?";
@@ -193,7 +193,7 @@ void structTableEditor :: v_draw () {
 				Graphics_setColour (graphics.get(), Melder_BLACK);
 			}
 			const double mid = (columnLeft [icol - colmin] + columnRight [icol - colmin]) / 2.0;
-			conststring32 cell = Table_getStringValue_Assert (our table(), irow, icol);
+			conststring32 cell = Table_getStringValue_a (our table(), irow, icol);
 			Melder_assert (cell);
 			if (cell [0] == U'\0')
 				cell = U"?";
@@ -273,7 +273,7 @@ void structTableEditor :: v_createChildren () {
 
 	our drawingArea = GuiDrawingArea_createShown (our windowForm, 0, - scrollWidth, y, - scrollWidth,
 		gui_drawingarea_cb_expose, gui_drawingarea_cb_mouse,
-		nullptr, gui_drawingarea_cb_resize, this, 0
+		nullptr, gui_drawingarea_cb_resize, nullptr, this, 0
 	);
 
 	our verticalScrollBar = GuiScrollBar_createShown (our windowForm, - scrollWidth, 0, y, - scrollWidth,

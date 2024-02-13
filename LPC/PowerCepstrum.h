@@ -2,7 +2,7 @@
 #define _PowerCepstrum_h_
 /* PowerCepstrum.h
  *
- * Copyright (C) 2012-2021 David Weenink
+ * Copyright (C) 2012-2024 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@
 */
 
 Thing_define (PowerCepstrum, Cepstrum) {
-	double v_getValueAtSample (integer isamp, integer which, int units)
+	double v_getValueAtSample (integer isamp, integer which, int units) const
 		override;
 };
 
@@ -86,7 +86,9 @@ double PowerCepstrum_getPeakProminence (PowerCepstrum me, double pitchFloor, dou
 
 void PowerCepstrum_fitTrendLine (PowerCepstrum me, double qmin, double qmax, double *out_slope, double *out_intercept, kCepstrum_trendType lineType, kCepstrum_trendFit method);
 
-autoPowerCepstrum PowerCepstrum_subtractTrend (PowerCepstrum me, double qstartFit, double qendFit, kCepstrum_trendType  lineType, kCepstrum_trendFit fitMethod);
+double PowerCepstrum_getTrendLineValue (PowerCepstrum me, double quefrency, double qstartFit, double qendFit, kCepstrum_trendType lineType, kCepstrum_trendFit fitMethod);
+
+autoPowerCepstrum PowerCepstrum_subtractTrend (PowerCepstrum me, double qstartFit, double qendFit, kCepstrum_trendType lineType, kCepstrum_trendFit fitMethod);
 
 void PowerCepstrum_subtractTrend_inplace (PowerCepstrum me, double qstartFit, double qendFit, kCepstrum_trendType lineType, kCepstrum_trendFit fitMethod);
 

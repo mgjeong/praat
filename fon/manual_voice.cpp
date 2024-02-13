@@ -39,7 +39,7 @@ NORMAL (U"The results of the voice measurements will depend on your @@Pitch sett
 	"In general, you will want to be careful about the pitch range. The standard range is 75\\--600 Hertz, "
 	"but take a range of e.g. 50\\--200 Hertz for pathological male voices if that is the typical range. "
 	"You may also want to choose ##Optimize for voice analysis#; otherwise, the voice report will complain about possible inaccuracies. "
-	"The `advanced' pitch settings like ##Silence threshold# and ##Octave jump cost# can stay at their standard values.")
+	"The “advanced” pitch settings like ##Silence threshold# and ##Octave jump cost# can stay at their standard values.")
 LIST_ITEM (U"@@Voice 1. Voice breaks@")
 LIST_ITEM (U"@@Voice 2. Jitter@")
 LIST_ITEM (U"@@Voice 3. Shimmer@")
@@ -61,7 +61,7 @@ NORMAL (U"The usual pitch analysis contains a %%path finder% that searches for a
 	"A frame is regarded as %locally unvoiced if it has a voicing strength below the %%voicing threshold% (whose standard value is 0.45), "
 	"or a local peak below the %%silence threshold% (whose standard value is 0.03).")
 NORMAL (U"In the voice report, the fraction of unvoiced frames will be reported as follows:")
-CODE (U"Fraction of locally unvoiced frames: 14.000\\%  (14/100)")
+CODE (U"Fraction of locally unvoiced frames: 14.000% (14/100)")
 NORMAL (U"The numbers between parentheses are the number of unvoiced frames and the total number of frames, "
 	"respectively (in MDVP, these are called NUV and SEG, respectively).")
 NORMAL (U"The normative value for the fraction of unvoiced frames is 0, i.e., normal healthy voices should "
@@ -77,7 +77,7 @@ NORMAL (U"This is the total duration of the breaks between the voiced parts of t
 	"and the end of the signal are not considered breaks, you will probably not want to select these silences "
 	"when measuring this parameter.")
 NORMAL (U"In the voice report, the degree of voice breaks will be reported like this:")
-CODE (U"Degree of voice breaks: 29.529\\%  (1.163061 s / 3.938685 s)")
+CODE (U"Degree of voice breaks: 29.529% (1.163061 s / 3.938685 s)")
 NORMAL (U"The numbers between parentheses are the total duration of the voice breaks and the duration of the analysed part of the signal, "
 	"respectively.")
 MAN_END
@@ -214,7 +214,7 @@ NORMAL (U"The difference between Praat's and MDVP's jitter measures is due to a 
 	"For detailed illustrations, see @@Boersma (2009a)@.")
 MAN_END
 
-MAN_BEGIN (U"Voice 6. Automating voice analysis with a script", U"ppgb", 20140421)
+MAN_BEGIN (U"Voice 6. Automating voice analysis with a script", U"ppgb", 20231115 /*20221202*/)
 INTRO (U"In a Praat script you usually do not want to raise a Sound window. "
 	"Instead, you probably want to work with objects in the Objects window only. "
 	"This page tells you how to do that for voice analysis.")
@@ -225,38 +225,38 @@ NORMAL (U"The pulses you see as blue lines are a @PointProcess object. You can s
 NORMAL (U"You can also create a PointProcess in the Objects window directly. To do this, "
 	"select a Sound and choose @@Sound: To PointProcess (periodic, cc)...@ from the #Periodicity menu.")
 NORMAL (U"You can also do this in two steps. First you create a Pitch with "
-	"@@Sound: To Pitch...@ or @@Sound: To Pitch (ac)...@ or @@Sound: To Pitch (cc)...@. "
+	"@@Sound: To Pitch (raw ac)...@ or @@Sound: To Pitch (raw cc)...@. "
 	"Then you select the resulting Pitch %together with the original Sound "
 	"and choose @@Sound & Pitch: To PointProcess (cc)@.")
 NORMAL (U"Since the direct method of @@Sound: To PointProcess (periodic, cc)...@ actually uses the AC method "
 	"for computing the Pitch (which is optimal for intonation analysis), "
 	"you may prefer the two-step version if your goal is to do voice analysis. "
-	"In that case, you use @@Sound: To Pitch (cc)...@ as the first step, "
+	"In that case, you use @@Sound: To Pitch (raw cc)...@ as the first step, "
 	"and @@Sound & Pitch: To PointProcess (cc)@ as the second step. "
 	"This is also how the Sound window does it: if you choose ##Optimize for voice analysis# in the @@Pitch settings...|Pitch settings@, "
-	"Praat uses @@Sound: To Pitch (cc)...@ for pitch analysis.")
+	"Praat uses @@Sound: To Pitch (raw cc)...@ for pitch analysis.")
 NORMAL (U"What you should %not do if you want to perform voice analysis is to create the PointProcess "
 	"by selecting a Pitch only and then choosing @@Pitch: To PointProcess@. In that way, "
 	"the resulting pulses would not be aligned to the periods in the Sound.")
 ENTRY (U"2. Measuring jitter from a script")
 NORMAL (U"Once you have a PointProcess that represents the periods in the Sound, "
-	"you can select it and choose some ##Get jitter# commands from the #Query menu.")
+	"you can select it and choose some ##Get jitter# commands from the @@Query submenu@.")
 ENTRY (U"3. Measuring shimmer from a script")
 NORMAL (U"Once you have a PointProcess that represents the periods in the Sound, "
-	"you can select it together with the Sound, then choose some ##Get shimmer# commands from the #Query menu.")
+	"you can select it together with the Sound, then choose some ##Get shimmer# commands from the @@Query submenu@.")
 ENTRY (U"4. Getting the whole voice report from a script")
 NORMAL (U"If you select the Sound, the Pitch, and the PointProcess together (all three), "
 	"there will be a button that says ##Voice report...#. If you press it, the voice report "
 	"will be written to the Info window. This is identical to the voice report in the Sound window, "
 	"although you will have to specify the time range by manually typing it.")
 NORMAL (U"In a script, you can get the jitter and shimmer from the voice report by doing something like:")
-CODE (U"voiceReport\\$  = Voice report: 0, 0, 75, 500, 1.3, 1.6, 0.03, 0.45")
-CODE (U"jitter = extractNumber (voiceReport\\$ , \"Jitter (local): \")")
-CODE (U"shimmer = extractNumber (voiceReport\\$ , \"Shimmer (local): \")")
-CODE (U"writeInfoLine: \"Jitter = \", percent\\$  (jitter, 3), \", shimmer = \", percent\\$  (shimmer, 3)")
+CODE (U"voiceReport$ = Voice report: 0, 0, 75, 500, 1.3, 1.6, 0.03, 0.45")
+CODE (U"jitter = extractNumber (voiceReport$, “Jitter (local): ”)")
+CODE (U"shimmer = extractNumber (voiceReport$, “Shimmer (local): ”)")
+CODE (U"writeInfoLine: “Jitter = ”, percent$ (jitter, 3), “, shimmer = ”, percent$ (shimmer, 3)")
 ENTRY (U"5. Disadvantage of automating voice analysis")
 NORMAL (U"In all the commands mentioned above, you have to guess the time range, "
-	"and you would usually supply \"0.0\" and \"0.0\", in which case "
+	"and you would usually supply “0.0” and “0.0”, in which case "
 	"you will get the average jitter and shimmer for the whole sound. "
 	"This may include parts of the sound that you are often not interested in, such as false starts. "
 	"You do not have these problems when asking for a voice report in the sound window, "

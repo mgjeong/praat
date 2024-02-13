@@ -2,7 +2,7 @@
 #define _SpeechSynthesizer_h_
 /* SpeechSynthesizer.h
  *
- * Copyright (C) 2011-2013, 2015-2017 David Weenink, 2015 Paul Boersma
+ * Copyright (C) 2011-2013, 2015-2023 David Weenink, 2015,2023 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,6 +60,8 @@ void SpeechSynthesizer_setSpeechOutputSettings (SpeechSynthesizer me, double sam
 autoSound SpeechSynthesizer_to_Sound (SpeechSynthesizer me, conststring32 text, autoTextGrid *tg, autoTable *events);
 
 void SpeechSynthesizer_playText (SpeechSynthesizer me, conststring32 text);
+
+autostring32 SpeechSynthesizer_getPhonemesFromText (SpeechSynthesizer me, conststring32 text, bool separateBySpaces);
 
 /* End of file SpeechSynthesizer.h */
 #endif

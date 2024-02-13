@@ -1,6 +1,6 @@
 /* praat_TableOfReal.cpp
  *
- * Copyright (C) 1992-2018,2021,2022 Paul Boersma
+ * Copyright (C) 1992-2018,2021-2023 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +32,11 @@ DIRECT (HELP_TableOfReal_help) {
 FORM (GRAPHICS_TableOfReal_drawAsNumbers, U"Draw as numbers", nullptr) {
 	NATURAL (fromRow, U"From row", U"1")
 	INTEGER (toRow, U"To row", U"0 (= all)")
-	RADIO (format, U"Format", 3)
-		RADIOBUTTON (U"decimal")
-		RADIOBUTTON (U"exponential")
-		RADIOBUTTON (U"free")
-		RADIOBUTTON (U"rational")
+	CHOICE (format, U"Format", 3)
+		OPTION (U"decimal")
+		OPTION (U"exponential")
+		OPTION (U"free")
+		OPTION (U"rational")
 	NATURAL (precision, U"Precision", U"5")
 	OK
 DO
@@ -48,11 +48,11 @@ DO
 FORM (GRAPHICS_TableOfReal_drawAsNumbers_if, U"Draw as numbers if...", nullptr) {
 	NATURAL (fromRow, U"From row", U"1")
 	INTEGER (toRow, U"To row", U"0 (= all)")
-	RADIO (format, U"Format", 3)
-		RADIOBUTTON (U"decimal")
-		RADIOBUTTON (U"exponential")
-		RADIOBUTTON (U"free")
-		RADIOBUTTON (U"rational")
+	CHOICE (format, U"Format", 3)
+		OPTION (U"decimal")
+		OPTION (U"exponential")
+		OPTION (U"free")
+		OPTION (U"rational")
 	NATURAL (precision, U"Precision", U"5")
 	FORMULA (condition, U"Condition", U"self <> 0")
 	OK
@@ -122,7 +122,7 @@ FORM (INTEGER_TableOfReal_getColumnIndex, U"Get column index", nullptr) {
 	OK
 DO
 	QUERY_ONE_FOR_REAL (TableOfReal)
-		integer result = TableOfReal_columnLabelToIndex (me, columnLabel);
+		const integer result = TableOfReal_columnLabelToIndex (me, columnLabel);
 	QUERY_ONE_FOR_REAL_END (U" (index of column ", columnLabel, U")")
 }
 	
@@ -144,7 +144,7 @@ DO
 	QUERY_ONE_FOR_REAL (TableOfReal)
 		if (columnNumber > my numberOfColumns)
 			Melder_throw (me, U": your column number should not be greater than the number of columns.");
-		double result = TableOfReal_getColumnMean (me, columnNumber);
+		const double result = TableOfReal_getColumnMean (me, columnNumber);
 	QUERY_ONE_FOR_REAL_END (U" (mean of column ", columnNumber, U")")
 }
 
@@ -153,9 +153,10 @@ FORM (REAL_TableOfReal_getColumnMean_label, U"Get column mean", nullptr) {
 	OK
 DO
 	QUERY_ONE_FOR_REAL (TableOfReal)
-		integer columnNumber = TableOfReal_columnLabelToIndex (me, columnLabel);
-		if (columnNumber == 0) Melder_throw (me, U": your column label does not exist.");
-		double result = TableOfReal_getColumnMean (me, columnNumber);
+		const integer columnNumber = TableOfReal_columnLabelToIndex (me, columnLabel);
+		if (columnNumber == 0)
+			Melder_throw (me, U": your column label does not exist.");
+		const double result = TableOfReal_getColumnMean (me, columnNumber);
 	QUERY_ONE_FOR_REAL_END (U" (mean of column ", columnLabel, U")")
 }
 
@@ -166,7 +167,7 @@ DO
 	QUERY_ONE_FOR_REAL (TableOfReal)
 		if (columnNumber > my numberOfColumns)
 			Melder_throw (me, U": your column number should not be greater than the number of columns.");
-		double result = TableOfReal_getColumnStdev (me, columnNumber);
+		const double result = TableOfReal_getColumnStdev (me, columnNumber);
 	QUERY_ONE_FOR_REAL_END (U" (standard deviation of column ", columnNumber, U")")
 }
 
@@ -175,21 +176,22 @@ FORM (REAL_TableOfReal_getColumnStdev_label, U"Get column standard deviation", n
 	OK
 DO
 	QUERY_ONE_FOR_REAL (TableOfReal)
-		integer columnNumber = TableOfReal_columnLabelToIndex (me, columnLabel);
-		if (columnNumber == 0) Melder_throw (me, U": column label does not exist.");
+		const integer columnNumber = TableOfReal_columnLabelToIndex (me, columnLabel);
+		if (columnNumber == 0)
+			Melder_throw (me, U": column label does not exist.");
 		double result = TableOfReal_getColumnStdev (me, columnNumber);
 	QUERY_ONE_FOR_REAL_END (U" (standard deviation of column ", columnLabel, U")")
 }
 
 DIRECT (INTEGER_TableOfReal_getNumberOfColumns) {
 	QUERY_ONE_FOR_REAL (TableOfReal)
-		integer result = my numberOfColumns;
+		const integer result = my numberOfColumns;
 	QUERY_ONE_FOR_REAL_END (U" columns")
 }
 
 DIRECT (INTEGER_TableOfReal_getNumberOfRows) {
 	QUERY_ONE_FOR_REAL (TableOfReal)
-		integer result = my numberOfRows;
+		const integer result = my numberOfRows;
 	QUERY_ONE_FOR_REAL_END (U" rows")
 }
 
@@ -198,7 +200,7 @@ FORM (INTEGER_TableOfReal_getRowIndex, U"Get row index", nullptr) {
 	OK
 DO
 	QUERY_ONE_FOR_REAL (TableOfReal)
-		integer result = TableOfReal_rowLabelToIndex (me, rowLabel);
+		const integer result = TableOfReal_rowLabelToIndex (me, rowLabel);
 	QUERY_ONE_FOR_REAL_END (U" (index of row ", rowLabel, U")")
 }
 

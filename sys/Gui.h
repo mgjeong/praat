@@ -2,7 +2,7 @@
 #define _Gui_h_
 /* Gui.h
  *
- * Copyright (C) 1993-2022 Paul Boersma, 2013 Tom Naughton
+ * Copyright (C) 1993-2023 Paul Boersma, 2013 Tom Naughton
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -495,10 +495,16 @@ typedef struct structGuiDrawingArea_ResizeEvent {
 	int width, height;
 } *GuiDrawingArea_ResizeEvent;
 
+typedef struct structGuiDrawingArea_ZoomEvent {
+	GuiDrawingArea widget;
+	double delta;   // positive means enlarge (zoom in), negative means shrink (zoom out)
+} *GuiDrawingArea_ZoomEvent;
+
 using GuiDrawingArea_ExposeCallback = MelderCallback <void, structThing /* boss */, GuiDrawingArea_ExposeEvent>;
 using GuiDrawingArea_MouseCallback  = MelderCallback <void, structThing /* boss */, GuiDrawingArea_MouseEvent >;
 using GuiDrawingArea_KeyCallback    = MelderCallback <void, structThing /* boss */, GuiDrawingArea_KeyEvent   >;
 using GuiDrawingArea_ResizeCallback = MelderCallback <void, structThing /* boss */, GuiDrawingArea_ResizeEvent>;
+using GuiDrawingArea_ZoomCallback   = MelderCallback <void, structThing /* boss */, GuiDrawingArea_ZoomEvent  >;
 
 Thing_define (GuiDrawingArea, GuiControl) {
 	GuiScrollBar d_horizontalScrollBar, d_verticalScrollBar;   // for swiping
@@ -510,6 +516,8 @@ Thing_define (GuiDrawingArea, GuiControl) {
 	Thing d_keyBoss;
 	GuiDrawingArea_ResizeCallback d_resizeCallback;
 	Thing d_resizeBoss;
+	GuiDrawingArea_ZoomCallback d_zoomCallback;
+	Thing d_zoomBoss;
 	integer numberOfGraphicses;
 	constexpr static integer MAXIMUM_NUMBER_OF_GRAPHICSES = 10;
 	Graphics graphicses [1+MAXIMUM_NUMBER_OF_GRAPHICSES];
@@ -524,37 +532,42 @@ GuiDrawingArea GuiDrawingArea_create (GuiForm parent, int left, int right, int t
 	GuiDrawingArea_ExposeCallback exposeCallback,
 	GuiDrawingArea_MouseCallback mouseCallback,
 	GuiDrawingArea_KeyCallback keyCallback,
-	GuiDrawingArea_ResizeCallback resizeCallback, Thing boss,
+	GuiDrawingArea_ResizeCallback resizeCallback,
+	GuiDrawingArea_ZoomCallback zoomCallback, Thing boss,
 	uint32 flags);
 GuiDrawingArea GuiDrawingArea_createShown (GuiForm parent, int left, int right, int top, int bottom,
 	GuiDrawingArea_ExposeCallback exposeCallback,
 	GuiDrawingArea_MouseCallback mouseCallback,
 	GuiDrawingArea_KeyCallback keyCallback,
-	GuiDrawingArea_ResizeCallback resizeCallback, Thing boss,
+	GuiDrawingArea_ResizeCallback resizeCallback,
+	GuiDrawingArea_ZoomCallback zoomCallback, Thing boss,
 	uint32 flags);
 GuiDrawingArea GuiDrawingArea_create (GuiScrolledWindow parent, int width, int height,
 	GuiDrawingArea_ExposeCallback exposeCallback,
 	GuiDrawingArea_MouseCallback mouseCallback,
 	GuiDrawingArea_KeyCallback keyCallback,
-	GuiDrawingArea_ResizeCallback resizeCallback, Thing boss,
+	GuiDrawingArea_ResizeCallback resizeCallback,
+	GuiDrawingArea_ZoomCallback zoomCallback, Thing boss,
 	uint32 flags);
 GuiDrawingArea GuiDrawingArea_createShown (GuiScrolledWindow parent, int width, int height,
 	GuiDrawingArea_ExposeCallback exposeCallback,
 	GuiDrawingArea_MouseCallback mouseCallback,
 	GuiDrawingArea_KeyCallback keyCallback,
-	GuiDrawingArea_ResizeCallback resizeCallback, Thing boss,
+	GuiDrawingArea_ResizeCallback resizeCallback,
+	GuiDrawingArea_ZoomCallback zoomCallback, Thing boss,
 	uint32 flags);
 
 void GuiDrawingArea_setSwipable (GuiDrawingArea me, GuiScrollBar horizontalScrollBar, GuiScrollBar verticalScrollBar);
 void GuiDrawingArea_setExposeCallback (GuiDrawingArea me, GuiDrawingArea_ExposeCallback callback, Thing boss);
 void GuiDrawingArea_setMouseCallback (GuiDrawingArea me, GuiDrawingArea_MouseCallback callback, Thing boss);
 void GuiDrawingArea_setResizeCallback (GuiDrawingArea me, GuiDrawingArea_ResizeCallback callback, Thing boss);
+void GuiDrawingArea_setZoomCallback (GuiDrawingArea me, GuiDrawingArea_ZoomCallback callback, Thing boss);
 
 /********** GuiFileSelect **********/
 
-autoStringSet GuiFileSelect_getInfileNames (GuiWindow parent, conststring32 title, bool allowMultipleFiles);
-autostring32 GuiFileSelect_getOutfileName (GuiWindow parent, conststring32 title, conststring32 defaultName);
-autostring32 GuiFileSelect_getFolderName (GuiWindow parent, conststring32 title);
+autoStringSet GuiFileSelect_getInfileNames (GuiWindow optionalParent, conststring32 title, bool allowMultipleFiles);
+autostring32 GuiFileSelect_getOutfileName (GuiWindow optionalParent, conststring32 title, conststring32 defaultName);
+autostring32 GuiFileSelect_getFolderName (GuiWindow optionalParent, conststring32 title);
 
 /********** GuiForm **********/
 
@@ -703,34 +716,37 @@ Thing_define (GuiMenuItem, GuiThing) {
 #define GuiMenu_OPTION  (1 << 24)
 #define GuiMenu_SHIFT  (1 << 25)
 #define GuiMenu_COMMAND  (1 << 26)
-#define GuiMenu_LEFT_ARROW  1   /* overlaps with the short form of GuiMenu_DEPTH_1 */
-#define GuiMenu_RIGHT_ARROW  2   /* overlaps with the short form of GuiMenu_DEPTH_2 */
-#define GuiMenu_UP_ARROW  3   /* overlaps with the short form of GuiMenu_DEPTH_3 */
-#define GuiMenu_DOWN_ARROW  4   /* overlaps with the short form of GuiMenu_DEPTH_4 */
-#define GuiMenu_PAUSE  5   /* overlaps with the short form of GuiMenu_DEPTH_5 */
-#define GuiMenu_DELETE  6   /* overlaps with the short form of GuiMenu_DEPTH_6 */
-#define GuiMenu_INSERT  7   /* overlaps with the short form of GuiMenu_DEPTH_7 */
-#define GuiMenu_BACKSPACE  8
-#define GuiMenu_TAB  9
-#define GuiMenu_LINEFEED  10
-#define GuiMenu_HOME  11
-#define GuiMenu_END  12
-#define GuiMenu_ENTER  13
-#define GuiMenu_PAGE_UP  14
-#define GuiMenu_PAGE_DOWN  15
-#define GuiMenu_ESCAPE  16
-#define GuiMenu_F1  17
-#define GuiMenu_F2  18
-#define GuiMenu_F3  19
-#define GuiMenu_F4  20
-#define GuiMenu_F5  21
-#define GuiMenu_F6  22
-#define GuiMenu_F7  23
-#define GuiMenu_F8  24
-#define GuiMenu_F9  25
-#define GuiMenu_F10  26
-#define GuiMenu_F11  27
-#define GuiMenu_F12  28
+// 1 is the short form of GuiMenu_DEPTH_1
+// 2 is the short form of GuiMenu_DEPTH_2
+// 3 is the short form of GuiMenu_DEPTH_3
+#define GuiMenu_LEFT_ARROW  4
+#define GuiMenu_RIGHT_ARROW  5
+#define GuiMenu_UP_ARROW  6
+#define GuiMenu_DOWN_ARROW  7
+#define GuiMenu_PAUSE  8
+#define GuiMenu_DELETE  9
+#define GuiMenu_INSERT  10
+#define GuiMenu_BACKSPACE  11
+#define GuiMenu_TAB  12
+#define GuiMenu_LINEFEED  13
+#define GuiMenu_HOME  14
+#define GuiMenu_END  15
+#define GuiMenu_ENTER  16
+#define GuiMenu_PAGE_UP  17
+#define GuiMenu_PAGE_DOWN  18
+#define GuiMenu_ESCAPE  19
+#define GuiMenu_F1  20
+#define GuiMenu_F2  21
+#define GuiMenu_F3  22
+#define GuiMenu_F4  23
+#define GuiMenu_F5  24
+#define GuiMenu_F6  25
+#define GuiMenu_F7  26
+#define GuiMenu_F8  27
+#define GuiMenu_F9  28
+#define GuiMenu_F10  29
+#define GuiMenu_F11  30
+#define GuiMenu_F12  31
 // or any ASCII character (preferably a letter or digit) between 32 and 126
 
 /* Button layout and state understood by GuiMenuItem: */
@@ -826,6 +842,7 @@ GuiMenuItem GuiMenu_addItem (GuiMenu menu, conststring32 title, uint32 flags,
 GuiMenuItem GuiMenu_addSeparator (GuiMenu menu);
 
 void GuiMenuItem_check (GuiMenuItem me, bool check);
+void GuiMenuItem_setText (GuiMenuItem me, conststring32 text);
 
 /********** GuiOptionMenu **********/
 
@@ -975,8 +992,7 @@ using GuiText_ChangedCallback = MelderCallback <void, structThing /* boss */, Gu
 	typedef char * history_data;
 #endif
 
-typedef struct _history_entry_s history_entry;
-struct _history_entry_s {
+struct history_entry {
 	history_entry *prev, *next;
 	integer first, last;
 	history_data text;

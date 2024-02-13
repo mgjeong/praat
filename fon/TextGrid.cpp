@@ -999,11 +999,11 @@ autoTextGrid PointProcess_to_TextGrid_vuv (PointProcess me, double maxT, double 
 }
 
 integer TextInterval_labelLength (TextInterval me) {
-	return my text ? str32len (my text.get()) : 0;
+	return Melder_length (my text.get());
 }
 
 integer TextPoint_labelLength (TextPoint me) {
-	return my mark ? str32len (my mark.get()) : 0;
+	return Melder_length (my mark.get());
 }
 
 integer IntervalTier_maximumLabelLength (IntervalTier me) {
@@ -1503,7 +1503,7 @@ autoTextGrid TextGrid_readFromCgnSyntaxFile (MelderFile file) {
 			if (strnequ (line, "  <tau ref=\"", 12)) {
 				Melder_require (sscanf (line, "%40s%40s%40s%40s%40s%40s%200s", arg1, arg2, arg3, arg4, arg5, arg6, arg7) == 7,
 					U"Too few strings in tau line.");
-				const integer length_s = str8len (arg3);
+				const integer length_s = Melder8_length (arg3);
 				Melder_require (length_s >= 5 && strnequ (arg3, "s=\"", 3),
 					U"Missing speaker name.");
 				arg3 [length_s - 1] = '\0';   // truncate at double quote
@@ -1564,11 +1564,11 @@ autoTextGrid TextGrid_readFromCgnSyntaxFile (MelderFile file) {
 			} else if (strnequ (line, "    <tw ref=\"", 13)) {
 				Melder_require (sscanf (line, "%40s%40s%40s%40s%40s%40s%200s", arg1, arg2, arg3, arg4, arg5, arg6, arg7) == 7,
 					U"Too few strings in tw line.");
-				const integer length_tb = str8len (arg3);
+				const integer length_tb = Melder8_length (arg3);
 				Melder_require (length_tb >= 6 && strnequ (arg3, "tb=\"", 4),
 					U"Missing tb.");
 				const double tb = atof (arg3 + 4);
-				const integer length_te = str8len (arg4);
+				const integer length_te = Melder8_length (arg4);
 				Melder_require (length_te >= 6 && strnequ (arg4, "te=\"", 4),
 					U"Missing te.");
 				const double te = atof (arg4 + 4);
@@ -1579,7 +1579,7 @@ autoTextGrid TextGrid_readFromCgnSyntaxFile (MelderFile file) {
 						Append a word.
 					*/
 					strcat (phrase, " ");
-					const integer length_w = str8len (arg7);
+					const integer length_w = Melder8_length (arg7);
 					Melder_require (length_w >= 6 && strnequ (arg7, "w=\"", 3),   // BUG? no words of length 1 allowed
 						U"Missing word.");
 					arg7 [length_w - 3] = '\0';   // truncate "/>
@@ -1593,7 +1593,7 @@ autoTextGrid TextGrid_readFromCgnSyntaxFile (MelderFile file) {
 						TextInterval_setText (lastInterval, Melder_peek8to32 (phrase));
 					}
 					phrase [0] = '\0';
-					const integer length_w = str8len (arg7);
+					const integer length_w = Melder8_length (arg7);
 					Melder_require (length_w >= 6 && strnequ (arg7, "w=\"", 3),   // BUG? no words of length 1 allowed
 						U"Missing word.");
 					arg7 [length_w - 3] = '\0';   // truncate "/>
@@ -1671,13 +1671,13 @@ autoTable TextGrid_downto_Table (TextGrid me, bool includeLineNumbers, integer t
 	autoTable thee = Table_createWithoutColumnNames (numberOfRows, 3 + includeLineNumbers + includeTierNames);
 	integer icol = 0;
 	if (includeLineNumbers)
-		Table_setColumnLabel (thee.get(), ++ icol, U"line");
-	Table_setColumnLabel (thee.get(), ++ icol, U"tmin");
+		Table_renameColumn_e (thee.get(), ++ icol, U"line");
+	Table_renameColumn_e (thee.get(), ++ icol, U"tmin");
 	const integer tmin_columnNumber = icol;
 	if (includeTierNames)
-		Table_setColumnLabel (thee.get(), ++ icol, U"tier");
-	Table_setColumnLabel (thee.get(), ++ icol, U"text");
-	Table_setColumnLabel (thee.get(), ++ icol, U"tmax");
+		Table_renameColumn_e (thee.get(), ++ icol, U"tier");
+	Table_renameColumn_e (thee.get(), ++ icol, U"text");
+	Table_renameColumn_e (thee.get(), ++ icol, U"tmax");
 	const integer tmax_columnNumber = icol;
 	integer irow = 0;
 	for (integer itier = 1; itier <= my tiers->size; itier ++) {
@@ -1714,7 +1714,7 @@ autoTable TextGrid_downto_Table (TextGrid me, bool includeLineNumbers, integer t
 			}
 		}
 	}
-	Table_sortRows_Assert (thee.get(), autoINTVEC ({ tmin_columnNumber, tmax_columnNumber }).get());   // sort by tmin and tmax
+	Table_sortRows_a (thee.get(), autoINTVEC ({ tmin_columnNumber, tmax_columnNumber }).get());   // sort by tmin and tmax
 	return thee;
 }
 
@@ -1778,7 +1778,7 @@ autoTable TextGrid_tabulateOccurrences (TextGrid me, constVEC searchTiers, kMeld
 			}
 		}
 	}
-	Table_sortRows_Assert (thee.get(), autoINTVEC ({ time_columnNumber }).get());   // sort by time
+	Table_sortRows_a (thee.get(), autoINTVEC ({ time_columnNumber }).get());   // sort by time
 	return thee;
 }
 

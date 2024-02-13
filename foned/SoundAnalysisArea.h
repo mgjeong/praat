@@ -2,7 +2,7 @@
 #define _SoundAnalysisArea_h_
 /* SoundAnalysisArea.h
  *
- * Copyright (C) 1992-2005,2007-2022 Paul Boersma
+ * Copyright (C) 1992-2005,2007-2023 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,12 @@ Thing_define (SoundAnalysisArea, FunctionArea) {
 	virtual bool v_hasPulses      () { return true; }
 	virtual void v_reset_analysis ();
 
+	virtual void v_spectrogramInfo () const;
+	virtual void v_pitchInfo       () const;
+	virtual void v_intensityInfo   () const;
+	virtual void v_formantsInfo    () const;
+	virtual void v_pulsesInfo      () const;
+
 protected:
 	void v_computeAuxiliaryData () override {
 		our v_reset_analysis ();
@@ -99,10 +105,10 @@ bool SoundAnalysisArea_mouse (SoundAnalysisArea me, GuiDrawingArea_MouseEvent ev
 inline void SoundAnalysisArea_drawDefaultLegends (SoundAnalysisArea me) {
 	if (my hasContentToShow () && my endWindow() - my startWindow() <= my instancePref_longestAnalysis())
 		FunctionArea_drawLegend (me,
-			my instancePref_spectrogram_show() ? FunctionArea_legend_GREYS U" %%derived spectrogram" : U"", Melder_BLACK,
-			my instancePref_formant_show()     ? FunctionArea_legend_SPECKLES U" %%derived formants"    : U"", Melder_RED,
-			my instancePref_intensity_show()   ? FunctionArea_legend_LINES U" %%derived intensity"   : U"", Melder_GREEN,
-			my instancePref_pitch_show()       ? FunctionArea_legend_LINES_SPECKLES U" %%derived pitch"       : U"", Melder_BLUE
+			my instancePref_spectrogram_show() ? FunctionArea_legend_GREYS U" %%derived spectrogram" : U"", 1.2 * Melder_BLACK,
+			my instancePref_formant_show()     ? FunctionArea_legend_SPECKLES U" %%derived formants"    : U"", 1.2 * Melder_RED,
+			my instancePref_intensity_show()   ? FunctionArea_legend_LINES U" %%derived intensity"   : U"", 1.2 * Melder_GREEN,
+			my instancePref_pitch_show()       ? FunctionArea_legend_LINES_SPECKLES U" %%derived pitch"       : U"", 1.2 * Melder_BLUE
 		);
 }
 

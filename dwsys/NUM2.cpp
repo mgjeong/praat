@@ -415,7 +415,7 @@ integer NUMsolveQuadraticEquation (double a, double b, double c, double *out_x1,
 	return result;
 }
 
-autoVEC newVECsolve (constMATVU const& a, constVECVU const& b, double tolerance) {
+autoVEC solve_VEC (constMATVU const& a, constVECVU const& b, double tolerance) {
 	Melder_assert (a.nrow == b.size);
 	autoSVD me = SVD_createFromGeneralMatrix (a);
 	SVD_zeroSmallSingularValues (me.get(), tolerance);
@@ -423,7 +423,7 @@ autoVEC newVECsolve (constMATVU const& a, constVECVU const& b, double tolerance)
 	return x;
 }
 
-autoMAT newMATsolve (constMATVU const& a, constMATVU const& b, double tolerance) {
+autoMAT solve_MAT (constMATVU const& a, constMATVU const& b, double tolerance) {
 	Melder_assert (a.nrow == b.nrow);
 	const double tol = ( tolerance > 0.0 ? tolerance : NUMfpp -> eps * a.nrow );
 	
@@ -452,7 +452,7 @@ void VECsolveNonnegativeLeastSquaresRegression (VECVU const& x, constMATVU const
 	const double normSquared_y = NUMsum2 (y);
 	integer iter = 1;
 	bool farFromConvergence = true;
-	double difsq, difsq_previous = 1e100; // large enough
+	double difsq = undefined, difsq_previous = 1e100; // large enough
 	while (iter <= maximumNumberOfIterations && farFromConvergence) {
 		/*
 			Alternating Least Squares: Fixate all except x [icol]
@@ -670,7 +670,7 @@ static double NUMbolzanoSearch (double (*func) (double x, void *closure), double
 	return 0.5 * (xmax + xmin);
 }
 
-autoVEC newVECsolveWeaklyConstrainedLinearRegression (constMAT const& a, constVEC const& y, double alpha, double delta) {
+autoVEC solveWeaklyConstrainedLinearRegression_VEC (constMAT const& a, constVEC const& y, double alpha, double delta) {
 	Melder_assert (a.nrow == y.size);
 	Melder_require (a.nrow >= a.ncol,
 		U"The number of rows should not be less than the number of columns.");
@@ -2266,6 +2266,12 @@ void NUMlpc_lpc_to_area (double *lpc, integer m, double *area) {
 
 #undef SIGN
 
+/* Start of GSL based routines:
+	The following random number generating routines are based on the GSL library
+	Copyright (C) 1996, 1997, 1998, 1999, 2000, 2007 James Theiler, Brian Gough
+	
+*/
+
 #define SMALL_MEAN 14
 /* If n*p < SMALL_MEAN then use BINV algorithm. The ranlib implementation used cutoff=30;
  * but on my (Brian Gough) computer 14 works better
@@ -2288,8 +2294,10 @@ inline static double Stirling (double y1)
 	return s;
 }
 
-// djmw 20121211 replaced calls to gsl_rng_uniform with NUMrandomUniform (0,1)
-
+/*
+	This implementation of NUMrandomBinomial is by James Theiler, April 2003,
+	djmw 20121211 replaced calls to gsl_rng_uniform with NUMrandomUniform (0,1)
+*/
 integer NUMrandomBinomial (double p, integer n) {
 	if (p < 0.0 || p > 1.0 || n < 0) {
 		return -100000000;
@@ -2566,6 +2574,9 @@ double NUMrandomBinomial_real (double p, integer n) {
 		return (double) NUMrandomBinomial (p, n);
 }
 
+/*
+	From gsl_ran_weibull.c
+*/
 double NUMrandomWeibull (double scale_lambda, double shape_k) {
 	Melder_require (scale_lambda > 0.0 && shape_k > 0.0,
 		U"NUMrandomWeibull: both arguments should be positive.");
@@ -2573,6 +2584,13 @@ double NUMrandomWeibull (double scale_lambda, double shape_k) {
 	return scale_lambda * pow (- log (u), 1.0 / shape_k);	
 }
 
+/*
+	Notice in GSL gsl_randist_gamma:
+	Version based on Marsaglia and Tsang, "A Simple Method for generating gamma variables", 
+	ACM Transactions on Mathematical Software, Vol 26, No 3 (2000), p363-372.
+
+	Implemented by J.D.Lamb@btinternet.com, minor modifications for GSL by Brian Gough
+ */
 double NUMrandomGamma (const double alpha, const double beta) {
 	Melder_require (alpha > 0 && beta > 0,
 		U"NUMrandomGamma: both arguments should be positive.");
@@ -2613,6 +2631,8 @@ void NUMlngamma_complex (double zr, double zi, double *out_lnr, double *out_arg)
 		*out_arg = ln_arg;
 }
 
+/* End of GSL based routines */
+
 autoVEC newVECbiharmonic2DSplineInterpolation_getWeights (constVECVU const& x, constVECVU const& y, constVECVU const& z) {
 	Melder_assert (x.size == y.size && x.size == z.size);
 	autoMAT g = raw_MAT (x.size, x.size);
@@ -2628,7 +2648,7 @@ autoVEC newVECbiharmonic2DSplineInterpolation_getWeights (constVECVU const& x, c
 		}
 		g [i] [i] = 0.0;
 	}
-	autoVEC w = newVECsolve (g.get(), z, 0.0);
+	autoVEC w = solve_VEC (g.get(), z, 0.0);
 	return w;
 }
 
@@ -2875,7 +2895,7 @@ void MATmul3_XYsXt (MATVU const& target, constMATVU const& x, constMATVU const& 
 */
 static void VECupdateDataAndSupport_inplace (VECVU const& v, BOOLVECVU const& support, integer numberOfNonZeros) {
 	Melder_assert (v.size == support.size);
-	autoVEC abs = newVECabs (v);
+	autoVEC abs = abs_VEC (v);
 	autoINTVEC index = to_INTVEC (v.size);
 	NUMsortTogether <double, integer> (abs.get(), index.get()); // sort is always increasing
 	for (integer i = 1; i <= v.size - numberOfNonZeros; i ++) {
@@ -2904,7 +2924,7 @@ static double update (VEC const& x_new, VEC const& y_new, BOOLVECVU const& suppo
 	return xdifsq / ydifsq;
 }
 
-autoVEC newVECsolveSparse_IHT (constMATVU const& dictionary, constVECVU const& y, integer numberOfNonZeros, integer maximumNumberOfIterations, double tolerance, integer infoLevel) {
+autoVEC solveSparse_IHT_VEC (constMATVU const& dictionary, constVECVU const& y, integer numberOfNonZeros, integer maximumNumberOfIterations, double tolerance, integer infoLevel) {
 	try {
 		Melder_assert (dictionary.ncol > dictionary.nrow); // must be underdetermined system
 		Melder_assert (dictionary.nrow == y.size); // y = D.x + e

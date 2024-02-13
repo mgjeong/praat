@@ -1,6 +1,6 @@
 /* PowerCepstrum.cpp
  *
- * Copyright (C) 2012-2021 David Weenink
+ * Copyright (C) 2012-2024 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 Thing_implement (PowerCepstrum, Cepstrum, 2);   // derives from Matrix; therefore also version 2
 
-double structPowerCepstrum :: v_getValueAtSample (integer isamp, integer row, int units) {
+double structPowerCepstrum :: v_getValueAtSample (integer isamp, integer row, int units) const {
 	double result = undefined;
 	if (row == 1) {
 		if (units == 0)
@@ -100,8 +100,8 @@ void PowerCepstrum_drawTrendLine (PowerCepstrum me, Graphics g, double qmin, dou
 	Melder_clipLeft (my xmin, & qstart);
 	Melder_clipRight (& qend, my xmax);
 
-	double a, intercept;
-	PowerCepstrum_fitTrendLine (me, qstart, qend, & a, & intercept, lineType, method);
+	double slope, intercept;
+	PowerCepstrum_fitTrendLine (me, qstart, qend, & slope, & intercept, lineType, method);
 	/*
 		Don't draw part outside window
 	*/
@@ -119,19 +119,19 @@ void PowerCepstrum_drawTrendLine (PowerCepstrum me, Graphics g, double qmin, dou
 		
 		for (integer i = 1; i <= n; i ++) {
 			const double q = q1 + (i - 1) * dq;
-			y [i] = a * log (q) + intercept;
+			y [i] = slope * log (q) + intercept;
 		}
 		Graphics_function (g, y.asArgumentToFunctionThatExpectsOneBasedArray(), 1, n, qstart, qend);
 	} else {
-		const double y1 = a * qstart + intercept;
-		const double y2 = a * qend + intercept;
+		const double y1 = slope * qstart + intercept;
+		const double y2 = slope * qend + intercept;
 		if (y1 >= dBminimum && y2 >= dBminimum) {
 			Graphics_line (g, qstart, y1, qend, y2);
 		} else if (y1 < dBminimum) {
-			qstart = (dBminimum - intercept) / a;
+			qstart = (dBminimum - intercept) / slope;
 			Graphics_line (g, qstart, dBminimum, qend, y2);
 		} else if (y2 < dBminimum) {
-			qend = (dBminimum - intercept) / a;
+			qend = (dBminimum - intercept) / slope;
 			Graphics_line (g, qstart, y1, qend, dBminimum);
 		} else {
 			// don't draw anything below lower limit?
@@ -143,18 +143,17 @@ void PowerCepstrum_drawTrendLine (PowerCepstrum me, Graphics g, double qmin, dou
 
 /*
 	Fit line y = aq+b or y = a log(q) + b  on interval [qmin,qmax]
- */
-void PowerCepstrum_fitTrendLine (PowerCepstrum me, double qmin, double qmax, double *out_a, double *out_intercept, kCepstrum_trendType lineType, kCepstrum_trendFit method) {
+*/
+void PowerCepstrum_fitTrendLine (PowerCepstrum me, double qmin, double qmax, double *out_slope, double *out_intercept, kCepstrum_trendType lineType, kCepstrum_trendFit method) {
 	try {
 		Function_unidirectionalAutowindow (me, & qmin, & qmax);
 		
-		double a = undefined, intercept;
 		integer imin, imax;
 		Melder_require (qmin >= my xmin && qmax <= my xmax,
 			U"Your quefrency range is outside the domain.");
 		Matrix_getWindowSamplesX (me, qmin, qmax, & imin, & imax);
 		Melder_clipLeft (2_integer, & imin); // never use q=0 in fitting
-		integer numberOfPoints = imax - imin + 1;
+		const integer numberOfPoints = imax - imin + 1;
 		Melder_require (numberOfPoints > 1,
 			U"Not enough points for fit.");
 
@@ -167,19 +166,19 @@ void PowerCepstrum_fitTrendLine (PowerCepstrum me, double qmin, double qmax, dou
 				x [i] = log (x [i]);
 			y [i] = my v_getValueAtSample (isamp, 1, 1);
 		}
+		double slope, intercept;
 		if (method == kCepstrum_trendFit::LEAST_SQUARES)
-			NUMfitLine_LS (x.get(), y.get(), & a, & intercept);
+			NUMfitLine_LS (x.get(), y.get(), & slope, & intercept);
 		else if (method == kCepstrum_trendFit::ROBUST_FAST)
-			NUMfitLine_theil (x.get(), y.get(), & a, & intercept, false);
+			NUMfitLine_theil (x.get(), y.get(), & slope, & intercept, false);
 		else if (method == kCepstrum_trendFit::ROBUST_SLOW)
-			NUMfitLine_theil (x.get(), y.get(), & a, & intercept, true);
-		else {
+			NUMfitLine_theil (x.get(), y.get(), & slope, & intercept, true);
+		else
 			Melder_throw (U"Invalid method.");
-		}
 		if (out_intercept)
 			*out_intercept = intercept;
-		if (out_a)
-			*out_a = a;
+		if (out_slope)
+			*out_slope = slope;
 	} catch (MelderError) {
 		Melder_throw (me, U": couldn't fit a line.");
 	}
@@ -200,6 +199,12 @@ static void PowerCepstrum_subtractTrendLine_inline2 (PowerCepstrum me, double sl
 }
 #endif
 
+
+static inline double getTrendLineValueAtQuefrency (double quefrency, double slope, double intercept, kCepstrum_trendType lineType) {
+	const double xq = ( lineType == kCepstrum_trendType::EXPONENTIAL_DECAY ? log (quefrency) : quefrency );
+	return slope * xq + intercept;
+}
+
 // clip with tilt line
 static void PowerCepstrum_subtractTrendLine_inplace (PowerCepstrum me, double slope, double intercept, kCepstrum_trendType lineType) {
 	for (integer j = 1; j <= my nx; j ++) {
@@ -209,14 +214,22 @@ static void PowerCepstrum_subtractTrendLine_inplace (PowerCepstrum me, double sl
 			This is no problem because the value at quefrency == 0 is not relevant.
 		*/
 		const double quefrency = ( j == 1 && lineType == kCepstrum_trendType::EXPONENTIAL_DECAY ? 0.5 * my dx : (j - 1) * my dx );
-		const double xq = ( lineType == kCepstrum_trendType::EXPONENTIAL_DECAY ? log (quefrency) : quefrency );
-		const double db_background = slope * xq + intercept;
+		const double db_background = getTrendLineValueAtQuefrency (quefrency, slope, intercept, lineType);
 		const double db_cepstrum = my v_getValueAtSample (j, 1, 1);
 		const double diff = Melder_clippedLeft (0.0, db_cepstrum - db_background);
 		my z [1] [j] = exp (diff * NUMln10 / 10.0);
 	}
 }
 
+double PowerCepstrum_getTrendLineValue (PowerCepstrum me, double quefrency, double qstartFit, double qendFit, kCepstrum_trendType lineType, kCepstrum_trendFit fitMethod) {
+	double trend_db = undefined;
+	if (quefrency >= my xmin && quefrency <= my xmax) {
+		double slope, intercept;
+		PowerCepstrum_fitTrendLine (me, qstartFit, qendFit, & slope, & intercept, lineType, fitMethod);
+		trend_db =  getTrendLineValueAtQuefrency (quefrency, slope, intercept, lineType);
+	}
+	return trend_db;
+}
 
 void PowerCepstrum_subtractTrend_inplace (PowerCepstrum me, double qstartFit, double qendFit, kCepstrum_trendType lineType, kCepstrum_trendFit fitMethod) {
 	double slope, intercept;
@@ -273,7 +286,7 @@ static void PowerCepstrum_smooth_inplaceRectangular_old (PowerCepstrum me, doubl
 
 static void PowerCepstrum_smooth_inplaceGaussian (PowerCepstrum me, double quefrencyAveragingWindow, integer numberOfIterations) {
 	try {
-		double numberOfQuefrencyBins = quefrencyAveragingWindow / my dx;
+		const double numberOfQuefrencyBins = quefrencyAveragingWindow / my dx;
 		if (numberOfQuefrencyBins > 1.0) {
 			/*
 				Applying  two Gaussians after another is associative: (G(s2)*(G(s1)*f) = (G(s2)*G(s1))*f.
@@ -287,7 +300,7 @@ static void PowerCepstrum_smooth_inplaceGaussian (PowerCepstrum me, double quefr
 				Due to imprecise arithmatic some values might turn out to be negative
 				(but very small). Just make them positive.
 			*/
-			VECabs_inplace (my z.row (1));
+			abs_VEC_inout (my z.row (1));
 		}
 	} catch (MelderError) {
 		Melder_throw (me, U": not smoothed.");

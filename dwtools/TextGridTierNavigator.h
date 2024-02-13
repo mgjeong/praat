@@ -2,7 +2,7 @@
 #define _TextGridTierNavigator_h_
 /* TextGridTierNavigator.h
  *
- * Copyright (C) 2020-2021 David Weenink
+ * Copyright (C) 2020-2023 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@
 	The navigation context handles what to match/search on the tier.
 	We search for a topic label which may be preceded by a Before label and/or an After label.
 */
+
+autoTextGridTierNavigator TextGridTierNavigator_create (Function me, NavigationContext thee, kMatchDomain matchDomain);
 
 autoTextGridTierNavigator TextGrid_and_NavigationContext_to_TextGridTierNavigator (TextGrid textgrid, NavigationContext navigationContext, integer tierNumber, kMatchDomain matchDomain);
 
@@ -61,6 +63,7 @@ integer TextGridTierNavigator_getNumberOfMatches (TextGridTierNavigator me);
 integer TextGridTierNavigator_getNumberOfTopicMatches (TextGridTierNavigator me);
 integer TextGridTierNavigator_getNumberOfBeforeMatches (TextGridTierNavigator me);
 integer TextGridTierNavigator_getNumberOfAfterMatches (TextGridTierNavigator me);
+integer TextGridTierNavigator_getNumberOfTopicOnlyMatches (TextGridTierNavigator me);
 
 integer TextGridTierNavigator_findNext (TextGridTierNavigator me);
 

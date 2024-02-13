@@ -2,7 +2,7 @@
 #define _StringsEditor_h_
 /* StringsEditor.h
  *
- * Copyright (C) 1993-2011,2015,2016,2018,2022 David Weenink & Paul Boersma
+ * Copyright (C) 1993-2011,2015,2016,2018,2022,2023 David Weenink & Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  * along with this work. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Editor.h"
+#include "ScriptEditor.h"
 #include "Strings_.h"
 
 Thing_define (StringsEditor, Editor) {
@@ -31,7 +31,7 @@ Thing_define (StringsEditor, Editor) {
 		override;
 	void v_createMenuItems_help (EditorMenu menu)
 		override;
-	void v1_dataChanged ()
+	void v1_dataChanged (Editor sender)
 		override;
 };
 

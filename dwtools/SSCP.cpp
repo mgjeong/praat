@@ -94,8 +94,8 @@ Thing_implement (SSCPList, TableOfRealList, 0);
 
 void structSSCP :: v1_info () {
 	structTableOfReal :: v1_info ();
-	const double zmin = NUMmin (our data.all());
-	const double zmax = NUMmax (our data.all());
+	const double zmin = NUMmin_u (our data.all());
+	const double zmax = NUMmax_u (our data.all());
 	MelderInfo_writeLine (U"Minimum value: ", zmin);
 	MelderInfo_writeLine (U"Maximum value: ", zmax);
 }
@@ -819,7 +819,7 @@ void SSCP_expandWithLowerCholeskyInverse (SSCP me) {
 }
 
 void SSCP_unExpandLowerCholesky (SSCP me) {
-	my lowerCholeskyInverse.reset();
+	my lowerCholeskyInverse. reset();
 	my lnd = 0.0;
 }
 
@@ -828,7 +828,7 @@ void SSCP_expandWithPCA (SSCP me) {
 }
 
 void SSCP_unExpandPCA (SSCP me) {
-	my pca.reset();
+	my pca. reset();
 }
 
 /* End of file SSCP.c */

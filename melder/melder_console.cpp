@@ -1,6 +1,6 @@
 /* melder_console.cpp
  *
- * Copyright (C) 1992-2018 Paul Boersma
+ * Copyright (C) 1992-2018,2020,2022 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@ static void ensureThatStdoutAndStderrAreInitialized () {
 			we manually attach stdout and stderr to the calling console.
 		*/
 		auto ensureThatStreamIsInitialized = [] (FILE *stream, int handle) {
-			bool streamHasBeenInitialized = ( _fileno (stream) >= 0 );
+			const bool streamHasBeenInitialized = ( _fileno (stream) >= 0 );
 			if (! streamHasBeenInitialized) {
 				/*
 					Don't change the following four lines into
@@ -82,7 +82,7 @@ static void ensureThatStdoutAndStderrAreInitialized () {
 				*/
 				HANDLE osfHandle = GetStdHandle (handle);
 				if (osfHandle) {
-					int fileDescriptor = _open_osfhandle ((intptr_t) osfHandle, _O_TEXT);
+					const int fileDescriptor = _open_osfhandle ((intptr_t) osfHandle, _O_TEXT);
 					Melder_assert (fileDescriptor != 0);
 					FILE *f = _fdopen (fileDescriptor, "w");
 					if (! f)
@@ -132,7 +132,7 @@ void MelderConsole::write (conststring32 message, bool useStderr) {
 		}
 		fflush (f);
 	} else if (MelderConsole :: encoding == Encoding::ANSI) {
-		integer n = str32len (message);
+		const integer n = Melder_length (message);
 		for (integer i = 0; i < n; i ++) {
 			/*
 				We convert Unicode to ISO 8859-1 by simple truncation. This loses information.

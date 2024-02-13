@@ -1,6 +1,6 @@
 /* PowerCepstrogram.cpp
  *
- * Copyright (C) 2013 - 2022 David Weenink
+ * Copyright (C) 2013-2022 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 
 Thing_implement (PowerCepstrogram, Matrix, 2); // derives from Matrix -> also version 2
 
-double structPowerCepstrogram :: v_getValueAtSample (integer sampleNumber, integer row, int unit) {
+double structPowerCepstrogram :: v_getValueAtSample (integer sampleNumber, integer row, int unit) const {
 	double result = undefined;
 	if (row >= 1 && row <= ny) {
 		if (unit == 0)
@@ -53,10 +53,7 @@ autoPowerCepstrogram PowerCepstrogram_create (double tmin, double tmax, integer 
 
 void PowerCepstrogram_paint (PowerCepstrogram me, Graphics g, double tmin, double tmax, double qmin, double qmax, double dBmaximum, int autoscaling, double dynamicRangedB, double dynamicCompression, bool garnish) {
 	Function_unidirectionalAutowindow (me, & tmin, & tmax);
-	if (qmax <= qmin) {
-		qmin = my ymin;
-		qmax = my ymax;
-	}
+	SampledXY_unidirectionalAutowindowY (me, & qmin, & qmax);
 	integer itmin, itmax, ifmin, ifmax;
 	if (Matrix_getWindowSamplesX (me, tmin - 0.49999 * my dx, tmax + 0.49999 * my dx, & itmin, & itmax) == 0 ||
 			Matrix_getWindowSamplesY (me, qmin - 0.49999 * my dy, qmax + 0.49999 * my dy, & ifmin, & ifmax) == 0)
@@ -77,7 +74,9 @@ void PowerCepstrogram_paint (PowerCepstrogram me, Graphics g, double tmin, doubl
 	}
 
 	for (integer icol = 1; icol <= my nx; icol ++) {
-		const double lmax = NUMmax (thy z.column (icol));
+		const double lmax = NUMmax_u (thy z.column (icol));
+		if (isundef (lmax))
+			return;
 		const double factor = dynamicCompression * (extrema.max - lmax);
 		thy z.column (icol) += factor;
 	}
@@ -153,12 +152,12 @@ autoTable PowerCepstrogram_to_Table_CPP (PowerCepstrogram me, bool includeFrameN
 		autoTable thee = Table_createWithoutColumnNames (my nx, includeFrameNumber + includeTime + includePeakQuefrency + 1);
 		integer icol = 0;
 		if (includeFrameNumber)
-			Table_setColumnLabel (thee.get(), ++ icol, U"frame");
+			Table_renameColumn_e (thee.get(), ++ icol, U"frame");
 		if (includeTime)
-			Table_setColumnLabel (thee.get(), ++ icol, U"time(s)");
+			Table_renameColumn_e (thee.get(), ++ icol, U"time(s)");
 		if (includePeakQuefrency)
-			Table_setColumnLabel (thee.get(), ++ icol, U"quefrency(s)");
-		Table_setColumnLabel (thee.get(), ++ icol, U"CPP(dB)");
+			Table_renameColumn_e (thee.get(), ++ icol, U"quefrency(s)");
+		Table_renameColumn_e (thee.get(), ++ icol, U"CPP(dB)");
 		autoPowerCepstrum him = PowerCepstrum_create (my ymax, my ny);
 		for (integer iframe = 1; iframe <= my nx; iframe ++) {
 			icol = 0;
@@ -270,8 +269,8 @@ static autoPowerCepstrogram PowerCepstrogram_smoothGaussian (PowerCepstrogram me
 			autoNUMfft_Table fourierTable;
 			NUMfft_Table_init (& fourierTable, nfft);
 			for (integer iq = 1; iq <= my ny; iq ++) {
-				VECsmooth_gaussian (thy z .row (iq), my z.row (iq), sigma, & fourierTable);
-				VECabs_inplace (thy z .row (iq));
+				VECsmooth_gaussian (thy z.row (iq), my z.row (iq), sigma, & fourierTable);
+				abs_VEC_inout (thy z.row (iq));
 			}
 		}
 		/*
@@ -285,7 +284,7 @@ static autoPowerCepstrogram PowerCepstrogram_smoothGaussian (PowerCepstrogram me
 			const double sigma = numberOfQuefrencyBins / numberOfSigmasInWindow;  // 2sigma -> 95.4%, 3sigma -> 99.7 % of the data
 			for (integer iframe = 1; iframe <= my nx; iframe ++) {
 				VECsmooth_gaussian_inplace (thy z.column (iframe), sigma, & fourierTable);
-				VECabs_inplace (thy z.column (iframe));
+				abs_VEC_inout (thy z.column (iframe));
 			}
 		}
 		return thee;
@@ -338,11 +337,13 @@ autoPowerCepstrogram Matrix_to_PowerCepstrogram (Matrix me) {
 autoPowerCepstrogram Sound_to_PowerCepstrogram (Sound me, double pitchFloor, double dt, double maximumFrequency, double preEmphasisFrequency) {
 	try {
 		const double analysisWidth = 3.0 / pitchFloor; // minimum analysis window has 3 periods of lowest pitch
-		double windowDuration = 2.0 * analysisWidth; // gaussian window
-
+		const double physicalAnalysisWidth = 2.0 * analysisWidth;
+		const double physicalDuration = my dx * my nx;
+		volatile const double windowDuration = Melder_clippedRight (2.0 * analysisWidth, my dx * my nx);   // gaussian window
+		Melder_require (physicalDuration >= physicalAnalysisWidth,
+			U"Your sound is too short:\n"
+			U"it should be longer than 6.0 / pitchFloor (", physicalAnalysisWidth, U" s).");
 		// Convenience: analyse the whole sound into one Cepstrogram_frame
-		if (windowDuration > my dx * my nx)
-			windowDuration = my dx * my nx;
 		const double samplingFrequency = 2.0 * maximumFrequency;
 		autoSound sound = Sound_resample (me, samplingFrequency, 50);
 		Sound_preEmphasis (sound.get(), preEmphasisFrequency);
@@ -362,7 +363,7 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram (Sound me, double pitchFloor, dou
 		autoMelderProgress progress (U"Cepstrogram analysis");
 
 		for (integer iframe = 1; iframe <= nFrames; iframe++) {
-			const double t = Sampled_indexToX (thee.get(), iframe);
+			const double t = Sampled_indexToX (thee.get(), iframe); // TODO express the following 3 lines more clearly
 			Sound_into_Sound (sound.get(), sframe.get(), t - windowDuration / 2);
 			Vector_subtractMean (sframe.get());
 			Sounds_multiply (sframe.get(), window.get());

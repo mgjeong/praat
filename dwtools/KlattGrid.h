@@ -206,9 +206,9 @@ void KlattGrid_removeFormant (KlattGrid me, kKlattGridFormantType formantType, i
 /***************** KlattGrid & Sound *************************************/
 
 // reset PlayOptions to defaults
-void KlattGrid_play (KlattGrid me);
+void KlattGrid_play (KlattGrid me, Sound_PlayCallback callback, Thing boss);
 // use playOptions
-void KlattGrid_playSpecial (KlattGrid me);
+void KlattGrid_playSpecial (KlattGrid me, Sound_PlayCallback callback, Thing boss);
 
 void KlattGrid_setDefaultPlayOptions (KlattGrid me);
 
@@ -227,6 +227,7 @@ autoSound Sound_KlattGrid_filterByVocalTract (Sound me, KlattGrid thee, kKlattGr
 
 autoSound Sound_KlattGrid_filter_frication (Sound me, KlattGrid thee);
 
-autoKlattGrid Sound_to_KlattGrid_simple (Sound me, double timeStep, integer maximumNumberOfFormants, double maximumFormantFrequency, double windowLength, double preEmphasisFrequency, double minimumPitch, double maximumPitch, double minimumPitchIntensity, int subtractMean);
+autoKlattGrid Sound_to_KlattGrid_simple (Sound me, double timeStep, integer maximumNumberOfFormants, double maximumFormantFrequency,
+		double windowLength, double preEmphasisFrequency, double pitchFloor, double pitchCeiling, double pitchFloorForIntensity, int subtractMean);
 
 #endif /* _KlattGrid_h_ */

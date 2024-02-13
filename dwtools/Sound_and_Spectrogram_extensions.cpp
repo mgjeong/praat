@@ -1,6 +1,6 @@
 /* Sound_and_Spectrogram_extensions.cpp
  *
- * Copyright (C) 1993-2019 David Weenink
+ * Copyright (C) 1993-2023 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -263,21 +263,12 @@ static int Sound_into_Spectrogram_frame (Sound me, Spectrogram thee, integer fra
 	return 1;
 }
 
-autoSpectrogram Sound_to_Spectrogram_pitchDependent (Sound me, double analysisWidth, double dt, double f1_hz, double fmax_hz, double df_hz, double relative_bw, double minimumPitch, double maximumPitch) {
+autoSpectrogram Sound_to_Spectrogram_pitchDependent (Sound me, double analysisWidth, double dt, double f1_hz, double fmax_hz, double df_hz, double relative_bw,
+	double pitchFloor, double pitchCeiling)
+{
 	try {
-		constexpr double floor = 80.0, ceiling = 600.0;
-		if (minimumPitch >= maximumPitch) {
-			minimumPitch = floor;
-			maximumPitch = ceiling;
-		}
-		if (minimumPitch <= 0.0)
-			minimumPitch = floor;
-		if (maximumPitch <= 0.0)
-			maximumPitch = ceiling;
-
-		autoPitch thee = Sound_to_Pitch (me, dt, minimumPitch, maximumPitch);
-		autoSpectrogram ff = Sound_Pitch_to_Spectrogram (me, thee.get(), analysisWidth, dt, f1_hz, fmax_hz, df_hz, relative_bw);
-		return ff;
+		autoPitch thee = Sound_to_Pitch (me, dt, pitchFloor, pitchCeiling);
+		return Sound_Pitch_to_Spectrogram (me, thee.get(), analysisWidth, dt, f1_hz, fmax_hz, df_hz, relative_bw);
 	} catch (MelderError) {
 		Melder_throw (me, U": no Spectrogram created.");
 	}
@@ -295,7 +286,7 @@ autoSpectrogram Sound_Pitch_to_Spectrogram (Sound me, Pitch thee, double analysi
 
 		if (isundef (f0_median) || f0_median == 0.0) {
 			f0_median = 100.0;
-			Melder_warning (U"Pitch values undefined. Bandwith fixed to 100 Hz. ");
+			Melder_warning (U"Pitch values undefined. Bandwidth fixed to 100 Hz. ");
 		}
 
 		if (f1_hz <= 0.0)

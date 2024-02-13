@@ -2,7 +2,7 @@
 #define _Editor_h_
 /* Editor.h
  *
- * Copyright (C) 1992-2020,2022 Paul Boersma
+ * Copyright (C) 1992-2020,2022,2023 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include "Graphics.h"
 
 Thing_declare (Editor);
+Thing_declare (ScriptEditor);
 
 Thing_define (EditorMenu, Thing) {
 	Editor d_editor;
@@ -54,11 +55,22 @@ typedef MelderCallback <void, structEditor, autoDaata /* publication */> Editor_
 
 Thing_define (Editor, DataGui) {
 	GuiWindow windowForm;
-	GuiMenuItem undoButton, searchButton;
+	GuiMenuItem undoButton, redoButton, clearUndoHistoryButton, searchButton;
 	OrderedOf<structEditorMenu> menus;
-	autoDaata previousData;   // the data that can be displayed and edited
-	char32 undoText [100];
-	Graphics pictureGraphics;
+
+	struct Undo {
+		static constexpr integer MAX_DEPTH = 10;
+		autoDaata data [1+MAX_DEPTH];   // the data that can be displayed and edited
+		autostring32 description [1+MAX_DEPTH];
+		integer position = 0;
+	} undo;
+	virtual autoDaata v_dataToSaveForUndo () {
+		return our data() ? Data_copy (our data()) : autoDaata();
+	}
+	virtual void v_restoreDataFromUndo (Daata savedData) {
+		Thing_swap (our data(), savedData);
+	}
+
 	Editor_DataChangedCallback d_dataChangedCallback;
 	Editor_DestructionCallback d_destructionCallback;
 	Editor_PublicationCallback d_publicationCallback;
@@ -88,9 +100,7 @@ Thing_define (Editor, DataGui) {
 
 	virtual void v_createChildren () { }
 
-	virtual void v1_dataChanged () { }
-	virtual void v_saveData ();
-	virtual void v_restoreData ();
+	virtual void v1_dataChanged (Editor /* sender */) { }
 
 	#include "Editor_prefs.h"
 };
@@ -104,7 +114,6 @@ GuiMenuItem EditorCommand_getItemWidget (EditorCommand me);
 EditorMenu Editor_addMenu (Editor me, conststring32 menuTitle, uint32 flags);
 GuiObject EditorMenu_getMenuWidget (EditorMenu me);
 
-#define Editor_HIDDEN  GuiMenu_HIDDEN
 GuiMenuItem Editor_addCommand (Editor me, conststring32 menuTitle, conststring32 itemTitle, uint32 flags, EditorCommandCallback commandCallback);
 GuiMenuItem Editor_addCommandScript (Editor me, conststring32 menuTitle, conststring32 itemTitle, uint32 flags,
 	conststring32 script);
@@ -120,13 +129,13 @@ inline void Editor_raise (Editor me)
 	{
 		GuiThing_show (my windowForm);
 	}
-inline void Editor_dataChanged (Editor me)
+inline void Editor_dataChanged (Editor me, Editor sender)
 	/*
-	 * Message: "your data has changed by an action from *outside* yourself,
-	 *    so you may e.g. like to redraw yourself."
-	 */
+		Message: "your data has changed by an action from inside *or* outside yourself,
+			so you may e.g. like to redraw yourself."
+	*/
 	{
-		my v1_dataChanged ();
+		my v1_dataChanged (sender);
 	}
 inline void Editor_setDataChangedCallback (Editor me, Editor_DataChangedCallback dataChangedCallback)
 	/*
@@ -231,15 +240,6 @@ autoUiForm UiInfile_createE (EditorCommand cmd, conststring32 title, conststring
 
 EditorCommand Editor_getMenuCommand (Editor me, conststring32 menuTitle, conststring32 itemTitle);
 void Editor_doMenuCommand (Editor me, conststring32 command, integer narg, Stackel args, conststring32 arguments, Interpreter interpreter);
-
-/*
- * The following two procedures are in praat_picture.cpp.
- * They allow editors to draw into the Picture window.
- */
-Graphics praat_picture_editor_open (bool eraseFirst);
-void praat_picture_editor_close ();
-void Editor_openPraatPicture (Editor me);
-void Editor_closePraatPicture (Editor me);
 
 #endif
 /* End of file Editor.h */

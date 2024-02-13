@@ -1,6 +1,6 @@
 /* NoulliGridEditor.cpp
  *
- * Copyright (C) 2018-2022 Paul Boersma
+ * Copyright (C) 2018-2023 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ Thing_implement (NoulliGridEditor, FunctionEditor, 0);
 #include "Prefs_copyToInstance.h"
 #include "NoulliGridEditor_prefs.h"
 
-static void drawSelectionOrWindow (NoulliGridEditor me, double xmin, double xmax, double tmin, double tmax, conststring32 header) {
+static void drawSelectionOrWindow (NoulliGridEditor me, double tmin, double tmax, conststring32 header) {
 	for (integer itier = 1; itier <= my noulliGrid() -> tiers.size; itier ++) {
 		if (itier == 1) {
 			Graphics_setColour (my graphics.get(), Melder_BLACK);
@@ -134,17 +134,14 @@ static void drawSelectionOrWindow (NoulliGridEditor me, double xmin, double xmax
 
 void structNoulliGridEditor :: v_drawSelectionViewer () {
 	Graphics_setWindow (our graphics.get(), -1.0, +1.0, -1.0, +1.0);
-	Graphics_setColour (our graphics.get(), Melder_WINDOW_BACKGROUND_COLOUR);
+	Graphics_setColour (our graphics.get(), DataGuiColour_WINDOW_BACKGROUND);
 	Graphics_fillRectangle (our graphics.get(), -1.0, +1.0, -1.0, +1.0);
-	drawSelectionOrWindow (this, 0.0, 1.0, our startSelection, our endSelection, U"");
-	//drawSelectionOrWindow (this, 0.0, 0.5, our startSelection, our endSelection,
-	//	our tmin == our tmax ? U"Cursor" : U"Selection");
-	//drawSelectionOrWindow (this, 0.5, 1.0, our startWindow, our endWindow, U"Window");
+	drawSelectionOrWindow (this, our startSelection, our endSelection, U"");
 }
 
 void structNoulliGridEditor :: v_drawRealTimeSelectionViewer (double time) {
 	Graphics_setWindow (our graphics.get(), -1.0, +1.0, -1.0, +1.0);
-	drawSelectionOrWindow (this, 0.0, 1.0, time - 1.0, time + 1.0, U"");
+	drawSelectionOrWindow (this, time - 1.0, time + 1.0, U"");
 }
 
 OPTIONMENU_ENUM_VARIABLE (kNoulliGridEditor_showCategoryInSelectionViewerAs, v_prefs_addFields__showCategoryInSelectionViewerAs)
