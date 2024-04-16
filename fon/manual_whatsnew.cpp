@@ -29,6 +29,23 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.07# (17 March 2024)
+• The command @@Sound & Pitch: To PointProcess (cc)@, which is also used when computing the times of pulses
+  in the Sound window, could cause Praat to freeze when the pitch ceiling (and the measured pitch)
+  were very high; this problem existed since at least 2001.
+• eSpeak: new version, with e.g. Tigrinya.
+• Support for 119-dpi graphics on Windows.
+• Repaired a bug that could cause the Artword windows to crash if the Time field was left empty.
+
+##6.4.06# (25 February 2024)
+• Sound files on Windows: corrected a bug (existing since July 2021)
+  that prevented reading FLAC files with special characters in their names.
+• FormantPathEditor without Sound: corrected several bugs that caused Praat to crash (such as ##Formant listing#, using the Pitch menu...).
+• Spectrogram painting: improved painting of very quiet spectrograms at extreme dynamic ranges.
+• Scripting: @`folderExists`.
+• Scripting: home-relative paths (such as `~/sounds/*.wav`) in more locations,
+  such as @`fileNames$#`, @@Create Strings as file list...@, and @`createFolder`.
+
 ##6.4.05# (27 January 2024)
 • Many typos in manual.
 • Made TIMIT label files readable on Windows.
