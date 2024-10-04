@@ -82,6 +82,7 @@ void HyperPage_clear (HyperPage me);
 /* "Methods" */
 #define HyperPage_ADD_BORDER  1
 #define HyperPage_USE_ENTRY_HINT  2
+#define HyperPage_EXECUTABLE  4
 
 void HyperPage_any (HyperPage me, conststring32 text, kGraphics_font font, double size, int style, double minFooterDistance,
 	double x, double secondIndent, double topSpacing, double bottomSpacing, uint32 method);
@@ -109,6 +110,10 @@ void HyperPage_code3 (HyperPage me, conststring32 text);
 void HyperPage_code4 (HyperPage me, conststring32 text);
 void HyperPage_code5 (HyperPage me, conststring32 text);
 void HyperPage_caption (HyperPage me, conststring32 text);
+void HyperPage_quote (HyperPage me, conststring32 text);
+void HyperPage_quote1 (HyperPage me, conststring32 text);
+void HyperPage_quote2 (HyperPage me, conststring32 text);
+void HyperPage_quote3 (HyperPage me, conststring32 text);
 void HyperPage_prototype (HyperPage me, conststring32 text);
 void HyperPage_formula (HyperPage me, conststring32 formula);
 void HyperPage_picture (HyperPage me, double width_inches, double height_inches, void (*draw) (Graphics g));

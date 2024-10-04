@@ -1,6 +1,6 @@
 /* Table.cpp
  *
- * Copyright (C) 2002-2023 Paul Boersma
+ * Copyright (C) 2002-2024 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -617,7 +617,7 @@ double Table_getQuantile (Table me, integer columnNumber, double quantile) {
 			const constTableRow row = my rows.at [irow];
 			sortingColumn [irow] = row -> cells [columnNumber]. number;
 		}
-		sort_VEC_inout (sortingColumn.get());
+		sort_e_VEC_inout (sortingColumn.get());
 		return NUMquantile (sortingColumn.get(), quantile);
 	} catch (MelderError) {
 		Melder_throw (me, U": cannot compute the ", quantile, U" quantile of column ", columnNumber, U".");
@@ -721,7 +721,10 @@ void Table_checkSpecifiedColumnNumbersWithinRange (Table me, constINTVECVU const
 void Table_columns_checkExist (Table me, constSTRVEC columnNames) {
 	for (integer i = 1; i <= columnNames.size; i ++)
 		if (Table_columnNameToNumber_0 (me, columnNames [i]) == 0)
-			Melder_throw (me, U": column “", columnNames [i], U"” does not exist.");
+			if (Melder_isHorizontalOrVerticalSpace (columnNames [i] [0]))
+				Melder_throw (me, U": column “", columnNames [i], U"” does not exist (note: it starts with a space)");
+			else
+				Melder_throw (me, U": column “", columnNames [i], U"” does not exist.");
 }
 
 static void Table_columns_checkCrossSectionEmpty (Table me, constINTVECVU factors, constINTVECVU vars) {
@@ -873,7 +876,7 @@ autoTable Table_collapseRows (Table me, constSTRVEC factors, constSTRVEC columns
 					for (integer jrow = rowmin; jrow <= rowmax; jrow ++)
 						sortingColumn [jrow] = my rows.at [jrow] -> cells [columns [icol]]. number;
 					const VEC part = sortingColumn.part (rowmin, rowmax);
-					sort_VEC_inout (part);
+					sort_e_VEC_inout (part);
 					const double median = NUMquantile (part, 0.5);
 					Table_setNumericValue (thee.get(), thy rows.size, icol, median);
 				}
@@ -907,7 +910,7 @@ autoTable Table_collapseRows (Table me, constSTRVEC factors, constSTRVEC columns
 						sortingColumn [jrow] = log (value);
 					}
 					const VEC part = sortingColumn.part (rowmin, rowmax);
-					sort_VEC_inout (part);
+					sort_e_VEC_inout (part);
 					const double median = NUMquantile (part, 0.5);
 					Table_setNumericValue (thee.get(), thy rows.size, icol, exp (median));
 				}
@@ -1134,7 +1137,10 @@ void Table_sortRows (Table me, constSTRVEC columnNames) {
 		for (integer icol = 1; icol <= numberOfColumns; icol ++) {
 			columns [icol] = Table_columnNameToNumber_0 (me, columnNames [icol]);
 			if (columns [icol] == 0)
-				Melder_throw (U"Column \"", columnNames [icol], U"\" does not exist.");
+				if (Melder_isHorizontalOrVerticalSpace (columnNames [icol] [0]))
+					Melder_throw (U"Column \"", columnNames [icol], U"\" does not exist (note: it starts with a space).");
+				else
+					Melder_throw (U"Column \"", columnNames [icol], U"\" does not exist.");
 		}
 		Table_sortRows_a (me, columns.get());
 	} catch (MelderError) {
@@ -2295,6 +2301,18 @@ autoTable Table_readFromCharacterSeparatedTextFile (MelderFile file, char32 sepa
 		return me;
 	} catch (MelderError) {
 		Melder_throw (U"Table object not read from character-separated text file ", file, U".");
+	}
+}
+
+autoSTRVEC Table_getColumn (Table me, integer columnNumber) {
+	try {
+		Table_checkSpecifiedColumnNumberWithinRange (me, columnNumber);
+		autoSTRVEC strings (my rows.size);
+		for (integer irow = 1; irow <= my rows.size; irow ++)
+			strings [irow] = Melder_dup (Table_getStringValue_a (me, irow, columnNumber));
+		return strings;
+	} catch (MelderError) {
+		Melder_throw (U"A string array could not be created from the column in the Table.");
 	}
 }
 

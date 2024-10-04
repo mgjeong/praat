@@ -1,6 +1,6 @@
 /* Praat_tests.cpp
  *
- * Copyright (C) 2001-2007,2009,2011-2023 Paul Boersma
+ * Copyright (C) 2001-2007,2009,2011-2024 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 /* 24 May 2011: C++ */
 /* 5 June 2015: char32 */
 
-#include "FileInMemoryManager.h"
+#include "FileInMemory.h"
 #include "Praat_tests.h"
 
 #include "Graphics.h"
@@ -92,7 +92,7 @@ int Praat_tests (kPraatTests itest, conststring32 arg1, conststring32 arg2, cons
 			for (int64 iteration = 1; iteration <= n; iteration ++) {
 				for (int64 i = 1; i <= size; i ++)
 					array [i] = NUMrandomFraction ();
-				sort_VEC_inout (array.get());
+				sort_e_VEC_inout (array.get());
 			}
 			t = Melder_stopwatch () / (size * log2 (size));
 		} break;
@@ -659,8 +659,9 @@ int Praat_tests (kPraatTests itest, conststring32 arg1, conststring32 arg2, cons
 				}
 			}
 		} break;
-		case kPraatTests::FILEINMEMORYMANAGER_IO: {
-			test_FileInMemoryManager_io ();
+		case kPraatTests::FILEINMEMORY_IO: {
+			//Melder_throw (U"Cannot test FileInMemoryManager directly from Praat.");
+			test_FileInMemory_io ();
 		} break;
 	}
 	MelderInfo_writeLine (Melder_single (n / t * 1e-9), U" Gflop/s");

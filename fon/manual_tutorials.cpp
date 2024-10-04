@@ -1,6 +1,6 @@
 /* manual_tutorials.cpp
  *
- * Copyright (C) 1992-2023 Paul Boersma
+ * Copyright (C) 1992-2024 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,129 +17,188 @@
  */
 
 #include "ManPagesM.h"
-#include "praat_version.h"
 
 void manual_tutorials_init (ManPages me);
 void manual_tutorials_init (ManPages me) {
 
-MAN_BEGIN (U"Praat menu", U"ppgb", 20161227)
-INTRO (U"The first menu in the @@Objects window@. "
-	"In macOS, this menu is in the main menu bar along the top of the screen.")
-MAN_END
+MAN_PAGES_BEGIN R"~~~(
+################################################################################
+"Praat menu"
+© Paul Boersma 2016-12-27
 
-MAN_BEGIN (U"Analyses menu", U"ppgb", 20221202)
-INTRO (U"A menu in the @SoundEditor or @TextGridEditor.")
-MAN_END
+The first menu in the @@Objects window@.
+In macOS, this menu is in the main menu bar along the top of the screen.
 
-MAN_BEGIN (U"Copy...", U"ppgb", 20111018)
-INTRO (U"One of the fixed buttons in the @@Objects window@.")
-ENTRY (U"Availability")
-NORMAL (U"You can choose this command after selecting one object of any type.")
-ENTRY (U"Behaviour")
-NORMAL (U"The Objects window copies the selected object, and all the data it contains, "
-	"to a new object, which will appear at the bottom of the List of Objects.")
-ENTRY (U"Example")
-NORMAL (U"If you select “Sound hallo” and click ##Copy...#, "
-	"a command window will appear, which prompts you for a name; "
-	"after you click #OK, a new object will appear in the list, bearing that name.")
-MAN_END
+################################################################################
+"Analyses menu"
+© Paul Boersma 2022-12-02
 
-MAN_BEGIN (U"Draw menu", U"ppgb", 20010417)
-INTRO (U"A menu that occurs in the @@Dynamic menu@ for many objects.")
-NORMAL (U"This menu contains commands for drawing the object to the @@Picture window@, "
-	"which will allow you to print the drawing or to copy it to your word processor.")
-MAN_END
+A menu in the @SoundEditor or @TextGridEditor.
 
-MAN_BEGIN (U"Dynamic menu", U"ppgb", 20110131)  // 2023-06-08
-INTRO (U"A column of buttons in the right-hand part of the @@Objects window@, "
-	"plus the @@Save menu@ in the Objects window.")
-NORMAL (U"If you select one or more @objects in the list, "
-	"the possible actions that you can perform with the selected objects "
-	"will appear in the dynamic menu. "
-	"These actions can include viewing & editing, saving, drawing, "
-	"conversions to other types (including analysis and synthesis), and more.")
-ENTRY (U"Example of analysis:")
-NORMAL (U"Record a Sound, select it, and click ##To Pitch...#. "
-	"This will create a new Pitch object and put it in the list of objects. "
-	"You can then edit, write, and draw this Pitch object.")
-ENTRY (U"Example of synthesis:")
-NORMAL (U"Create a Speaker, create and edit an Artword, and click ##To Sound...#.")
-MAN_END
+################################################################################
+"Copy..."
+© Paul Boersma 2011-10-18
 
-MAN_BEGIN (U"View & Edit", U"ppgb", 20110128)
-INTRO (U"A command in the @@Dynamic menu@ of several types of @objects.")
-NORMAL (U"This command puts an @@Editors|editor@ window on the screen, which shows the contents of the selected object. "
-	"This window will allow your to view and modify the contents of this object.")
-MAN_END
+One of the fixed buttons in the @@Objects window@.
 
-MAN_BEGIN (U"Extract visible formant contour", U"ppgb", 20030316)
-INTRO (U"One of the commands in the Formant menu of the @SoundEditor and the @TextGridEditor.")
-NORMAL (U"See @@Intro 5. Formant analysis@")
-MAN_END
+Availability
+============
 
-MAN_BEGIN (U"Extract visible intensity contour", U"ppgb", 20030316)
-INTRO (U"One of the commands in the Intensity menu of the @SoundEditor and the @TextGridEditor.")
-NORMAL (U"See @@Intro 6. Intensity analysis@")
-MAN_END
+You can choose this command after selecting one object of any type.
 
-MAN_BEGIN (U"Extract visible pitch contour", U"ppgb", 20030316)
-INTRO (U"One of the commands in the Pitch menu of the @SoundEditor and the @TextGridEditor.")
-NORMAL (U"See @@Intro 4. Pitch analysis@")
-MAN_END
+Behaviour
+=========
 
-MAN_BEGIN (U"Extract visible spectrogram", U"ppgb", 20030316)
-INTRO (U"One of the commands in the Spectrogram menu of the @SoundEditor and the @TextGridEditor.")
-NORMAL (U"See @@Intro 3. Spectral analysis@")
-MAN_END
+The Objects window copies the selected object, and all the data it contains,
+to a new object, which will appear at the bottom of the List of Objects.
 
-MAN_BEGIN (U"FAQ (Frequently Asked Questions)", U"ppgb", 20071210)
-LIST_ITEM (U"@@FAQ: How to cite Praat")
-LIST_ITEM (U"@Unicode")
-LIST_ITEM (U"@@FAQ: Formant analysis")
-LIST_ITEM (U"@@FAQ: Pitch analysis")
-LIST_ITEM (U"@@FAQ: Spectrograms")
-LIST_ITEM (U"@@FAQ: Scripts")
-/* Hardware */
-/* Pitch: octave errors */
-MAN_END
+Example
+=======
 
-MAN_BEGIN (U"FAQ: Formant analysis", U"ppgb", 20030916)
-NORMAL (U"#Problem: I get different formant values if I choose to analyse 3 formants "
-	"than if I choose to analyse 4 formants.")
-NORMAL (U"Solution: the “number of formants” in formant analysis determines the "
-	"number of peaks with which the %entire spectrum is modelled. For an average "
-	"female voice, you should choose to analyse 5 formants in the region up to 5500 Hz, "
-	"even if you are interested only in the first three formants.")
-NORMAL (U"")
-NORMAL (U"#Problem: I often get only 1 formant in a region where I see clearly 2 formants "
-	"in the spectrogram.")
-NORMAL (U"This occurs mainly in back vowels (F1 and F2 close together) for male voices, "
-	"if the “maximum formant” is set to the standard of 5500 Hz, which is appropriate "
-	"for female voices. Set the “maximum formant” down to 5000 Hz. "
-	"No, Praat comes without a guarantee: the formant analysis is based on LPC, "
-	"and this comes with several assumptions as to what a speech spectrum is like.")
-NORMAL (U"")
-NORMAL (U"#Question: what algorithm is used for formant analysis?")
-NORMAL (U"Answer: see @@Sound: To Formant (burg)...@.")
-MAN_END
+If you select “Sound hallo” and click ##Copy...#,
+a command window will appear, which prompts you for a name;
+after you click #OK, a new object will appear in the list, bearing that name.
 
-MAN_BEGIN (U"FAQ: How to cite Praat", U"ppgb", 20140826)
-NORMAL (U"#Question: how do I cite Praat in my articles?")
-NORMAL (U"Answer: nowadays most journals allow you to cite computer programs and web sites. "
-	"The style approved by the American Psychological Association, "
-	"and therefore by many journals, is like the following "
-	"(change the dates and version number as needed):")
-NORMAL (U"Boersma, Paul & Weenink, David (" stringize(PRAAT_YEAR) "). "
-	"Praat: doing phonetics by computer [Computer program]. "
-	"Version " stringize(PRAAT_VERSION_STR) ", retrieved " stringize(PRAAT_DAY) " " stringize(PRAAT_MONTH) " " stringize(PRAAT_YEAR) " from http://www.praat.org/")
-NORMAL (U"If the journal does not allow you to cite a web site, then try:")
-NORMAL (U"Boersma, Paul (2001). Praat, a system for doing phonetics by computer. "
-	"%%Glot International% ##5:9/10#, 341-345.")
-NORMAL (U"This paper can be downloaded from Boersma's website.")
-MAN_END
+################################################################################
+"Draw menu"
+© Paul Boersma 2001-04-17
 
-MAN_BEGIN (U"FAQ: Pitch analysis", U"ppgb", 20231115)   // 20221202
-NORMAL (U"Please also consult @@How to choose a pitch analysis method@.")
+A menu that occurs in the @@Dynamic menu@ for many objects.
+
+This menu contains commands for drawing the object to the @@Picture window@,
+which will allow you to print the drawing or to copy it to your word processor.
+
+################################################################################
+"Dynamic menu"
+© Paul Boersma 20110131  // 2023-06-08
+
+A column of buttons in the right-hand part of the @@Objects window@,
+plus the @@Save menu@ in the Objects window.
+
+If you select one or more @objects in the list,
+the possible actions that you can perform with the selected objects
+will appear in the dynamic menu.
+These actions can include viewing & editing, saving, drawing,
+conversions to other types (including analysis and synthesis), and more.
+
+Example of analysis:
+====================
+
+Record a Sound, select it, and click ##To Pitch...#.
+This will create a new Pitch object and put it in the list of objects.
+You can then edit, write, and draw this Pitch object.
+
+Example of synthesis:
+=====================
+
+Create a Speaker, create and edit an Artword, and click ##To Sound...#.
+
+################################################################################
+"View & Edit"
+© Paul Boersma 2011-01-28
+
+A command in the @@Dynamic menu@ of several types of @objects.
+
+This command puts an @@Editors|editor@ window on the screen, which shows the contents of the selected object.
+This window will allow your to view and modify the contents of this object.
+
+################################################################################
+"Extract visible formant contour"
+© Paul Boersma 2003-03-16
+
+One of the commands in the Formant menu of the @SoundEditor and the @TextGridEditor.
+
+See @@Intro 5. Formant analysis@
+
+################################################################################
+"Extract visible intensity contour"
+© Paul Boersma 2003-03-16
+
+One of the commands in the Intensity menu of the @SoundEditor and the @TextGridEditor.
+
+See @@Intro 6. Intensity analysis@
+
+################################################################################
+"Extract visible pitch contour"
+© Paul Boersma 2003-03-16
+
+One of the commands in the Pitch menu of the @SoundEditor and the @TextGridEditor.
+
+See @@Intro 4. Pitch analysis@
+
+################################################################################
+"Extract visible spectrogram"
+© Paul Boersma 2003-03-16
+
+One of the commands in the Spectrogram menu of the @SoundEditor and the @TextGridEditor.
+
+See @@Intro 3. Spectral analysis@
+
+################################################################################
+"FAQ (Frequently Asked Questions)"
+© Paul Boersma 2007-12-10
+
+,	@@FAQ: How to cite Praat
+,	@Unicode
+,	@@FAQ: Formant analysis
+,	@@FAQ: Pitch analysis
+,	@@FAQ: Spectrograms
+,	@@FAQ: Scripts
+
+// Hardware
+// Pitch: octave errors */
+
+################################################################################
+"FAQ: Formant analysis"
+© Paul Boersma 2003-09-16
+
+#Problem: I get different formant values if I choose to analyse 3 formants
+than if I choose to analyse 4 formants.
+
+Solution: the “number of formants” in formant analysis determines the
+number of peaks with which the %entire spectrum is modelled. For an average
+female voice, you should choose to analyse 5 formants in the region up to 5500 Hz,
+even if you are interested only in the first three formants.
+
+#Problem: I often get only 1 formant in a region where I see clearly 2 formants
+in the spectrogram.
+
+This occurs mainly in back vowels (F1 and F2 close together) for male voices,
+if the “maximum formant” is set to the standard of 5500 Hz, which is appropriate
+for female voices. Set the “maximum formant” down to 5000 Hz.
+No, Praat comes without a guarantee: the formant analysis is based on LPC,
+and this comes with several assumptions as to what a speech spectrum is like.
+
+#Question: what algorithm is used for formant analysis?
+
+Answer: see @@Sound: To Formant (burg)...@.
+
+################################################################################
+"FAQ: How to cite Praat"
+© Paul Boersma 2014-08-26
+
+#Question: how do I cite Praat in my articles?
+
+Answer: nowadays most journals allow you to cite computer programs and web sites.
+The style approved by the American Psychological Association,
+and therefore by many journals, is like the following
+(change the dates and version number as needed):
+{-
+	writeInfoLine: “Boersma, Paul & Weenink, David (”, appYear(),
+	... “). Praat: doing phonetics by computer [Computer program]. Version ”, appVersion$(),
+	... “, retrieved ”, appDay(), “ ”, appMonth$(), “ ”, appYear(), “ from http://www.praat.org/”
+}
+If the journal does not allow you to cite a web site, then try:
+
+Boersma, Paul (2001). Praat, a system for doing phonetics by computer.
+%%Glot International% ##5:9/10#, 341-345.
+
+This paper can be downloaded from Boersma’s website.
+)~~~"
+MAN_PAGES_END
+
+MAN_BEGIN (U"FAQ: Pitch analysis", U"ppgb", 20231115)   // 20221202 2024
+NORMAL (U"Please also consult @@how to choose a pitch analysis method@.")
 NORMAL (U"#Question: what algorithm is used for pitch analysis?")
 NORMAL (U"Answer: for how the raw pitch analysis method works, "
 	"see @@Sound: To Pitch (ac)...@. The 1993 article is downloadable from "
@@ -152,14 +211,14 @@ NORMAL (U"The first possibility is that the pitch has fallen below the @@pitch f
 	"If this happens, it may help to lower the pitch floor to e.g. 30 Hz (@@Pitch settings...@), "
 	"although that may also smooth the pitch curve too much in other places.")
 NORMAL (U"The second possibility is that the pitch has moved too fast. This could happen at the end of a Chinese fourth tone, "
-	"which drops very fast. If this happens, it may help to use the ##optimize for voice analysis# setting, "
-	"(@@Pitch settings...@), although Praat may then hallucinate pitches in other places that you would prefer to consider voiceless.")
+	"which drops very fast. If this happens, it may help to use @@pitch analysis by raw cross-correlation@, "
+	"although Praat may then hallucinate pitches in other places that you would prefer to consider voiceless.")
 NORMAL (U"The third possibility is that the periods are very irregular, as in some pathological voices. "
-	"If you want to see a pitch in those cases, it may help to use the ##optimize for voice analysis# setting "
-	"(@@Pitch settings...@). Or it may help to lower the ##voicing threshold# setting (@@Advanced pitch settings (filtered AC and CC)...@) "
-	"to 0.25 (instead of the standard 0.50) or so.")
+	"If you want to see a pitch in those cases, it may help to use @@pitch analysis by raw cross-correlation@. "
+	"Or it may help to lower the ##voicing threshold# setting "
+	"to 0.25 (instead of the standard 0.50) or so (@@Pitch settings...@).")
 NORMAL (U"The fourth possibility is that there is a lot of background noise, as in a recording on a busy street. "
-	"In such a case, it may help to lower the ##voicing threshold# setting (@@Advanced pitch settings (filtered AC and CC)...@) "
+	"In such a case, it may help to lower the ##voicing threshold# setting "
 	"to 0.25 (instead of the standard 0.50) or so. The disadvantage of lowering this setting is that for non-noisy "
 	"recordings, Praat will become too eager to find voicing in some places that you would prefer to consider voiceless; "
 	"so make sure to set it back to 0.50 once you have finished analysing the noisy recordings.")
@@ -807,20 +866,22 @@ NORMAL (U"To the right of the window, you may see three pitch values, written wi
 	"at the cursor, or the average pitch in the selection.")
 MAN_END
 
-MAN_BEGIN (U"Intro 4.2. Configuring the pitch contour", U"ppgb", 20231115 /*20190331*/)
+MAN_BEGIN (U"Intro 4.2. Configuring the pitch contour", U"ppgb", 20231115 /*20190331*/)  /*2024*/
 NORMAL (U"With @@Pitch settings...@ from the #Pitch menu, "
 	"you can determine how the pitch contour is displayed and how it is computed. "
 	"These settings will be remembered across Praat sessions. "
 	"All these settings have standard values (“factory settings”), which appear "
 	"when you click #Standards.")
-ENTRY (U"The %%pitch range% setting")
-NORMAL (U"This is the most important setting for pitch analysis. The standard range is from 50 to 800 hertz, "
-	"which means that the pitch analysis method will only find values between 50 and 800 Hz. "
+ENTRY (U"The %%pitch range% (%%pitch floor and top%) setting")
+NORMAL (U"This is the most important setting for pitch analysis. "
+	"The standard range (for filtered autocorrelation) is from 50 to 800 hertz, "
+	"which means that the pitch analysis method will only find values between 50 and 800 Hz "
+	"(and values between 400 and 800 Hz only rarely). "
 	"The range that you set here will be shown to the right of the analysis window.")
 NORMAL (U"You may have set the range to values appropriate for your speaker, "
 	"because speakers can vary enormously in their pitch ranges. "
-	"For some low-pitched (e.g. average male) voices, you might want to set the floor to 50 Hz, and the ceiling to 300 Hz; "
-	"for some high-pitched (e.g. average female) voices, a range of 100-600 Hz might instead be appropriate; "
+	"For some low-pitched (e.g. average male) voices, you might want to set the floor to 50 Hz, and the top to 600 Hz; "
+	"for some high-pitched (e.g. average female) voices, a range of 100-800 Hz might instead be appropriate; "
 	"however, it may well be the case that the standard setting of 50–800 Hz will work for all of these voices. "
 	"On the high side, however, some children can reach almost 2000 Hz when yelling; "
 	"on the low side, creaky voice can go as low as 30 Hz; "
@@ -849,8 +910,13 @@ NORMAL (U"Normally, the range of pitch values that can be seen in the editor win
 	"However, the analysis range will also change in that case, so that the curve itself may change. "
 	"If you do not want that, you can change the %%View range% settings "
 	"from “0.0 (= auto)” - “0.0 (= auto)” to something else, perhaps “350” - “400”.")
-ENTRY (U"Advanced settings")
-NORMAL (U"The Pitch menu also contains @@Advanced pitch settings (raw AC and CC)...@ and @@Advanced pitch settings (filtered AC and CC)...@.")
+ENTRY (U"Further reading")
+NORMAL (U"For more details, see:")
+LIST_ITEM (U"@@how to choose a pitch analysis method@")
+LIST_ITEM (U"@@pitch analysis by filtered autocorrelation@")
+LIST_ITEM (U"@@pitch analysis by raw cross-correlation@")
+LIST_ITEM (U"@@pitch analysis by raw autocorrelation@")
+LIST_ITEM (U"@@pitch analysis by filtered cross-correlation@")
 MAN_END
 
 MAN_BEGIN (U"Time step settings...", U"ppgb", 20231115 /*20031003,20220814*/)
@@ -894,28 +960,6 @@ NORMAL (U"Another way to override the standard time step is by setting the %%Tim
 	"As with the %%Fixed time step% setting, Praat will draw the pitch as separate disks in case of undersampling. "
 	"You may want to use this setting if you want the pitch curve to be drawn equally fast independently of the degree "
 	"of zooming.")
-MAN_END
-
-MAN_BEGIN (U"Advanced pitch settings (raw AC and CC)...", U"ppgb", 20231115 /*20110808*/)
-INTRO (U"A command in the #Pitch menu of the @SoundEditor or @TextGridEditor windows. "
-	"Before changing the advanced pitch settings, make sure you understand "
-	"@@Intro 4.2. Configuring the pitch contour@.")
-ENTRY (U"Pitch analysis settings")
-NORMAL (U"For information about these, see @@Sound: To Pitch (raw ac)...@. The standard settings are best in most cases. "
-	"For some pathological voices, you will want to set the voicing threshold to much less than the standard of 0.45, "
-	"in order to get pitch values even in irregular parts of the signal. "
-	"For prevocied plosives, you may want to lower the silence threshold from 0.03 to 0.01 or so.")
-MAN_END
-
-MAN_BEGIN (U"Advanced pitch settings (filtered AC and CC)...", U"ppgb", 20231115 /*20110808*/)
-INTRO (U"A command in the #Pitch menu of the @SoundEditor or @TextGridEditor windows. "
-	"Before changing the advanced pitch settings, make sure you understand "
-	"@@Intro 4.2. Configuring the pitch contour@.")
-ENTRY (U"Pitch analysis settings")
-NORMAL (U"For information about these, see @@Sound: To Pitch (filtered ac)...@. The standard settings are best in most cases. "
-	"For some pathological voices, you will want to set the voicing threshold to much less than the standard of 0.50, "
-	"in order to get pitch values even in irregular parts of the signal. "
-	"For prevocied plosives, you may want to lower the silence threshold from 0.09 to 0.01 or so.")
 MAN_END
 
 MAN_BEGIN (U"Intro 4.3. Querying the pitch contour", U"ppgb", 20040614)
@@ -1386,13 +1430,13 @@ LIST_ITEM (U"• The @@Save menu@: for writing objects from memory to file.")
 LIST_ITEM (U"• The ##Help menu#: for viewing the manual.")
 MAN_END
 
-MAN_BEGIN (U"Periodicity menu", U"ppgb", 20231115 /*20010417*/)
+MAN_BEGIN (U"Periodicity menu", U"ppgb", 20240722 /*20010417, 20231115*/)
 INTRO (U"A menu that occurs in the @@Dynamic menu@ for a @Sound.")
 NORMAL (U"This menu contains commands for analysing the pitch contour of the selected Sound:")
-LIST_ITEM (U"@@Sound: To Pitch (filtered ac)...")
-LIST_ITEM (U"@@Sound: To Pitch (raw cc)...")
-LIST_ITEM (U"@@Sound: To Pitch (raw ac)...")
-LIST_ITEM (U"@@Sound: To Pitch (filtered ac)...")
+LIST_ITEM (U"@@Sound: To Pitch (filtered autocorrelation)...")
+LIST_ITEM (U"@@Sound: To Pitch (raw cross-correlation)...")
+LIST_ITEM (U"@@Sound: To Pitch (raw autocorrelation)...")
+LIST_ITEM (U"@@Sound: To Pitch (filtered cross-correlation)...")
 LIST_ITEM (U"@@Sound: To Pitch (shs)...")
 LIST_ITEM (U"@@Sound: To Harmonicity (cc)...")
 LIST_ITEM (U"@@Sound: To Harmonicity (ac)...")
@@ -1400,11 +1444,6 @@ MAN_END
 
 MAN_BEGIN (U"Pitch menu", U"ppgb", 20221202)
 INTRO (U"A menu in the @SoundEditor or @TextGridEditor.")
-MAN_END
-
-MAN_BEGIN (U"Pitch settings...", U"ppgb", 20030316)
-INTRO (U"A command in the Pitch menu of the @SoundEditor and @TextGridEditor windows. "
-	"See @@Intro 4.2. Configuring the pitch contour@.")
 MAN_END
 
 MAN_BEGIN (U"Play", U"ppgb", /*20021212*/ 20220814)

@@ -17,7 +17,7 @@
  * along with this program; if not, see: <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
+#include "espeak__config.h"
 
 #include <ctype.h>
 #include <errno.h>
@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <wctype.h>
+#include "wctype_portable.h"
 
 #include "espeak_ng.h"
 #include "speak_lib.h"
@@ -38,22 +38,19 @@
 #include "common.h"
 #include "translate.h"
 
+#include "espeak_praat.h"   // for FileInMemory
+
 #pragma GCC visibility push(default)
 
-#if ! DATA_FROM_SOURCECODE_FILES
 int GetFileLength(const char *filename)
 {
 	struct stat statbuf;
-
-	if (stat(filename, &statbuf) != 0)
+	if (FileInMemorySet_stat(theEspeakPraatFileInMemorySet(), filename, &statbuf) != 0)
 		return -errno;
-
 	if (S_ISDIR(statbuf.st_mode))
 		return -EISDIR;
-
 	return statbuf.st_size;
 }
-#endif // ! DATA_FROM_SOURCECODE_FILES
 
 void strncpy0(char *to, const char *from, int size)
 {
@@ -88,7 +85,6 @@ int utf8_in(int *c, const char *buf)
 	 */
 	return utf8_in2(c, buf, 0);
 }
-#pragma GCC visibility pop
 
 int utf8_out(unsigned int c, char *buf)
 {
@@ -180,7 +176,7 @@ int IsAlpha(unsigned int c)
 		0
 	};
 
-	if (iswalpha(c))
+	if (iswalpha_portable(c))
 		return 1;
 
 	if (c < 0x300)
@@ -250,7 +246,7 @@ int IsDigit09(unsigned int c)
 
 int IsDigit(unsigned int c)
 {
-	if (iswdigit(c))
+	if (iswdigit_portable(c))
 		return 1;
 
 	if ((c >= 0x966) && (c <= 0x96f))
@@ -267,7 +263,7 @@ int IsSpace(unsigned int c)
 		return 1; // box drawing characters
 	if ((c >= 0xfff9) && (c <= 0xffff))
 		return 1; // unicode specials
-	return iswspace(c);
+	return iswspace_portable(c);
 }
 
 int isspace2(unsigned int c)
@@ -286,7 +282,7 @@ int is_str_totally_null(const char* str, int size) {
 	return (*str == 0 && memcmp(str, str+1, size-1) == 0);
 }
 
-int Read4Bytes(FILE *f)
+int Read4Bytes(FileInMemory f)
 {
 	// Read 4 bytes (least significant first) into a word
 	int ix;
@@ -294,7 +290,7 @@ int Read4Bytes(FILE *f)
 
 	for (ix = 0; ix < 4; ix++) {
 		unsigned char c;
-		c = fgetc(f) & 0xff;
+		c = FileInMemory_fgetc(f) & 0xff;
 		acc += (c << (ix*8));
 	}
 	return acc;
@@ -332,14 +328,18 @@ static uint32_t espeak_rand_state = 0;
 
 long espeak_rand(long min, long max) {
 	// Ref: https://github.com/bminor/glibc/blob/glibc-2.36/stdlib/random_r.c#L364
+#if 1
 	espeak_rand_state = (((uint64_t)espeak_rand_state * 1103515245) + 12345) % 0x7fffffff;
+#endif
 	long res = (long)espeak_rand_state;
 	return (res % (max-min+1))-min;
 }
 
 void espeak_srand(long seed) {
+#if 1
 	espeak_rand_state = (uint32_t)(seed);
 	(void)espeak_rand(0, 1); // Dummy flush a generator
+#endif
 }
 
 #pragma GCC visibility push(default)

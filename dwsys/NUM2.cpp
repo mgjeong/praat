@@ -528,13 +528,13 @@ void VECsolveNonnegativeLeastSquaresRegression (VECVU const& x, constMATVU const
 		difsq = NUMsum2 (r.all());
 		farFromConvergence = ( fabs (difsq - difsq_previous) > std::max (tol * normSquared_y, NUMeps) );
 		if (infoLevel > 1)
-			MelderInfo_writeLine (U"Iteration: ", iter, U", error: ", difsq);
+			MelderInfo_writeLine (U"\t\tIteration: ", iter, U", error: ", difsq);
 		difsq_previous = difsq;
 		iter ++;
 	}
 	iter --;
 	if (infoLevel >= 1)
-		MelderInfo_writeLine (U"Number of iterations: ", iter, U"; Minimum: ", difsq);
+		MelderInfo_writeLine (U"\t\tNumber of iterations: ", iter, U"; Minimum: ", difsq);
 	if (infoLevel > 0)
 			MelderInfo_drain();
 }
@@ -1499,7 +1499,7 @@ autoVEC newVECburg (constVEC const& x, integer numberOfPredictionCoefficients, d
 
 void VECfilterInverse_inplace (VEC const& s, constVEC const& filter, VEC const& filterMemory) {
 	Melder_assert (filterMemory.size >= filter.size);
-	filterMemory  <<=  0.0;
+	filterMemory.part (1, filter.size)  <<=  0.0;
 	for (integer i = 1; i <= s.size; i ++) {
 		const double y0 = s [i];
 		for (integer j = 1; j <= filter.size; j ++)
@@ -2092,7 +2092,7 @@ void NUMfitLine_theil_preallocated (VEC const& out_lineParameters, constVEC cons
 				Get slope as the median of all slopes
 			*/
 			VEC mbsPart = mbs.part (1, numberOfCombinations);
-			sort_VEC_inout (mbsPart);
+			sort_e_VEC_inout (mbsPart);
 			out_lineParameters [1] = NUMquantile (mbsPart, 0.5);
 			out_lineParameters [2] = NUMquantile (mbsPart, oneTailedUnconfidence);
 			out_lineParameters [3] = NUMquantile (mbsPart, 1.0 - oneTailedUnconfidence);
@@ -2103,7 +2103,7 @@ void NUMfitLine_theil_preallocated (VEC const& out_lineParameters, constVEC cons
 				for (integer i = 1; i <= x.size; i ++)
 					mbs [i] = y [i] - out_lineParameters [1] * x [i];
 				mbsPart = mbs.part (1, x.size);
-				sort_VEC_inout (mbsPart);
+				sort_e_VEC_inout (mbsPart);
 				out_lineParameters [4] = NUMquantile (mbsPart, 0.5);
 				out_lineParameters [5] = NUMquantile (mbsPart, oneTailedUnconfidence);
 				out_lineParameters [6] = NUMquantile (mbsPart, 1.0 - oneTailedUnconfidence);
@@ -3072,7 +3072,7 @@ void VECsolveSparse_IHT (VECVU const& x, constMATVU const& dictionary, constVECV
 			const double relativeError = fabs (rms - rms_new) / rms_y;
 			convergence = relativeError < tolerance;
 			if (infoLevel > 1)
-				MelderInfo_writeLine (U"Iteration: ", iter, U", error: ", rms_new, U" relative: ", relativeError, U" stepSize: ", stepSize);
+				MelderInfo_writeLine (U"\t\tIteration: ", iter, U", error: ", rms_new, U" relative: ", relativeError, U" stepSize: ", stepSize);
 			
 			x  <<=  x_new.all();
 			support.all()  <<=  support_new.all();
@@ -3082,7 +3082,7 @@ void VECsolveSparse_IHT (VECVU const& x, constMATVU const& dictionary, constVECV
 		}
 		iter = std::min (iter, maximumNumberOfIterations);
 		if (infoLevel >= 1)
-			MelderInfo_writeLine (U"Number of iterations: ", iter, U" Difference squared: ", rms);
+			MelderInfo_writeLine (U"\t\tNumber of iterations: ", iter, U" Difference squared: ", rms);
 		if (infoLevel > 0)
 			MelderInfo_drain();
 	} catch (MelderError) {

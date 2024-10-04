@@ -1,6 +1,6 @@
 /* Sound_extensions.cpp
  *
- * Copyright (C) 1993-2023 David Weenink, 2017 Paul Boersma
+ * Copyright (C) 1993-2023 David Weenink, 2017,2024 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -809,27 +809,6 @@ static autoSound Sound_derivative2 (Sound me, double lowPassFrequency, double sm
 		}
 }
 
-
-void Sound_preEmphasis (Sound me, double preEmphasisFrequency) {
-	if (preEmphasisFrequency >= 0.5 / my dx)
-		return;    // above Nyquist?
-	const double preEmphasis = exp (- NUM2pi * preEmphasisFrequency * my dx);
-	for (integer channel = 1; channel <= my ny; channel ++) {
-		VEC s = my z.row (channel);
-		for (integer i = my nx; i >= 2; i --)
-			s [i] -= preEmphasis * s [i - 1];
-	}
-}
-
-void Sound_deEmphasis (Sound me, double deEmphasisFrequency) {
-	const double deEmphasis = exp (- NUM2pi * deEmphasisFrequency * my dx);
-	for (integer channel = 1; channel <= my ny; channel ++) {
-		VEC s = my z.row (channel);
-		for (integer i = 2; i <= my nx; i ++)
-			s [i] += deEmphasis * s [i - 1];
-	}
-}
-
 autoSound Sound_createGaussian (double windowDuration, double samplingFrequency) {
 	try {
 		autoSound me = Sound_createSimple (1, windowDuration, samplingFrequency);
@@ -1146,19 +1125,18 @@ Sound Sound_createShepardTone (double minimumTime, double maximumTime, double sa
 	Sound me; integer i, j, nComponents = 1 + log2 (maximumFrequency / 2 / baseFrequency);
 	double lmin = pow (10, - amplitudeRange / 10);
 	double twoPi = NUM2pi, f = baseFrequency * (1 + frequencyShiftFraction);
-	if (nComponents < 2) Melder_warning (U"Sound_createShepardTone: only 1 component.");
+	if (nComponents < 2)
+		Melder_warning (U"Sound_createShepardTone: only 1 component.");
 	Melder_casual (U"Sound_createShepardTone: ", nComponents, U" components.");
-	if (! (me = Sound_create2 (minimumTime, maximumTime, samplingFrequency))) return nullptr;
+	if (! (me = Sound_create2 (minimumTime, maximumTime, samplingFrequency)))
+		return nullptr;
 
-	for (j=1; j <= nComponents; j ++)
-	{
+	for (j=1; j <= nComponents; j ++) {
 		double fj = f * pow (2, j-1), wj = twoPi * fj;
 		double amplitude = lmin + (1 - lmin) *
 			(1 - cos (twoPi * log (fj + 1) / log (maximumFrequency + 1))) / 2;
 		for (i=1; i <= my nx; i ++)
-		{
 			my z [1] [i] += amplitude * sin (wj * (i - 0.5) * my dx);
-		}
 	}
 	Vector_scale (me, 0.99996948);
 	return me;
@@ -1308,7 +1286,7 @@ autoSound Sound_createPattersonWightmanTone (double minimumTime, double maximumT
 
 autoSound Sound_createPlompTone (double minimumTime, double maximumTime, double samplingFrequency, double baseFrequency, double frequencyFraction, integer m) {
 	try {
-		Melder_require (12.0 * (1.0 + frequencyFraction) * baseFrequency <=  samplingFrequency / 2.0,
+		Melder_require (12.0 * (1.0 + frequencyFraction) * baseFrequency <= samplingFrequency / 2.0,
 			U"Sound_createPlompTone: frequency of one or more components too large.");
 		
 		const double w1 = NUM2pi * (1.0 - frequencyFraction) * baseFrequency;
@@ -1735,52 +1713,58 @@ void Sound_getStartAndEndTimesOfSounding (Sound me, double minPitch, double time
 	}
 }
 
-autoSound Sound_trimSilences (Sound me, double trimDuration, bool onlyAtStartAndEnd, double minPitch, double timeStep, double silenceThreshold, double minSilenceDuration, double minSoundingDuration, autoTextGrid *p_tg, conststring32 trimLabel) {
-    try {
+autoSound Sound_trimSilences (Sound me, double trimDuration, bool onlyAtStartAndEnd,
+	double minPitch, double timeStep, double silenceThreshold,
+	double minSilenceDuration, double minSoundingDuration,
+	autoTextGrid *out_tg, conststring32 trimLabel
+) {
+	try {
 		Melder_require (my ny == 1,
 			U"The sound should be a mono sound.");
-		
-        const conststring32 silentLabel = U"silent", soundingLabel = U"sounding";
-        const conststring32 copyLabel = U"";
-        autoTextGrid tg = Sound_to_TextGrid_detectSilences (me, minPitch, timeStep, silenceThreshold, minSilenceDuration, minSoundingDuration, silentLabel, soundingLabel);
-        autoIntervalTier itg = Data_copy ((IntervalTier) tg -> tiers->at [1]);
-        IntervalTier tier = (IntervalTier) tg -> tiers->at [1];
-        for (integer iint = 1; iint <= tier -> intervals.size; iint ++) {
-            const TextInterval ti = tier -> intervals.at [iint];
-            const TextInterval ati = itg -> intervals.at [iint];
-            const double duration = ti -> xmax - ti -> xmin;
-            if (duration > trimDuration && Melder_equ (ti -> text.get(), silentLabel)) {   // silent
+
+		const conststring32 silentLabel = U"silent", soundingLabel = U"sounding";
+		const conststring32 copyLabel = U"";
+		autoTextGrid tg = Sound_to_TextGrid_detectSilences (me, minPitch, timeStep, silenceThreshold, minSilenceDuration, minSoundingDuration, silentLabel, soundingLabel);
+		autoIntervalTier itg = Data_copy ((IntervalTier) tg -> tiers->at [1]);
+		IntervalTier tier = (IntervalTier) tg -> tiers->at [1];
+		for (integer iint = 1; iint <= tier -> intervals.size; iint ++) {
+			const TextInterval ti = tier -> intervals.at [iint];
+			const TextInterval ati = itg -> intervals.at [iint];
+			const double duration = ti -> xmax - ti -> xmin;
+			if (duration > trimDuration && Melder_equ (ti -> text.get(), silentLabel)) {   // silent
 				conststring32 label = trimLabel;
-                if (iint == 1) { // first is special
-                    const double trim_t = ti -> xmax - trimDuration;
-                    IntervalTier_moveBoundary (itg.get(), iint, false, trim_t);
-                } else if (iint == tier -> intervals.size) {   // last is special
-                    const double trim_t = ti -> xmin + trimDuration;
-                    IntervalTier_moveBoundary (itg.get(), iint, true, trim_t);
-                } else {
+				if (tier -> intervals.size == 1) {   // current interval is both the first and the last: very special
+					// all of the sound is silent: do nothing
+				} else if (iint == 1) {   // first is special
+					const double trim_t = ti -> xmax - trimDuration;
+					IntervalTier_moveRightBoundary (itg.get(), iint, trim_t);
+				} else if (iint == tier -> intervals.size) {   // last is special
+					const double trim_t = ti -> xmin + trimDuration;
+					IntervalTier_moveLeftBoundary (itg.get(), iint, trim_t);
+				} else {
 					if (onlyAtStartAndEnd) {
 						label = ati -> text.get();
 					} else {
-                    	double trim_t = ti -> xmin + 0.5 * trimDuration;
-						IntervalTier_moveBoundary (itg.get(), iint, true, trim_t);
-                    	trim_t = ti -> xmax - 0.5 * trimDuration;
-                    	IntervalTier_moveBoundary (itg.get(), iint, false, trim_t);
+						double trim_t = ti -> xmin + 0.5 * trimDuration;
+						IntervalTier_moveLeftBoundary (itg.get(), iint, trim_t);
+						trim_t = ti -> xmax - 0.5 * trimDuration;
+						IntervalTier_moveRightBoundary (itg.get(), iint, trim_t);
 					}
-                }
-                TextInterval_setText (ati, label);
-            } else {   // sounding
-                TextInterval_setText (ati, copyLabel);
-            }
-        }
-        autoSound thee = Sound_IntervalTier_cutPartsMatchingLabel (me, itg.get(), trimLabel);
-        if (p_tg) {
+				}
+				TextInterval_setText (ati, label);
+			} else {   // sounding
+				TextInterval_setText (ati, copyLabel);
+			}
+		}
+		autoSound thee = Sound_IntervalTier_cutPartsMatchingLabel (me, itg.get(), trimLabel);
+		if (out_tg) {
 			TextGrid_addTier_copy (tg.get(), itg.get());
-            *p_tg = tg.move();
-        }
-        return thee;
-    } catch (MelderError) {
-        Melder_throw (me, U": silences not trimmed.");
-    }
+			*out_tg = tg.move();
+		}
+		return thee;
+	} catch (MelderError) {
+		Melder_throw (me, U": silences not trimmed.");
+	}
 }
 
 autoSound Sound_trimSilencesAtStartAndEnd (Sound me, double trimDuration, double minPitch, double timeStep,
@@ -1789,7 +1773,7 @@ autoSound Sound_trimSilencesAtStartAndEnd (Sound me, double trimDuration, double
 	try {
 		autoTextGrid tg;
 		autoSound thee = Sound_trimSilences (me, trimDuration, true, minPitch, timeStep, silenceThreshold, 
-			minSilenceDuration, minSoundingDuration, & tg, U"trimmed");
+				minSilenceDuration, minSoundingDuration, & tg, U"trimmed");
 		const IntervalTier trim = (IntervalTier) tg -> tiers->at [2];
 		const TextInterval ti1 = trim -> intervals.at [1];
 		if (startTimeOfSounding) {
@@ -1805,7 +1789,7 @@ autoSound Sound_trimSilencesAtStartAndEnd (Sound me, double trimDuration, double
 		}
 		return thee;
 	} catch (MelderError) {
-		Melder_throw (me, U": silences not trimmed.");
+		Melder_throw (me, U": silences at start and end not trimmed.");
 	}
 }
 
@@ -2456,7 +2440,7 @@ static autoSound Sound_reduceNoiseBySpectralSubtraction_mono (Sound me, Sound no
 	try {
 		Melder_require (my dx == noise -> dx,
 			U"The sound and the noise should have the same sampling frequency.");
-		Melder_require (noise -> ny == 1 && noise -> ny == 1,
+		Melder_require (my ny == 1 && noise -> ny == 1,
 			U"The number of channels in the noise and the sound should equal 1.");
 
 		const double samplingFrequency = 1.0 / my dx, nyquistFrequency = 0.5 / my dx;
@@ -2704,4 +2688,96 @@ void Sound_saveAsMP3File_VBR (Sound me, MelderFile file, double inverseQuality) 
 		Melder_throw (U"");
 	}
 }
+
+void windowShape_into_VEC (kSound_windowShape windowShape, VEC inout_window) {
+	const integer size = inout_window.size;
+	const double imid = 0.5 * (double) (size + 1);
+	switch (windowShape) {
+		case kSound_windowShape::RECTANGULAR: {
+			inout_window  <<=  1.0; 
+		} break; case kSound_windowShape::TRIANGULAR: {  // "Bartlett"
+			for (integer i = 1; i <= size; i ++) {
+				const double phase = (double) (i - 0.5) / size;
+				inout_window [i] = 1.0 - fabs ((2.0 * phase - 1.0));
+			} 
+		} break; case kSound_windowShape::PARABOLIC: {  // "Welch"
+			for (integer i = 1; i <= size; i ++) { 
+				const double phase = (double) (i - 0.5) / size;
+				inout_window [i] = 1.0 - (2.0 * phase - 1.0) * (2.0 * phase - 1.0);
+			}
+		} break; case kSound_windowShape::HANNING: {
+			for (integer i = 1; i <= size; i ++) {
+				const double phase = (double) (i - 0.5) / size;
+				inout_window [i] = 0.5 * (1.0 - cos (NUM2pi * phase));
+			}
+		} break; case kSound_windowShape::HAMMING: {
+			for (integer i = 1; i <= size; i ++) { 
+				const double phase = (double) (i - 0.5) / size;
+				inout_window [i] = 0.54 - 0.46 * cos (NUM2pi * phase);
+			}
+		} break; case kSound_windowShape::GAUSSIAN_1: {
+			const double edge = exp (-3.0), onebyedge1 = 1.0 / (1.0 - edge);   // -0.5..+0.5
+			for (integer i = 1; i <= size; i ++) {
+				const double phase = ((double) i - imid) / size;
+				inout_window [i] = (exp (-12.0 * phase * phase) - edge) * onebyedge1;
+			}
+		} break; case kSound_windowShape::GAUSSIAN_2: {
+			const double edge = exp (-12.0), onebyedge1 = 1.0 / (1.0 - edge);
+			for (integer i = 1; i <= size; i ++) {
+				const double phase = ((double) i - imid) / size;
+				inout_window [i] = (exp (-48.0 * phase * phase) - edge) * onebyedge1;
+			}
+		} break; case kSound_windowShape::GAUSSIAN_3: {
+			const double edge = exp (-27.0), onebyedge1 = 1.0 / (1.0 - edge);
+			for (integer i = 1; i <= size; i ++) {
+				const double phase = ((double) i - imid) / size;
+				inout_window [i] = (exp (-108.0 * phase * phase) - edge) * onebyedge1;
+			}
+		} break; case kSound_windowShape::GAUSSIAN_4: {
+			const double edge = exp (-48.0), onebyedge1 = 1.0 / (1.0 - edge);
+			for (integer i = 1; i <= size; i ++) { 
+				const double phase = ((double) i - imid) / size;
+				inout_window [i] = (exp (-192.0 * phase * phase) - edge) * onebyedge1; 
+			}
+		} break; case kSound_windowShape::GAUSSIAN_5: {
+			const double edge = exp (-75.0), onebyedge1 = 1.0 / (1.0 - edge);
+			for (integer i = 1; i <= size; i ++) { 
+				const double phase = ((double) i - imid) / size;
+				inout_window [i] = (exp (-300.0 * phase * phase) - edge) * onebyedge1;
+			}
+		} break; case kSound_windowShape::KAISER_1: {
+			const double factor = 1.0 / NUMbessel_i0_f (NUM2pi);
+			for (integer i = 1; i <= size; i ++) { 
+				const double phase = 2.0 * ((double) i - imid) / size;   // -1..+1
+				const double root = 1.0 - phase * phase;
+				inout_window [i] = ( root <= 0.0 ? 0.0 : factor * NUMbessel_i0_f (NUM2pi * sqrt (root)) );
+			}
+		} break; case kSound_windowShape::KAISER_2: {
+			const double factor = 1.0 / NUMbessel_i0_f (NUM2pi * NUMpi + 0.5);
+			for (integer i = 1; i <= size; i ++) { 
+				const double phase = 2.0 * ((double) i - imid) / size;   // -1..+1
+				const double root = 1.0 - phase * phase;
+				inout_window [i] = ( root <= 0.0 ? 0.0 : factor * NUMbessel_i0_f ((NUM2pi * NUMpi + 0.5) * sqrt (root)) ); 
+			}
+		} break; default: {
+			inout_window  <<=  1.0;
+		}
+	}
+}
+
+autoSound Sound_resampleAndOrPreemphasize (constSound me, double maximumFrequency, integer depth, double preEmphasisFrequency) {
+	try {
+		const double nyquistFrequency = 0.5 / my dx;
+		autoSound sound;
+		if (maximumFrequency <= 0.0 || fabs (maximumFrequency / nyquistFrequency - 1.0) < 1.0e-12)
+			sound = Data_copy (me);
+		else
+			sound = Sound_resample (me, maximumFrequency * 2.0, depth);
+		Sound_preEmphasize_inplace (sound.get(), preEmphasisFrequency);
+		return sound;
+	} catch (MelderError) {
+		Melder_throw (me, U": could not resample.");
+	}
+}
+
 /* End of file Sound_extensions.cpp */

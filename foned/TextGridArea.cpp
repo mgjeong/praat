@@ -1,6 +1,6 @@
 /* TextGridArea.cpp
  *
- * Copyright (C) 1992-2023 Paul Boersma
+ * Copyright (C) 1992-2024 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1278,9 +1278,9 @@ static void menu_cb_DrawVisibleSoundAndTextGrid (TextGridArea me, EDITOR_ARGS) {
 static void menu_cb_DrawTextGridAndPitch (TextGridArea me, EDITOR_ARGS) {
 	EDITOR_FORM (U"Draw TextGrid and Pitch separately", nullptr)
 		my v_form_pictureWindow (cmd);
-		LABEL (U"TextGrid:")
+		COMMENT (U"TextGrid:")
 		BOOLEAN (showBoundariesAndPoints, U"Show boundaries and points", my default_picture_showBoundaries ());
-		LABEL (U"Pitch:")
+		COMMENT (U"Pitch:")
 		BOOLEAN (speckle, U"Speckle", my default_picture_pitch_speckle ());
 		my v_form_pictureMargins (cmd);
 		my v_form_pictureSelection (cmd);
@@ -1301,19 +1301,22 @@ static void menu_cb_DrawTextGridAndPitch (TextGridArea me, EDITOR_ARGS) {
 		my setClassPref_picture_garnish (garnish);
 		SoundAnalysisArea_haveVisiblePitch (my borrowedSoundAnalysisArea);
 		DataGui_openPraatPicture (me);
+		const kPitch_unit borrowedPitchUnit = my borrowedSoundAnalysisArea -> dynamic_instancePref_pitch_unit();
 		const double pitchFloor_hidden = Function_convertStandardToSpecialUnit (my borrowedSoundAnalysisArea -> d_pitch.get(),
-				my borrowedSoundAnalysisArea -> instancePref_pitch_floor(), Pitch_LEVEL_FREQUENCY, (int) my borrowedSoundAnalysisArea -> instancePref_pitch_unit());
+				my borrowedSoundAnalysisArea -> dynamic_instancePref_pitch_floor(), Pitch_LEVEL_FREQUENCY, (int) borrowedPitchUnit);
 		const double pitchCeiling_hidden = Function_convertStandardToSpecialUnit (my borrowedSoundAnalysisArea -> d_pitch.get(),
-				my borrowedSoundAnalysisArea -> instancePref_pitch_ceiling(), Pitch_LEVEL_FREQUENCY, (int) my borrowedSoundAnalysisArea -> instancePref_pitch_unit());
+				my borrowedSoundAnalysisArea -> dynamic_instancePref_pitch_ceilingOrTop(), Pitch_LEVEL_FREQUENCY, (int) borrowedPitchUnit);
 		const double pitchFloor_overt = Function_convertToNonlogarithmic (my borrowedSoundAnalysisArea -> d_pitch.get(),
-				pitchFloor_hidden, Pitch_LEVEL_FREQUENCY, (int) my borrowedSoundAnalysisArea -> instancePref_pitch_unit());
+				pitchFloor_hidden, Pitch_LEVEL_FREQUENCY, (int) borrowedPitchUnit);
 		const double pitchCeiling_overt = Function_convertToNonlogarithmic (my borrowedSoundAnalysisArea -> d_pitch.get(),
-				pitchCeiling_hidden, Pitch_LEVEL_FREQUENCY, (int) my borrowedSoundAnalysisArea -> instancePref_pitch_unit());
-		const double pitchViewFrom_overt = ( my borrowedSoundAnalysisArea -> instancePref_pitch_viewFrom() < my borrowedSoundAnalysisArea -> instancePref_pitch_viewTo() ? my borrowedSoundAnalysisArea -> instancePref_pitch_viewFrom() : pitchFloor_overt );
-		const double pitchViewTo_overt = ( my borrowedSoundAnalysisArea -> instancePref_pitch_viewFrom() < my borrowedSoundAnalysisArea -> instancePref_pitch_viewTo() ? my borrowedSoundAnalysisArea -> instancePref_pitch_viewTo() : pitchCeiling_overt );
+				pitchCeiling_hidden, Pitch_LEVEL_FREQUENCY, (int) borrowedPitchUnit);
+		const double borrowedPitchViewFrom = my borrowedSoundAnalysisArea -> dynamic_instancePref_pitch_viewFrom();
+		const double borrowedPitchViewTo = my borrowedSoundAnalysisArea -> dynamic_instancePref_pitch_viewTo();
+		const double pitchViewFrom_overt = ( borrowedPitchViewFrom < borrowedPitchViewTo ? borrowedPitchViewFrom : pitchFloor_overt );
+		const double pitchViewTo_overt = ( borrowedPitchViewFrom < borrowedPitchViewTo ? borrowedPitchViewTo : pitchCeiling_overt );
 		TextGrid_Pitch_drawSeparately (my textGrid(), my borrowedSoundAnalysisArea -> d_pitch.get(), my pictureGraphics(), my startWindow(), my endWindow(),
 			pitchViewFrom_overt, pitchViewTo_overt, showBoundariesAndPoints, my instancePref_useTextStyles(), garnish,
-			speckle, my borrowedSoundAnalysisArea -> instancePref_pitch_unit()
+			speckle, borrowedPitchUnit
 		);
 		FunctionArea_garnishPicture (me);
 		DataGui_closePraatPicture (me);
@@ -1361,23 +1364,23 @@ static void menu_cb_AlignInterval (TextGridArea me, EDITOR_ARGS) {
 }
 static void menu_cb_AlignmentSettings (TextGridArea me, EDITOR_ARGS) {
 	EDITOR_FORM (U"Alignment settings", nullptr)
-		OPTIONMENU (language, U"Language", (int) Strings_findString (espeakdata_languages_names.get(), U"English (Great Britain)"))
-		for (integer i = 1; i <= espeakdata_languages_names -> numberOfStrings; i ++) {
-			OPTION ((conststring32) espeakdata_languages_names -> strings [i].get());
+		OPTIONMENU (language, U"Language", (int) NUMfindFirst (theSpeechSynthesizerLanguageNames, U"English (Great Britain)"))
+		for (integer i = 1; i <= theSpeechSynthesizerLanguageNames.size; i ++) {
+			OPTION (theSpeechSynthesizerLanguageNames [i]);
 		}
 		BOOLEAN (includeWords,    U"Include words",    my default_align_includeWords ())
 		BOOLEAN (includePhonemes, U"Include phonemes", my default_align_includePhonemes ())
 		BOOLEAN (allowSilences,   U"Allow silences",   my default_align_allowSilences ())
 	EDITOR_OK
-		int prefVoice = (int) Strings_findString (espeakdata_languages_names.get(), my instancePref_align_language());
+		int prefVoice = (int) NUMfindFirst (theSpeechSynthesizerLanguageNames, my instancePref_align_language());
 		if (prefVoice == 0)
-			prefVoice = (int) Strings_findString (espeakdata_languages_names.get(), U"English (Great Britain)");
+			prefVoice = (int) NUMfindFirst (theSpeechSynthesizerLanguageNames, U"English (Great Britain)");
 		SET_OPTION (language, prefVoice)
 		SET_BOOLEAN (includeWords, my instancePref_align_includeWords())
 		SET_BOOLEAN (includePhonemes, my instancePref_align_includePhonemes())
 		SET_BOOLEAN (allowSilences, my instancePref_align_allowSilences())
 	EDITOR_DO
-		my setInstancePref_align_language (espeakdata_languages_names -> strings [language].get());
+		my setInstancePref_align_language (theSpeechSynthesizerLanguageNames [language]);
 		my setInstancePref_align_includeWords (includeWords);
 		my setInstancePref_align_includePhonemes (includePhonemes);
 		my setInstancePref_align_allowSilences (allowSilences);
@@ -1562,7 +1565,7 @@ static void menu_cb_RemoveTier (TextGridArea me, EDITOR_ARGS) {
 	checkTierSelection (me, U"remove a tier");
 
 	FunctionArea_save (me, U"Remove tier");
-	my textGrid() -> tiers-> removeItem (my selectedTier);
+	my textGrid() -> tiers -> removeItem (my selectedTier);
 
 	//my textGridArea -> selectedTier = 1; TRY OUT 2022-07-23
 	FunctionArea_broadcastDataChanged (me);
@@ -1873,7 +1876,6 @@ void structTextGridArea :: v_createMenus () {
 	}
 }
 void structTextGridArea :: v_updateMenuItems () {
-	TextGridArea_Parent :: v_updateMenuItems ();
 	GuiThing_setSensitive (extractSelectedTextGridPreserveTimesButton, our endSelection() > our startSelection());
 	GuiThing_setSensitive (extractSelectedTextGridTimeFromZeroButton,  our endSelection() > our startSelection());
 }

@@ -1,6 +1,6 @@
 /* manual_whatsnew.cpp
  *
- * Copyright (C) 1992-2023 Paul Boersma
+ * Copyright (C) 1992-2024 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,78 @@ R"~~~(
 © Paul Boersma 1995–2024
 
 Latest changes in Praat.
+
+##6.4.21# (21 September 2024)
+• SpeechSynthesizer: repaired an old bug whereby ##Get phonemes from text...# could increase the duration
+  of a subsequent ##Play# (or ##To Sound...#).
+• SpeechSynthesizer and TextGrid alignment: repaired a bug (existing since 6.4.18) whereby #clause and #word tiers would be empty.
+• TextGrid window: disambiguated Command-F5 (now Option-F5 for ##Get minimum pitch#; likewise, Option-F8 for ##Get minimum intensity#).
+• Calling Praat from command line: reenabled `--pref-dir=` option.
+
+##6.4.20# (18 September 2024)
+• Linux: repaired a major bug whereby Praat could crash when trying to draw to a hidden Picture window.
+• Scripting: just like normal forms, pause forms now also accept “yes” and “off” (and the like) instead of just 1 and 0.
+• Scripting: repaired a minor bug whereby `optionmenu` in forms would show an incorrect default value.
+
+##6.4.19# (4 September 2024)
+• Repaired many bugs in the eSpeak part of Praat.
+
+##6.4.18# (21 August 2024)
+• SpeechSynthesizer and TextGrid alignment: solved an eSpeak-internal bug that caused some
+  rare long phoneme codes to be handled incorrectly.
+• Scripting: `padLeft$`(), `truncateLeft$`() and `padOrTruncateLeft$`(), and their `Right` counterparts.
+• s390x edition for Linux.
+
+##6.4.17# (8 August 2024)
+• Spectrogram: #Paint: solved a bug that could cause Praat to crash if the time domain was smaller than that of the Spectrogram.
+• ScriptEditor: ##Run selection# can call procedures outside the selected text.
+• Audio files: can open Polyphone (Shorten) files.
+
+##6.4.16# (29 July 2024)
+• Windows: make command-line output visible (new on ARM64, was lost in 6.4.14 for Intel64 and Intel32).
+
+##6.4.15# (26 July 2024)
+• Distinguish between %%pitch ceiling% (flat) and %%pitch top% (curved ceiling),
+  mainly because of their different meanings.
+
+##6.4.14# (22 July 2024)
+• Pitch menu (in e.g. Sound or TextGrid window): separate settings for four pitch analysis methods.
+• Formant analysis: faster on all systems.
+• ARM64 Windows: worked around a compiler bug that caused incorrect window sizes.
+• Pitch analysis: faster on Windows (Intel64 and Intel32).
+• Windows: better fonts and background colours (perhaps dependent on language settings).
+• ##TextGrids: Concatenate#: guard against some incorrect TexGrid files.
+
+##6.4.13# (10 June 2024)
+• More manual pages.
+• @@Sounds: Concatenate with overlap...@: guard against a crash that would occur
+  if the total overlap time was longer than the original sounds together.
+• @`number` recognizes hexadecimal numbers again (bug since February 2023).
+
+##6.4.12# (2 May 2024)
+• ##Align interval#: fewer error messages.
+
+##6.4.11# (26 April 2024)
+• Menu commands that call a script (e.g. those that were added from a plug-in)
+  are now visible as such by being marked with a little “+” sign.
+• Fixed a bug that could cause the SpeechSynthesizer to mishandle European
+  characters with accents on Linux.
+
+##6.4.10# (21 April 2024)
+• Function windows: fixed a problem that could cause Praat to crash when doing #all after #Group
+  when windows had a different duration.
+
+##6.4.09# (20 April 2024)
+• TextGrid window: fixed a rare problem with ##Align interval# that could lead to a zero-length interval.
+• Windows ARM64 edition: fixed a bug that would cause ##Align interval# to crash.
+• ##Sound & TextGrid: Align interval...# now also available in the Objects window.
+
+##6.4.08# (14 April 2024)
+• Windows: fixed a problem with the right and bottom edges of windows (half-visible scroll bars)
+	for the Intel editions (the ARM64 edition still has this problem).
+• Scripting: fixed a bug that could cause Praat to crash when an unknown choice was given to an option menu.
+• MelSpectrogram: fixed a bug that could cause Praat to crash if a mel value was negative.
+• DataModeler: improved confidence limits on estimated model parameters.
 
 ##6.4.07# (17 March 2024)
 • The command @@Sound & Pitch: To PointProcess (cc)@, which is also used when computing the times of pulses
@@ -84,7 +156,7 @@ Latest changes in Praat.
 • @@Sound: To Pitch (filtered ac)...@ has become the preferred method for
   measuring vocal-fold vibration and intonation (@@Sound: To Pitch (raw cc)...@
   is still the preferred method for voice analysis).
-  See @@How to choose a pitch analysis method@.
+  See @@how to choose a pitch analysis method@.
 
 ##6.3.20# (24 October 2023)
 • SpeechSynthesizer and automatic alignment in TextGridEditor: worked around a bug
@@ -1133,7 +1205,7 @@ the column index was larger than the number of rows.
 • Sound window: ##Extract selected sound for overlap...#.
 
 ##5.3.49# (13 May 2013)
-• TextGrid window: alignment of the sound and the annotation in an interval, via Espeak.
+• TextGrid window: alignment of the sound and the annotation in an interval, via eSpeak.
 • Scripting: repaired a bug introduced in 5.3.32 that could cause very slow running of scripts.
 
 ##5.3.48# (1 May 2013)

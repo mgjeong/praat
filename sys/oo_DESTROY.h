@@ -25,17 +25,17 @@
 #define oo_ANYVEC(type, storage, x, sizeExpression)  \
 	if (! _thisStructCanAutodestroyItsMembers_) { \
 		our x. reset(); \
-	}
+	} else { }
 
 #define oo_ANYMAT(type, storage, x, nrowExpression, ncolExpression)  \
 	if (! _thisStructCanAutodestroyItsMembers_) { \
 		our x. reset(); \
-	}
+	} else { }
 
 #define oo_ANYTEN3(type, storage, x, ndim1Expression, ndim2Expression, ndim3Expression)  \
 	if (! _thisStructCanAutodestroyItsMembers_) { \
 		our x. reset(); \
-	}
+	} else { }
 
 #define oo_ENUMx(kType, storage, x)
 
@@ -44,19 +44,19 @@
 #define oo_STRINGx(storage, x)  \
 	if (! _thisStructCanAutodestroyItsMembers_) { \
 		our x. reset(); \
-	}
+	} else { }
 
 #define oo_STRINGx_SET(storage, x, setType)  \
 	if (! _thisStructCanAutodestroyItsMembers_) { \
 		for (int _i = 0; _i <= setType::MAX; _i ++) { \
 			our x [_i]. reset(); \
 		} \
-	}
+	} else { }
 
 #define oo_STRINGx_VECTOR(storage, x, n)  \
 	if (! _thisStructCanAutodestroyItsMembers_) { \
 		our x. reset(); \
-	}
+	} else { }
 
 #define oo_STRUCT(Type, x)  \
 	our x. destroy ();
@@ -73,21 +73,25 @@
 	} \
 	if (! _thisStructCanAutodestroyItsMembers_) { \
 		our x. reset(); \
-	} \
+	} else { } \
 }
 
 #define oo_OBJECT(Class, version, x)  \
 	if (! _thisStructCanAutodestroyItsMembers_) { \
 		our x. reset(); \
-	}
+	} else { }
 
 #define oo_COLLECTION_OF(Class, x, ItemClass, version)
 
 #define oo_COLLECTION(Class, x, ItemClass, version)
 
-#define oo_FILE(x)
+#define oo_TRANSIENT_FILE(x)
 
-#define oo_FOLDER(x)
+#define oo_TRANSIENT_FOLDER(x)
+
+#define oo_UNSAFE_BORROWED_TRANSIENT_CONST_OBJECT_REFERENCE(Class, x)
+
+#define oo_UNSAFE_BORROWED_TRANSIENT_MUTABLE_OBJECT_REFERENCE(Class, x)
 
 #define oo_DEFINE_STRUCT(Struct)  \
 	void struct##Struct :: destroy () { \

@@ -20,7 +20,6 @@
 #include "praatP.h"
 #include "praat_script.h"
 #include "Formula.h"
-#include "praat_version.h"
 #include "../kar/UnicodeData.h"
 
 #include "../fon/Vector.h"
@@ -54,7 +53,9 @@
 
 #define Interpreter_BUTTON 19
 #define Interpreter_OPTION 20
-#define Interpreter_COMMENT 21
+#define Interpreter_HEADING 21
+#define Interpreter_COMMENT 22
+#define Interpreter_CAPTION 23
 
 Thing_implement (InterpreterVariable, SimpleString, 0);
 
@@ -166,7 +167,7 @@ void Melder_includeIncludeFiles (autostring32 *inout_text, bool onlyInCodeChunks
 					continue;   // if the text starts with "include", it cannot be within a code chunk
 				integer braceDepth = 0;
 				for (const char32 *p = head; p != includeLocation; p ++)
-					if (*p == U'\n')
+					if (Melder_isEndOfLine (*p)) {
 						if (p [1] == U'{') {
 							if (braceDepth > 0)
 								Melder_throw (U"Opening brace within a code chunk. Don't know whether or not to include an include file.");
@@ -176,6 +177,7 @@ void Melder_includeIncludeFiles (autostring32 *inout_text, bool onlyInCodeChunks
 								Melder_throw (U"Closing brace outside a code chunk. Don't know whether or not to include an include file.");
 							braceDepth -= 1;
 						}
+					}
 				if (braceDepth == 0) {
 					head = includeLocation + 8;
 					continue;
@@ -266,7 +268,7 @@ integer Interpreter_readParameters (Interpreter me, mutablestring32 text) {
 			/*
 				Check invariant here: we are at the beginning of a line.
 			*/
-			Melder_assert (p == text || p [-1] == '\n');
+			Melder_assert (p == text || Melder_isEndOfLine (p [-1]));
 
 			if (scriptTextIsNotebookText) {
 				if (*p == U'{') {
@@ -313,12 +315,13 @@ integer Interpreter_readParameters (Interpreter me, mutablestring32 text) {
 				Melder_throw (U"The title of a form should start with a double quote character (\").");
 			char32* p = dialogTitle + 1;   // BUG: could be const (change Melder_skipHorizontalSpace())
 			for (; p < endOfLine; p ++) {
-				if (*p == U'"')
+				if (*p == U'"') {
 					if (p [1] == U'"') {
 						p ++;
 						continue;
 					} else
 						break;
+				}
 				MelderString_appendCharacter (& string, *p);
 			}
 			if (*p != U'"')
@@ -512,12 +515,13 @@ integer Interpreter_readParameters (Interpreter me, mutablestring32 text) {
 					}
 					p ++;   // skip opening quote
 					for (; p < endOfLine; p ++) {
-						if (*p == U'"')
+						if (*p == U'"') {
 							if (p [1] == U'"') {   // look ahead
 								p ++;
 								continue;
 							} else
 								break;
+						}
 						MelderString_appendCharacter (& string, *p);
 					}
 					if (*p != U'"') {
@@ -562,12 +566,13 @@ integer Interpreter_readParameters (Interpreter me, mutablestring32 text) {
 				}
 				p ++;   // skip opening quote
 				for (; p < endOfLine; p ++) {
-					if (*p == U'"')
+					if (*p == U'"') {
 						if (p [1] == U'"') {   // look ahead
 							p ++;
 							continue;
 						} else
 							break;
+					}
 					MelderString_appendCharacter (& string, *p);
 				}
 				if (*p != U'"') {
@@ -600,7 +605,7 @@ integer Interpreter_readParameters (Interpreter me, mutablestring32 text) {
 						Melder_throw (U"Only “choice”, “optionmenu” and “boolean” fields can take a number:\n", startOfLine);
 					}
 					const integer value = Melder_atoi (p);
-					if (type == Interpreter_CHOICE)
+					if (type == Interpreter_CHOICE || type == Interpreter_OPTIONMENU)
 						MelderString_append (& string, value);
 					else
 						MelderString_appendCharacter (& string, value != 0 ? U'1' : U'0');
@@ -612,18 +617,19 @@ integer Interpreter_readParameters (Interpreter me, mutablestring32 text) {
 						*(p + 1) = U'\0';   // destroy input in order to limit printing of line
 						Melder_throw (U"Missing opening quote after comma in form field:\n", startOfLine);
 					}
-					if (type == Interpreter_CHOICE) {
+					if (type == Interpreter_CHOICE || type == Interpreter_OPTIONMENU) {
 						*(p + 1) = U'\0';   // destroy input in order to limit printing of line
 						Melder_throw (U"A “choice” field can take only a number, not a string:\n", startOfLine);
 					}
 					p ++;   // skip opening quote
 					for (; p < endOfLine; p ++) {
-						if (*p == U'"')
+						if (*p == U'"') {
 							if (p [1] == U'"') {
 								p ++;
 								continue;
 							} else
 								break;
+						}
 						MelderString_appendCharacter (& string, *p);
 					}
 					if (*p != U'"') {
@@ -811,8 +817,12 @@ autoUiForm Interpreter_createForm (Interpreter me, GuiWindow parent, Editor opti
 				UiForm_addOption (form.get(), my arguments [ipar].get());
 			} break; case Interpreter_OPTION: {
 				UiForm_addOption (form.get(), my arguments [ipar].get());
+			} break; case Interpreter_HEADING: {
+				UiForm_addHeading (form.get(), nullptr, my arguments [ipar].get());
 			} break; case Interpreter_COMMENT: {
-				UiForm_addLabel (form.get(), nullptr, my arguments [ipar].get());
+				UiForm_addComment (form.get(), nullptr, my arguments [ipar].get());
+			} break; case Interpreter_CAPTION: {
+				UiForm_addCaption (form.get(), nullptr, my arguments [ipar].get());
 			} break; default: {
 				UiForm_addWord (form.get(), nullptr, nullptr, parameter, my arguments [ipar].get());
 			}
@@ -2124,7 +2134,7 @@ void Interpreter_run (Interpreter me, char32 *text, const bool reuseVariables) {
 				structMelderFolder folder { };
 				Melder_getCurrentFolder (& folder);
 				Interpreter_addStringVariable (me, U"defaultDirectory$", Melder_folderToPath (& folder));
-				Interpreter_addStringVariable (me, U"preferencesDirectory$", Melder_folderToPath (& Melder_preferencesFolder));
+				Interpreter_addStringVariable (me, U"preferencesDirectory$", Melder_folderToPath (Melder_preferencesFolder()));
 				Melder_getHomeDir (& folder);
 				Interpreter_addStringVariable (me, U"homeDirectory$", Melder_folderToPath (& folder));
 				Melder_getTempDir (& folder);
@@ -2164,8 +2174,8 @@ void Interpreter_run (Interpreter me, char32 *text, const bool reuseVariables) {
 			Interpreter_addNumericVariable (me, U"stereo", 2);   // deprecated 2010 (Praat 5.2.06)
 			Interpreter_addNumericVariable (me, U"all", 0);   // deprecated 2010 (Praat 5.2.06)
 			Interpreter_addNumericVariable (me, U"average", 0);   // deprecated 2010 (Praat 5.2.06)
-			Interpreter_addStringVariable (me, U"praatVersion$", U"" stringize(PRAAT_VERSION_STR));
-			Interpreter_addNumericVariable (me, U"praatVersion", PRAAT_VERSION_NUM);
+			Interpreter_addStringVariable (me, U"praatVersion$", Melder_appVersionSTR());
+			Interpreter_addNumericVariable (me, U"praatVersion", Melder_appVersion());
 		}
 		/*
 			Execute commands.
@@ -2186,14 +2196,14 @@ void Interpreter_run (Interpreter me, char32 *text, const bool reuseVariables) {
 				char32 c0;
 				bool fail = false;
 				MelderString_copy (& command2, lines [lineNumber]);
-				c0 = command2. string [0];
+				c0 = command2.string [0];
 				if (c0 == U'\0')
 					continue;
 				/*
 					Substitute variables.
 				*/
 				trace (U"substituting variables");
-				for (char32 *p = & command2. string [0]; *p != U'\0'; p ++) if (*p == U'\'') {
+				for (char32 *p = & command2.string [0]; *p != U'\0'; p ++) if (*p == U'\'') {
 					/*
 						Found a left quote. Search for a matching right quote.
 					*/

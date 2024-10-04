@@ -1,6 +1,6 @@
 /* ScriptEditor.cpp
  *
- * Copyright (C) 1997-2005,2007-2018,2020-2023 Paul Boersma
+ * Copyright (C) 1997-2005,2007-2018,2020-2024 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,11 +56,12 @@ void structScriptEditor :: v_nameChanged () {
 	const bool dirtinessAlreadyShown = GuiWindow_setDirty (our windowForm, our dirty);   // (3) on the Mac (last checked 2023-02-25)
 	static MelderString buffer;
 	MelderString_copy (& buffer, MelderFile_isNull (& our file) ? U"untitled script" : U"Script");   // (1)
-	if (our wasCreatedInAnEditor())
+	if (our wasCreatedInAnEditor()) {
 		if (our optionalReferenceToOwningEditor)
 			MelderString_append (& buffer, U" [editor “", Thing_getName (our optionalReferenceToOwningEditor), U"”]");   // (4), (5)
 		else
 			MelderString_append (& buffer, U" [closed ", our optionalOwningEditorClassName.get(), U"]");   // (4)
+	}
 	if (! MelderFile_isNull (& our file))
 		MelderString_append (& buffer, U" ", MelderFile_messageName (& our file));   // (2)
 	if (our dirty && ! dirtinessAlreadyShown)
@@ -163,13 +164,31 @@ static void menu_cb_run (ScriptEditor me, EDITOR_ARGS) {
 static void menu_cb_runSelection (ScriptEditor me, EDITOR_ARGS) {
 	if (my interpreter -> running)
 		Melder_throw (U"The script is already running (paused). Please close or continue the pause or demo window.");
-	autostring32 text = GuiText_getSelection (my textWidget);
-	if (! text)
+	autostring32 selectedText = GuiText_getSelection (my textWidget);
+	if (! selectedText)
 		Melder_throw (U"No text selected.");
 	if (! MelderFile_isNull (& my file))
 		MelderFile_setDefaultDir (& my file);
-	Melder_includeIncludeFiles (& text);
-	const integer npar = Interpreter_readParameters (my interpreter.get(), text.get());
+	Melder_includeIncludeFiles (& selectedText);
+	const integer npar = Interpreter_readParameters (my interpreter.get(), selectedText.get());
+	autoMelderString textPlusProcedures;
+	MelderString_copy (& textPlusProcedures, selectedText.get());
+	if (! Melder_stringMatchesCriterion (selectedText.get(), kMelder_string :: CONTAINS, U"\nprocedure ", true)) {
+		autostring32 wholeText = GuiText_getString (my textWidget);
+		autoMelderReadText textReader = MelderReadText_createFromText (wholeText.move());
+		int procedureDepth = 0;
+		for (;;) {
+			mutablestring32 line = MelderReadText_readLine (textReader.get());
+			if (! line)
+				break;
+			if (Melder_startsWith (line, U"procedure "))
+				procedureDepth += 1;
+			if (procedureDepth > 0)
+				MelderString_append (& textPlusProcedures, U"\n", line);
+			if (Melder_startsWith (line, U"endproc"))
+				procedureDepth -= 1;
+		}
+	}
 	if (npar != 0) {
 		/*
 			Pop up a dialog box for querying the arguments.
@@ -180,7 +199,9 @@ static void menu_cb_runSelection (ScriptEditor me, EDITOR_ARGS) {
 		autoPraatBackground background;
 		if (! MelderFile_isNull (& my file))
 			MelderFile_setDefaultDir (& my file);
-		Interpreter_run (my interpreter.get(), text.get(), false);
+TRACE
+trace (U"<<", textPlusProcedures.string, U">>");
+		Interpreter_run (my interpreter.get(), textPlusProcedures.string, false);
 	}
 }
 

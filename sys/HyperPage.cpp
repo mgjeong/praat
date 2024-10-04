@@ -159,6 +159,10 @@ void HyperPage_any (HyperPage me, conststring32 text, kGraphics_font font, doubl
 		} else {
 			Graphics_setFont (my graphics.get(), font);
 			Graphics_setFontSize (my graphics.get(), size);
+			//if (method & HyperPage_EXECUTABLE)
+			//	Graphics_setColour (my graphics.get(), Melder_GREEN);
+			//else
+			//	Graphics_setColour (my graphics.get(), Melder_BLACK);
 			Graphics_setWrapWidth (my graphics.get(), my rightMargin - x - 0.1);
 			Graphics_setSecondIndent (my graphics.get(), secondIndent);
 			Graphics_setFontStyle (my graphics.get(), style);
@@ -265,7 +269,7 @@ void HyperPage_code0 (HyperPage me, conststring32 text) {
 	HyperPage_any (me, text, kGraphics_font::COURIER, my instancePref_fontSize() * 0.86, 0, 0.0, 0.0, 0.5, 0.0, 0.0, 0);
 }
 void HyperPage_code (HyperPage me, conststring32 text) {
-	HyperPage_any (me, text, kGraphics_font::COURIER, my instancePref_fontSize() * 0.86, 0, 0.0, 0.3, 0.5, 0.0, 0.0, 0);
+	HyperPage_any (me, text, kGraphics_font::COURIER, my instancePref_fontSize() * 0.86, 0, 0.0, 0.3, 0.5, 0.0, 0.0, HyperPage_EXECUTABLE);
 }
 void HyperPage_code1 (HyperPage me, conststring32 text) {
 	HyperPage_any (me, text, kGraphics_font::COURIER, my instancePref_fontSize() * 0.86, 0, 0.0, 0.6, 0.5, 0.0, 0.0, 0);
@@ -284,6 +288,18 @@ void HyperPage_code5 (HyperPage me, conststring32 text) {
 }
 void HyperPage_caption (HyperPage me, conststring32 text) {
 	HyperPage_any (me, text, my instancePref_font(), my instancePref_fontSize() * 0.86, 0, 0.0, 0.5, 0.5, 0.0, 0.2, 0);
+}
+void HyperPage_quote (HyperPage me, conststring32 text) {
+	HyperPage_any (me, text, my instancePref_font(), my instancePref_fontSize() * 0.86, 0, 0.0, 0.5, 0.0, 0.1, 0.1, 0);
+}
+void HyperPage_quote1 (HyperPage me, conststring32 text) {
+	HyperPage_any (me, text, my instancePref_font(), my instancePref_fontSize() * 0.86, 0, 0.0, 1.0, 0.0, 0.1, 0.1, 0);
+}
+void HyperPage_quote2 (HyperPage me, conststring32 text) {
+	HyperPage_any (me, text, my instancePref_font(), my instancePref_fontSize() * 0.86, 0, 0.0, 1.5, 0.0, 0.1, 0.1, 0);
+}
+void HyperPage_quote3 (HyperPage me, conststring32 text) {
+	HyperPage_any (me, text, my instancePref_font(), my instancePref_fontSize() * 0.86, 0, 0.0, 2.0, 0.0, 0.1, 0.1, 0);
 }
 void HyperPage_prototype (HyperPage me, conststring32 text) {
 	HyperPage_any (me, text, my instancePref_font(), my instancePref_fontSize(), 0, 0.0, 0.03, 0.5, 0.0, 0.0, 0);
@@ -462,7 +478,7 @@ void HyperPage_script (HyperPage me, double width_inches, double height_inches, 
 
 				{// scope
 					autoMelderProgressOff progress;
-					autoMelderWarningOff warning;
+					autoMelderWarningOff nowarn;
 					autoMelderSaveCurrentFolder saveFolder;
 					if (! MelderFolder_isNull (& my rootDirectory))
 						Melder_setCurrentFolder (& my rootDirectory);
@@ -560,7 +576,7 @@ void HyperPage_script (HyperPage me, double width_inches, double height_inches, 
 
 			{// scope
 				autoMelderProgressOff progress;
-				autoMelderWarningOff warning;
+				autoMelderWarningOff nowarn;
 				autoMelderSaveCurrentFolder saveFolder;
 				if (! MelderFolder_isNull (& my rootDirectory))
 					Melder_setCurrentFolder (& my rootDirectory);

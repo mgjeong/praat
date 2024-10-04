@@ -1,6 +1,6 @@
 /* praat_statistics.cpp
  *
- * Copyright (C) 1992-2012,2014-2022 Paul Boersma
+ * Copyright (C) 1992-2012,2014-2022,2024 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,8 +84,15 @@ void praat_reportTextProperties () {
 	MelderInfo_writeLine (U"Text properties of this edition of Praat on this computer:\n");
 	MelderInfo_writeLine (U"Locale: ", Melder_peek8to32 (setlocale (LC_ALL, nullptr)));
 	MelderInfo_writeLine (U"A \"char\" is ",                                      8, U" bits.");
+	constexpr bool charIsSigned = ( (int) (char) 200 < 0 );
+	if (charIsSigned)
+		MelderInfo_writeLine (U"A \"char\" is ", charIsSigned ? U"signed." : U"unsigned.");
 	MelderInfo_writeLine (U"A \"char16_t\" is ",           sizeof (char16_t)    * 8, U" bits.");
 	MelderInfo_writeLine (U"A \"wchar_t\" is ",            sizeof (wchar_t)     * 8, U" bits.");
+	if constexpr ((wchar_t) -1 < 0)
+		MelderInfo_writeLine (U"A \"wchar_t\" is signed.");
+	else
+		MelderInfo_writeLine (U"A \"wchar_t\" is unsigned.");
 	MelderInfo_writeLine (U"A \"char32_t\" is ",           sizeof (char32_t)    * 8, U" bits.");
 	MelderInfo_close ();
 }
@@ -170,6 +177,10 @@ void praat_reportSystemProperties () {
 	#endif
 	#if defined (__aarch64__) || defined (_M_ARM64_)
 		MelderInfo_writeLine (U"Built for processor type: ", U"arm64");
+	#elif defined (__s390x__)
+		MelderInfo_writeLine (U"Built for processor type: ", U"s390x");
+	#elif defined (raspberrypi)
+		MelderInfo_writeLine (U"Built for processor type: ", U"armv7");
 	#else
 		MelderInfo_writeLine (U"Built for processor type: ", sizeof (void *) == 4 ? U"intel32" : U"intel64");
 	#endif
@@ -189,6 +200,27 @@ void praat_reportSystemProperties () {
 		MelderInfo_writeLine (U"Localized app name: ", Melder_peek8to32 ([[currentApplication localizedName] UTF8String]));
 		MelderInfo_writeLine (U"App bundle identifier: ", Melder_peek8to32 ([[currentApplication bundleIdentifier] UTF8String]));
 	#endif
+	#ifdef _WIN32
+		MelderInfo_writeLine (U"SM_CXFIXEDFRAME: ", GetSystemMetrics (SM_CXFIXEDFRAME));
+		MelderInfo_writeLine (U"SM_CYFIXEDFRAME: ", GetSystemMetrics (SM_CYFIXEDFRAME));
+		MelderInfo_writeLine (U"SM_CXSIZEFRAME: ", GetSystemMetrics (SM_CXSIZEFRAME));
+		MelderInfo_writeLine (U"SM_CYSIZEFRAME: ", GetSystemMetrics (SM_CYSIZEFRAME));
+		MelderInfo_writeLine (U"SM_CYCAPTION: ", GetSystemMetrics (SM_CYCAPTION));
+		MelderInfo_writeLine (U"SM_CYMENU: ", GetSystemMetrics (SM_CYMENU));
+	#endif
+	MelderInfo_close ();
+}
+
+void praat_reportAppProperties () {
+	MelderInfo_open ();
+	MelderInfo_writeLine (U"Upper-case app name: ", Melder_upperCaseAppName());
+	MelderInfo_writeLine (U"Lower-case app name: ", Melder_lowerCaseAppName());
+	MelderInfo_writeLine (U"App version (as a number): ", Melder_appVersion());
+	MelderInfo_writeLine (U"App version (as text): ", Melder_appVersionSTR());
+	MelderInfo_writeLine (U"App year: ", Melder_appYear());
+	MelderInfo_writeLine (U"App month (as a number): ", Melder_appMonth());
+	MelderInfo_writeLine (U"App month (as text): ", Melder_appMonthSTR());
+	MelderInfo_writeLine (U"App day: ", Melder_appDay());
 	MelderInfo_close ();
 }
 

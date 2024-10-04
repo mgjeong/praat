@@ -1,6 +1,6 @@
 /* Sound_files.cpp
  *
- * Copyright (C) 1992-2018,2020,2022,2023 Paul Boersma & David Weenink
+ * Copyright (C) 1992-2018,2020,2022-2024 Paul Boersma & David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,15 +74,18 @@ autoSound Sound_readFromSoundFile (MelderFile file) {
 		int fileType = MelderFile_checkSoundFile (file, & numberOfChannels, & encoding, & sampleRate, & startOfData, & numberOfSamples);
 		if (fileType == 0)
 			Melder_throw (U"Not an audio file.");
-		if (fseek (file -> filePointer, startOfData, SEEK_SET) == EOF)   // start from beginning of Data Chunk
+		try {
+			MelderFile_seek (file, startOfData, SEEK_SET);   // start from beginning of Data Chunk
+		} catch (MelderError) {
 			Melder_throw (U"No data in audio file.");
+		}
 		if (numberOfSamples < 1)
 			Melder_throw (U"Audio file contains 0 samples.");
 		autoSound me = Sound_createSimple (numberOfChannels, numberOfSamples / sampleRate, sampleRate);
 		Melder_assert (my z.ncol == numberOfSamples);
-		if (encoding == Melder_SHORTEN || encoding == Melder_POLYPHONE)
+		if (encoding == Melder_SHORTEN)
 			Melder_throw (U"Cannot unshorten. Write to paul.boersma@uva.nl for more information.");
-		Melder_readAudioToFloat (file -> filePointer, encoding, my z.get());
+		Melder_readAudioToFloat (file, encoding, my z.get());
 		mfile.close ();
 		return me;
 	} catch (MelderError) {
@@ -397,21 +400,21 @@ autoDaata Sound_readFromAnyKayFile (MelderFile file) {
 autoSound Sound_readFromRawAlawFile (MelderFile file) {
 	try {
 		double sampleRate = 8000.0;
-		autofile f = Melder_fopen (file, "rb");
-		fseek (f, 0, SEEK_END);
-		integer numberOfSamples = ftell (f);
-		rewind (f);
-		autoSound me = Sound_createSimple (1, numberOfSamples / sampleRate, sampleRate); 
+		autoMelderFile mfile = MelderFile_open (file);
+		MelderFile_seek (file, 0, SEEK_END);
+		integer numberOfSamples = MelderFile_tell (file);
+		MelderFile_rewind (file);
+		autoSound me = Sound_createSimple (1, numberOfSamples / sampleRate, sampleRate);
 		Melder_assert (my z.ncol == numberOfSamples);
-		Melder_readAudioToFloat (f, Melder_ALAW, my z.get());
-		f.close (file);
+		Melder_readAudioToFloat (file, Melder_ALAW, my z.get());
+		mfile.close ();
 		return me;
 	} catch (MelderError) {
 		Melder_throw (U"Sound not read from raw A-law file ", file, U".");
 	}
 }
 
-void Sound_saveAsAudioFile (Sound me, MelderFile file, int audioFileType, int numberOfBitsPerSamplePoint) {
+void Sound_saveAsAudioFile (constSound me, MelderFile file, int audioFileType, int numberOfBitsPerSamplePoint) {
 	try {
 		autoMelderFile mfile = MelderFile_create (file);
 		MelderFile_writeAudioFileHeader (file, audioFileType, Melder_iround_tieDown (1.0 / my dx), my nx, my ny, numberOfBitsPerSamplePoint);
@@ -423,7 +426,7 @@ void Sound_saveAsAudioFile (Sound me, MelderFile file, int audioFileType, int nu
 	}
 }
 
-void Sound_saveAsSesamFile (Sound me, MelderFile file) {
+void Sound_saveAsSesamFile (constSound me, MelderFile file) {
 	try {
 		autofile f = Melder_fopen (file, "wb");
 		integer header [1 + 128];
@@ -463,7 +466,7 @@ void Sound_saveAsSesamFile (Sound me, MelderFile file) {
 	}
 }
 
-void Sound_saveAsKayFile (Sound me, MelderFile file) {
+void Sound_saveAsKayFile (constSound me, MelderFile file) {
 	try {
 		Melder_require (my ny <= 8,
 			U"Cannot write more than 8 channels into a Kay sound file.");
@@ -538,7 +541,7 @@ void Sound_saveAsKayFile (Sound me, MelderFile file) {
 	}
 }
 
-void Sound_saveAsRawSoundFile (Sound me, MelderFile file, int encoding) {
+void Sound_saveAsRawSoundFile (constSound me, MelderFile file, int encoding) {
 	try {
 		autoMelderFile mfile = MelderFile_create (file);
 		MelderFile_writeFloatToAudio (file, my z.get(), encoding, true);

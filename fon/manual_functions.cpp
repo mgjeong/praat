@@ -31,6 +31,7 @@ A growing list of functions that you can use in @formulas and @scripting...
 , @`abs` (%`x`) – absolute value
 , @`abs#` (%`vector#`) – absolute value of each element of %`vector#`
 , @`abs##` (%`matrix##`) – absolute value of each cell of %`matrix##`
+, @`appDay` ( ) – the month day at which the present version of Praat was built
 , @`appendFile` (%`filePath$`, `...`) – write texts, numbers, vectors and so on
 	at the end of an existing file (create such a file if it does not exist yet)
 , @`appendFileLine` (%`filePath$`, `...`) – write texts, numbers, vectors and so on,
@@ -40,6 +41,11 @@ A growing list of functions that you can use in @formulas and @scripting...
 	to the Info window
 , @`appendInfoLine` (`...`) – write texts, numbers, vectors and so on,
 	followed by a newline, to the Info window
+, @`appMonth` ( ) – the month in which the present version of Praat was built (between 1 and 12)
+, @`appMonth$` ( ) – the name of the month (in English) in which the present version of Praat was built
+, @`appVersion` ( ) – the number of the present version of Praat
+, @`appVersion$` ( ) – the present version of Praat, as text
+, @`appYear` ( ) – the year in which the present version of Praat was built
 , @`arccos` (%`x`) – inverse cosine
 , @`arccos#` (%`vector#`) – inverse cosine of each element of %`vector#`
 , @`arccos##` (%`matrix##`) – inverse cosine of each cell of %`matrix##`
@@ -60,6 +66,7 @@ A growing list of functions that you can use in @formulas and @scripting...
 , @`arctanh#` (%`vector#`) – inverse hyperbolic tangent of each element of %`vector#`
 , @`arctanh##` (%`matrix##`) – inverse hyperbolic tangent of each cell of %`matrix##`
 , @`assert` %`condition` – condition checking
+, @`asserterror` %`message$` – testing that a certain error occurs
 , @`asynchronous` – let the script continue while the sound is playing
 , @`backslashTrigraphsToUnicode$` (%`string$`) – convert e.g. \bsct to \ct
 , @`barkToHertz` (%`x`) – from Bark-rate to acoustic frequency
@@ -80,6 +87,8 @@ A growing list of functions that you can use in @formulas and @scripting...
 , @`chooseReadFile$` (%`title$`) – pops up a file selection window for opening (or appending to) an existing file
 , @`chooseWriteFile$` (%`title$`, %`defaultFilename$`) – pops up a file selection window for saving to a new file
 , @`clearinfo` – clear the Info window
+, @`col` – the columns number (of the current cell) in a Formula command
+, @`col$` [%`i`] – the name of column %i of an object
 , @`col#` (%`matrix##`, %`columnNumber`) - extract one column from a matrix
 , @`columnSums#` (%`matrix##`)
 , @`combine#` (...) - combine numbers, vectors and matrices into a new vector
@@ -114,6 +123,8 @@ A growing list of functions that you can use in @formulas and @scripting...
 , @`demoX` ( ) – the horizontal position of a mouse click in the Demo window
 , @`demoY` ( ) – the vertical position of a mouse click in the Demo window
 , @`differenceLimensToPhon` (%`x`) – from jnd-scale to perceptual loudness
+, @`dx` – the horizontal distance between cells (i.e. the distance between columns) of an object
+, @`dy` – the vertical distance between cells (i.e. the distance between rows) of an object
 , @`editor` (%`editor($)`) – enter the environment of an editor (by number or by name)
 , @`empty$#` (%`numberOfStrings`) – create an array of empty strings
 , @`endeditor` – leave the environment of an editor
@@ -189,6 +200,7 @@ A growing list of functions that you can use in @formulas and @scripting...
 , @`log10` (%x) – logarithm, base 10
 , @`log10#` (%`vector#`) – base-10 logarithm of each element of %`vector#`
 , @`log10##` (%`matrix##`) – base-10 logarithm of each cell of %`matrix##`
+, @`lowerCaseAppName$` ( ) – the name of the app in lower snake case, e.g. `praat` or `praat_for_hospitals`
 , @`max` (%`x`, `...`) – maximum
 , @`mean` (%`v#`) – average of the elements of a vector
 , @`melToHertz` (%`x`) – from mel to acoustic frequency
@@ -196,11 +208,19 @@ A growing list of functions that you can use in @formulas and @scripting...
 , @`min` (%`x`, `...`) – minimum
 , @`minusObject` (`...`) – shrink the selection of objects in the list
 , @`mul##` (%`a##`, %`b##`) – matrix multiplication
+, @`ncol` – the number of columns of an object
+, @`nrow` – the number of rows of an object
 , @`number` (%`a$`) – interpret a string as a number
 , @`number#` (%`a$#`) – interpret strings as numbers
 , @`numberOfColumns` (%`matrix##`)
 , @`numberOfRows` (%`matrix##`)
+, @`nx` – the number of cells horizontally (i.e. the number of columns) of an object
+, @`ny` – the number of cells vertically (i.e. the number of rows) of an object
 , @`outer##` (%`a#`, %`b#`) – outer product, i.e. %%result__ij_% = %%a__i_%%%b__j_%
+, @`padLeft$` (%`string$`, %`minimumNewWidth` [, %`pad$`]) – left padding
+, @`padOrTruncateLeft$` (%`string$`, %`newWidth` [, %`pad$`]) – left padding or truncation
+, @`padOrTruncateRight$` (%`string$`, %`newWidth` [, %`pad$`]) – right padding or truncation
+, @`padRight$` (%`string$`, %`minimumNewWidth` [, %`pad$`]) – right padding
 , @`pauseScript` (`...`) – show a message in a simple @@pause window@
 , @`percent$` (%`number`, %`precision`) – format a number as a string,
 	with a trailing percent sign and %`precision` digits after the decimal point
@@ -268,6 +288,8 @@ A growing list of functions that you can use in @formulas and @scripting...
 , @`round` (%`x`) – nearest integer
 , @`round#` (%`vector#`) – nearest integer of each element of %`vector#`
 , @`round##` (%`matrix##`) – nearest integer of each cell of %`matrix##`
+, @`row` – the row number (of the current cell) in a Formula command
+, @`row$` [%`i`] – the name of row %i of an object
 , @`row#` (%`matrix##`, %`rowNumber`) - extract one row from a matrix
 , @`rowSums#` (%`matrix##`)
 , @`runScript` (%`filePath$`, `...`) – run a script with the given arguments
@@ -338,17 +360,26 @@ A growing list of functions that you can use in @formulas and @scripting...
 , @`tanh##` (%`matrix##`) – hyperbolic tangent of each cell of %`matrix##`
 , @`to#` (%`n`) – the integers 1 through %`n`
 , @`transpose##` (%`matrix##`) – flip matrix along its diagonal
+, @`truncateLeft$` (%`string$`, %`newMaximumWidth` [, %`pad$`]) – left truncation of %`string$`
+, @`truncateRight$` (%`string$`, %`newMaximumWidth` [, %`pad$`]) – right truncation of %`string$`
 , @`tryToAppendFile` (%`filePath$`) – check whether a file can be appended to
 , @`tryToWriteFile` (%`filePath$`) – check whether a file can be written (destructive!)
 , @`unicode` (%`c$`) – the Unicode codepoint number that corresponds to character %`c$`
 , @`unicode$` (%`n`) – the character that corresponds to Unicode codepoint %`n`
 , @`unicodeToBackslashTrigraphs$` (%`string$`) – convert e.g. \ct to \bsct
+, @`upperCaseAppName$` ( ) – the name of the app in upper camel case, e.g. `Praat` or `PraatForHospitals`
 , @`variableExists` (%`variableName$`) – does the variable %`variableName$` exist?
 , @`vertical$` (%`stringArray$#`) – format a string array vertically
 , @`writeFile` (%`filePath$`, `...`) – create a new text file, and write texts, numbers, vectors and so on into it
 , @`writeFileLine` (%`filePath$`, `...`) – create a new text file, write texts, numbers, vectors and so on into it, followed by a newline
 , @`writeInfo` (`...`) – write texts, numbers, vectors and so on, to a clear Info window
 , @`writeInfoLine` (`...`) – write texts, numbers, vectors and so on, followed by a newline, to a clear Info window
+, @`x` – the horizontal place (in world coordinates) of the current cell in a Formula command
+, @`xmax` – the top of the horizontal domain of an object
+, @`xmin` – the bottom of the horizontal domain of an object
+, @`y` – the vertical place (in world coordinates) of the current cell in a Formula command
+, @`ymax` – the top of the vertical domain of an object
+, @`ymin` – the bottom of the vertical domain of an object
 , @`zero#` (%`n`) – vector with %`n` elements that are all 0
 , @`zero##` (%`nrow`, %`ncol`) – matrix with %`nrow` \xx %`ncol` elements that are all 0
 
@@ -407,6 +438,24 @@ Examples
 }
 
 ################################################################################
+"`appDay`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@. The month day on which the present version of Praat was built
+(a number between 1 and 31).
+
+Syntax and semantics
+====================
+#`appDay` ( )
+: give the month day of the creation of the present version of Praat.
+
+Examples
+========
+{
+	writeInfoLine: \#{appDay} ( )
+}
+
+################################################################################
 "`appendFile`"
 © Paul Boersma 2023
 
@@ -455,6 +504,92 @@ Syntax and semantics
 	to the end of the Info window
 
 ################################################################################
+"`appMonth`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@. The number of the month in which the present version of Praat was built
+(a number between 1 and 12).
+
+Syntax and semantics
+====================
+#`appMonth` ( )
+: give the month of the creation of the present version of Praat, as a number.
+
+Examples
+========
+{
+	writeInfoLine: \#{appMonth} ( )
+}
+
+################################################################################
+"`appMonth$`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@. The name of the month in which the present version of Praat was built.
+
+Syntax and semantics
+====================
+#`appMonth$` ( )
+: give the month of the creation of the present version of Praat, as text.
+
+Examples
+========
+{
+	writeInfoLine: \#{appMonth$} ( )
+}
+
+################################################################################
+"`appVersion`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@. The present version of Praat, as a number.
+
+Syntax and semantics
+====================
+#`appVersion` ( )
+: give the present version of Praat, as a number.
+
+Examples
+========
+{
+	writeInfoLine: \#{appVersion} ( )
+}
+
+################################################################################
+"`appVersion$`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@. The present version of Praat, as text.
+
+Syntax and semantics
+====================
+#`appVersion$` ( )
+: give the present version of Praat, as text.
+
+Examples
+========
+{
+	writeInfoLine: \#{appVersion$} ( )
+}
+
+################################################################################
+"`appYear`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@. The year in which the present version of Praat was built.
+
+Syntax and semantics
+====================
+#`appYear` ( )
+: give the year of the creation of the present version of Praat.
+
+Examples
+========
+{
+	writeInfoLine: \#{appYear} ( )
+}
+
+################################################################################
 "`arccos`"
 © Paul Boersma 2023
 
@@ -473,8 +608,8 @@ Tests
 =====
 {
 	\`{assert} \#{arccos} (-1.1) = undefined
-	\`{assert} abs (\#{arccos} (-1.0) - pi) < 1e-17
-	\`{assert} abs (\#{arccos} (0.0) - pi/2) < 1e-17
+	\`{assert} \`{abs} (\#{arccos} (-1.0) - pi) < 1e-17
+	\`{assert} \`{abs} (\#{arccos} (0.0) - pi/2) < 1e-17
 	\`{assert} \#{arccos} (1.0) = 0
 	\`{assert} \#{arccos} (1.1) = undefined
 	\`{assert} \#{arccos} (undefined) = undefined
@@ -574,9 +709,9 @@ Tests
 =====
 {
 	\`{assert} \#{arcsin} (-1.1) = undefined
-	\`{assert} abs (\#{arcsin} (-1.0) - -pi/2) < 1e-17
+	\`{assert} \`{abs} (\#{arcsin} (-1.0) - -pi/2) < 1e-17
 	\`{assert} \#{arcsin} (0.0) = 0
-	\`{assert} abs (\#{arcsin} (1.0) - pi/2) < 1e-17
+	\`{assert} \`{abs} (\#{arcsin} (1.0) - pi/2) < 1e-17
 	\`{assert} \#{arcsin} (1.1) = undefined
 	\`{assert} \#{arcsin} (undefined) = undefined
 }
@@ -707,13 +842,13 @@ Tests
 =====
 {
 	\`{assert} \#{arctan2} (0.0, 3.0) = 0
-	\`{assert} abs (\#{arctan2} (3.0, 3.0) - pi/4) < 1e-17
-	\`{assert} abs (\#{arctan2} (3.0, 0.0) - pi/2) < 1e-17
-	\`{assert} abs (\#{arctan2} (3.0, -3.0) - 3*pi/4) < 1e-17
-	\`{assert} abs (\#{arctan2} (0.0, -3.0) - pi) < 1e-17
-	\`{assert} abs (\#{arctan2} (-3.0, -3.0) + 3*pi/4) < 1e-17
-	\`{assert} abs (\#{arctan2} (-3.0, 0.0) + pi/2) < 1e-17
-	\`{assert} abs (\#{arctan2} (-3.0, 3.0) + pi/4) < 1e-17
+	\`{assert} \`{abs} (\#{arctan2} (3.0, 3.0) - pi/4) < 1e-17
+	\`{assert} \`{abs} (\#{arctan2} (3.0, 0.0) - pi/2) < 1e-17
+	\`{assert} \`{abs} (\#{arctan2} (3.0, -3.0) - 3*pi/4) < 1e-17
+	\`{assert} \`{abs} (\#{arctan2} (0.0, -3.0) - pi) < 1e-17
+	\`{assert} \`{abs} (\#{arctan2} (-3.0, -3.0) + 3*pi/4) < 1e-17
+	\`{assert} \`{abs} (\#{arctan2} (-3.0, 0.0) + pi/2) < 1e-17
+	\`{assert} \`{abs} (\#{arctan2} (-3.0, 3.0) + pi/4) < 1e-17
 	;\`{assert} \#{arctan2} (0.0, 0.0) = undefined
 }
 Edge cases
@@ -801,6 +936,61 @@ the assertion is false, and the script stops, mentioning the line number
 as well as the text of the assertion (i.e. “`a < 10`”).
 
 ################################################################################
+"`asserterror`"
+© Paul Boersma 2023
+
+A keyword that can be used in @Scripting, to test whether an expected erroe message is indeed generated.
+
+Examples
+========
+
+{
+	\#{asserterror} Unknown variable
+	a = 2 * b + 3
+}
+The line `a = 2 * b + 3` contains the unknown variable `b`. Therefore, the script would normally issue an error message like
+`
+	Unknown variable:
+	« a = 2 * b
+
+	Script line 2 not performed or completed:
+		« a = 2 * b + 3 »
+	Menu command “Run” not completed.
+`
+The line with #`asserterror` prevents the error message from being popped up, and instead checks
+that the error message contains the string “Unknown variable”, which it does.
+
+This one works differently:
+{;
+	b = 4
+	\#{asserterror} Unknown variable
+	a = 2 * b + 3
+}
+In this case the expected error message does not occur, and the script exits with the following error message:
+`
+	Script assertion fails in line 2: error « Unknown variable » not raised.
+	Instead: no error.
+
+	Script line 3 not performed or completed:
+		« a = 2 * b + 3 »
+	Menu command “Run” not completed.
+`
+Another case:
+{;
+	\#{asserterror} What is blabla
+	a = Create Sound from blabla: 1, 2, 3
+}
+In this case a different error message than the expected error message occurs, and the script exits with the following error message:
+`
+	Script assertion fails in line 1: error « What is blabla » not raised.
+	Instead: Command “Create Sound from blabla:” not available for current selection.
+
+	Script line 2 not performed or completed:
+		« a = Create Sound from blabla: 1, 2, 3 »
+	Menu command “Run” not completed.
+`
+
+################################################################################
 "`asynchronous`"
 © Paul Boersma 2023
 
@@ -834,7 +1024,7 @@ Syntax and semantics
 
 Definition
 ==========
-~ #`barkToHertz` (%x) = 650 sinh (%x / 7)
+~ #`barkToHertz` (%x) = 650 @`sinh` (%x / 7)
 
 ################################################################################
 "`besselI`"
@@ -1077,6 +1267,27 @@ Syntax and semantics
 : clear the @@Info window@.
 
 ################################################################################
+"`col`"
+© Paul Boersma 2024
+
+The column number (of the current cell) in a Formula command.
+
+See @@Formulas 1.7. Formulas for modification@.
+
+################################################################################
+"`col$`"
+© Paul Boersma 2024
+
+The name of a column of an object.
+
+Syntax and semantics
+====================
+#`col$` [%`i`]
+: the name of the %%i%th column of an object.
+
+See @@Formulas 8. Attributes of objects@.
+
+################################################################################
 "`col#`"
 © Paul Boersma 2024
 
@@ -1119,10 +1330,10 @@ Syntax and semantics
 Examples
 ========
 {
-	\`{assert} combine# (7, 4, 99) = { 7, 4, 99 }
-	\`{assert} combine# ({ 7, 4 }, 99) = { 7, 4, 99 }
-	\`{assert} combine# ({ 7, 4 }, { 99, 103, 1 }) = { 7, 4, 99, 103, 1 }
-	\`{assert} combine# ({{ 7, 4 }, { 99, 103 }}, 1, { 8, -1, 2 }) =
+	\`{assert} \#{combine#} (7, 4, 99) = { 7, 4, 99 }
+	\`{assert} \#{combine#} ({ 7, 4 }, 99) = { 7, 4, 99 }
+	\`{assert} \#{combine#} ({ 7, 4 }, { 99, 103, 1 }) = { 7, 4, 99, 103, 1 }
+	\`{assert} \#{combine#} ({{ 7, 4 }, { 99, 103 }}, 1, { 8, -1, 2 }) =
 	... { 7, 4, 99, 103, 1, 8, -1, 2 }
 }
 
@@ -1607,6 +1818,24 @@ Definition
 Related function
 ================
 #`differenceLimensToPhon` is the inverse of @`phonToDifferenceLimens`.
+
+################################################################################
+"`dx`"
+© Paul Boersma 2024
+
+The horizontal distance between cells (i.e. the distance between columns) of an object,
+in world coordinates.
+
+See @@Formulas 8. Attributes of objects@.
+
+################################################################################
+"`dy`"
+© Paul Boersma 2024
+
+The vertical distance between cells (i.e. the distance between rows) of an object,
+in world coordinates.
+
+See @@Formulas 8. Attributes of objects@.
 
 ################################################################################
 "`editor`"
@@ -2557,6 +2786,24 @@ Syntax and semantics
 : compute the base-10 logarithm (@`log10`) of each cell of the matrix %`m##`.
 
 ################################################################################
+"`lowerCaseAppName$`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@. The name of the present app,
+in lower snake case, such as `praat` or `praat_for_hospitals`.
+
+Syntax and semantics
+====================
+#`lowerCaseAppName$` ( )
+: give the name of the present app, in lower snake case.
+
+Examples
+========
+{
+	writeInfoLine: \#{lowerCaseAppName$} ( )
+}
+
+################################################################################
 "`max`"
 © Paul Boersma 2023
 
@@ -2570,7 +2817,7 @@ Syntax and semantics
 Tests
 =====
 {
-	assert max (7.2, -5, 3) = 7.2
+	\`{assert} \#{max} (7.2, -5, 3) = 7.2
 }
 
 ################################################################################
@@ -2650,8 +2897,24 @@ Syntax and semantics
 : perform a matrix multiplication of the matrices %`a##` and %`b##`.
 
 ################################################################################
+"`ncol`"
+© Paul Boersma 2024
+
+The number of columns of an object.
+
+See @@Formulas 8. Attributes of objects@.
+
+################################################################################
+"`nrow`"
+© Paul Boersma 2024
+
+The number of rows of an object.
+
+See @@Formulas 8. Attributes of objects@.
+
+################################################################################
 "`number`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2024
 
 A function that can be used in @@Formulas@.
 
@@ -2659,6 +2922,51 @@ Syntax and semantics
 ====================
 #`number` (%`a$`)
 : interpret a string as a number.
+
+{
+	\`{assert} \#{number} ("0.0") = 0
+	\`{assert} \#{number} ("0.00123") = 0.00123   ; decimal point
+	\`{assert} \#{number} ("12e34") = 1.2e+35   ; exponent introduced by "e" or "E"
+	\`{assert} \#{number} ("junk") = undefined   ; i.e. not zero as in C++ !
+	\`{assert} \#{number} ("  -0.0000000123junk") = -1.23e-08   ; maximize digits, then ignore
+	\`{assert} \#{number} ("1.0e+309") = undefined
+	\`{assert} \#{number} ("1.0e-309") <> 0   ; denormalized
+	\`{assert} \#{number} ("1.0e-319") <> 0   ; denormalized
+	\`{assert} \#{number} ("1.0e-329") = 0   ; underflow
+	\`{assert} \#{number} ("32278") = 32278
+	\`{assert} \#{number} ("-32278") = -32278
+	\`{assert} \#{number} ("32278.64785") = 32278.64785
+	\`{assert} \#{number} ("-32278.64785") = -32278.64785
+	\`{assert} \#{number} ("32278.647e85") = 32278.647e85
+	\`{assert} \#{number} ("-32278.647e85") = -32278.647e85
+	\`{assert} \#{number} ("32278.647e-85") = 32278.647e-85
+	\`{assert} \#{number} ("-32278.647e-85") = -32278.647e-85
+	\`{assert} \#{number} ("32278.647e-305") = 32278.647e-305
+	\`{assert} \#{number} ("-32278.647e-305") = -32278.647e-305
+	\`{assert} \#{number} ("32278.647e-315") = 32278.647e-315
+	\`{assert} \#{number} ("-32278.647e-315") = -32278.647e-315
+	\`{assert} \#{number} ("32278.647e-325") = 32278.647e-325
+	\`{assert} \#{number} ("-32278.647e-325") = -32278.647e-325
+	\`{assert} \#{number} ("32278.647e305") = 32278.647e305
+	\`{assert} \#{number} ("-32278.647e305") = -32278.647e305
+	\`{assert} \#{number} ("32278.647e315") = 32278.647e315
+	\`{assert} \#{number} ("-32278.647e315") = -32278.647e315
+	\`{assert} \#{number} ("32278.647e325") = 32278.647e325
+	\`{assert} \#{number} ("-32278.647e325") = -32278.647e325
+}
+Hexadecimal:
+{
+	\`{assert} \#{number} ("0x32278") = 0x32278
+	\`{assert} \#{number} ("0x123") = 291
+	\`{assert} \#{number} ("0x000001ABCDEFGH") = 0x00001abcdef   ; maximize digits, then ignore
+	\`{assert} \#{number} ("0x123.456") = 291.27099609375
+	\`{assert} \#{number} ("0x123.abc") = 291.6708984375   ; hexadecimal point
+	\`{assert} \#{number} ("0x123.abcp-1") = 145.83544921875   ; exponent introduced by "p" or "P"
+	\`{assert} \#{number} ("0x123.abcP-2") = 72.917724609375
+	\`{assert} \#{number} ("0x123.abcp-12") = 0.07120871543884277   ; the exponent is decimal !
+	\`{assert} \#{number} ("0x123.abcp-1A2") = 145.83544921875   ; the exponent is decimal !
+	\`{assert} \#{number} ("-0x1afp-2") = -107.75   ; from `cppreference.com`
+}
 
 ################################################################################
 "`number#`"
@@ -2694,6 +3002,24 @@ Syntax and semantics
 : return the number of rows of the matrix %`m##`.
 
 ################################################################################
+"`nx`"
+© Paul Boersma 2024
+
+The number of cells horizontally (i.e. the number of columns) of an object.
+This is the same as @`ncol`.
+
+See @@Formulas 8. Attributes of objects@.
+
+################################################################################
+"`ny`"
+© Paul Boersma 2024
+
+The number of cells vertically (i.e. the number of rows) of an object.
+This is the same as @`nrow`.
+
+See @@Formulas 8. Attributes of objects@.
+
+################################################################################
 "`outer##`"
 © Paul Boersma 2023
 
@@ -2707,6 +3033,154 @@ Syntax and semantics
 Definition
 ==========
 ~	%result__%i%j_ = %a_%i %b_%j
+
+################################################################################
+"`padLeft$`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@.
+
+Syntax and semantics
+====================
+#`padLeft$` (%`string$`, %`minimumNewWidth` [, %`pad$`])
+: add characters (selected from %`pad$`) to the left of %`string$` until the result is at least as long as %`minimumNewWidth`:
+{
+	\`{assert} \#{padLeft$} ("hello", 12, ".") = ".......hello"
+	\`{assert} \#{padLeft$} ("hello", 5, ".") = "hello"
+}
+If %`pad$` is not given, the padding will be done with spaces:
+{
+	\`{assert} \#{padLeft$} ("hello", 12) = "       hello"
+}
+No truncation takes place, so the resulting string may be longer than %`minimumNewWidth`:
+{
+	\`{assert} \#{padLeft$} ("hello", 3) = "hello"
+	\`{assert} \#{padLeft$} ("hello", -100) = "hello"
+}
+If %`pad$` contains more than one character, the left edge of %`pad$` is left-aligned to the resulting string,
+so that the result will look good if padding is used for visualizing columns:
+{
+	\`{assert} \#{padLeft$} ("hello", 12, ".-;)")   = ".-;).-;hello"
+	\`{assert} \#{padLeft$} ("goodbye", 12, ".-;)") = ".-;).goodbye"
+}
+There will be an error message if padding is required but no characters are to be found in %`pad$`:
+{
+	\`{asserterror} Empty pad string.
+	a$ = \#{padLeft$} ("hello", 12, "")
+}
+
+################################################################################
+"`padOrTruncateLeft$`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@.
+
+Syntax and semantics
+====================
+#`padOrTruncateLeft$` (%`string$`, %`newWidth` [, %`pad$`])
+: add characters (selected from %`pad$`) to the left of %`string$`, or remove characters from the left of %`string$`,
+  until the result is precisely %`newWidth` characters long:
+{
+	\`{assert} \#{padOrTruncateLeft$} ("hello", 12, ".") = ".......hello"
+	\`{assert} \#{padOrTruncateLeft$} ("hello", 3, ".") = "llo"
+	\`{assert} \#{padOrTruncateLeft$} ("hello", 0) = ""
+}
+If %`pad$` is not given, the padding will be done with spaces:
+{
+	\`{assert} \#{padOrTruncateLeft$} ("hello", 12) = "       hello"
+	\`{assert} \#{padOrTruncateLeft$} ("hello", 3) = "llo"
+}
+If characters have to be added, and %`pad$` contains more than one character,
+the left edge of %`pad$` is left-aligned to the resulting string,
+so that the result will look good if padding is used for visualizing columns:
+{
+	\`{assert} \#{padOrTruncateLeft$} ("hello", 12, ".-;)")   = ".-;).-;hello"
+	\`{assert} \#{padOrTruncateLeft$} ("goodbye", 12, ".-;)") = ".-;).goodbye"
+}
+Note that %`newWidth` cannot be negative:
+{
+	\`{asserterror} Can never truncate a string down to -3 characters.
+	a$ = \#{padOrTruncateLeft$} ("hello", -3)
+}
+There will be an error message if padding is required but no characters are to be found in %`pad$`:
+{
+	\`{asserterror} Empty pad string.
+	a$ = \#{padOrTruncateLeft$} ("hello", 12, "")
+}
+
+################################################################################
+"`padOrTruncateRight$`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@.
+
+Syntax and semantics
+====================
+#`padOrTruncateRight$` (%`string$`, %`newWidth` [, %`pad$`])
+: add characters (selected from %`pad$`) to the right of %`string$`, or remove characters from the right of %`string$`,
+  until the result is precisely %`newWidth` characters long:
+{
+	\`{assert} \#{padOrTruncateRight$} ("hello", 12, ".") = "hello......."
+	\`{assert} \#{padOrTruncateRight$} ("hello", 3, ".") = "hel"
+	\`{assert} \#{padOrTruncateRight$} ("hello", 0) = ""
+}
+If %`pad$` is not given, the padding will be done with spaces:
+{
+	\`{assert} \#{padOrTruncateRight$} ("hello", 12) = "hello       "
+	\`{assert} \#{padOrTruncateRight$} ("hello", 3) = "hel"
+}
+If characters have to be added, and %`pad$` contains more than one character,
+the right edge of %`pad$` is right-aligned to the resulting string,
+so that the result will look good if padding is used for visualizing columns:
+{
+	\`{assert} \#{padOrTruncateRight$} ("hello", 12, ".-;)")   = "hello-;).-;)"
+	\`{assert} \#{padOrTruncateRight$} ("goodbye", 12, ".-;)") = "goodbye).-;)"
+}
+Note that %`newWidth` cannot be negative:
+{
+	\`{asserterror} Can never truncate a string down to -3 characters.
+	a$ = \#{padOrTruncateRight$} ("hello", -3)
+}
+There will be an error message if padding is required but no characters are to be found in %`pad$`:
+{
+	\`{asserterror} Empty pad string.
+	a$ = \#{padOrTruncateRight$} ("hello", 12, "")
+}
+
+################################################################################
+"`padRight$`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@.
+
+Syntax and semantics
+====================
+#`padRight$` (%`string$`, %`minimumNewWidth` [, %`pad$`])
+: add characters (selected from %`pad$`) to the right of %`string$` until the result is at least as long as %`minimumNewWidth`:
+{
+	\`{assert} \#{padRight$} ("hello", 12, ".") = "hello......."
+	\`{assert} \#{padRight$} ("hello", 5, ".") = "hello"
+}
+If %`pad$` is not given, the padding will be done with spaces:
+{
+	\`{assert} \#{padRight$} ("hello", 12) = "hello       "
+}
+No truncation takes place, so the resulting string may be longer than %`minimumNewWidth`:
+{
+	\`{assert} \#{padRight$} ("hello", 3) = "hello"
+	\`{assert} \#{padRight$} ("hello", -100) = "hello"
+}
+If %`pad$` contains more than one character, the right edge of %`pad$` is right-aligned to the resulting string,
+so that the result will look good if padding is used for visualizing columns:
+{
+	\`{assert} \#{padRight$} ("hello", 12, ".-;)")   = "hello-;).-;)"
+	\`{assert} \#{padRight$} ("goodbye", 12, ".-;)") = "goodbye).-;)"
+}
+There will be an error message if padding is required but no characters are to be found in %`pad$`:
+{
+	\`{asserterror} Empty pad string.
+	a$ = \#{padRight$} ("hello", 12, "")
+}
 
 ################################################################################
 "`part#`"
@@ -3075,11 +3549,11 @@ Syntax and semantics
 and fill all elements with independent Bernoulli-distributed zeroes and ones.
 This is shorthand for doing
 `
-	\#{randomBernoulli#} (\`{size} (model#), \%{p})
+	\#{randomBernoulli#} (\`{size} (\%{model#}), \%{p})
 `
 ################################################################################
 "`randomBernoulli##`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2024
 
 A function that can be used in @Formulas.
 
@@ -3088,12 +3562,12 @@ Syntax and semantics
 #`randomBernoulli##` (%`nrow`, %`ncol`, %`p`)
 : generate %`nrow` \xx %`ncol` independent Bernoulli-distributed (@`randomBernoulli`) zeroes and ones.
 
-#`randomBernoulli##` (%`model#`, %`p`)
-: create a matrix with the same number of rows and columns as %`model#`,
+#`randomBernoulli##` (%`model##`, %`p`)
+: create a matrix with the same number of rows and columns as %`model##`,
 and fill all cells with independent Bernoulli-distributed zeroes and ones.
 This is shorthand for doing
 `
-	\#{randomBernoulli##} (\`{numberOfRows} (model##), \`{numberOfColumns} (model##), \%{p})
+	\#{randomBernoulli##} (\`{numberOfRows} (\%{model##}), \`{numberOfColumns} (\%{model##}), \%{p})
 `
 ################################################################################
 "`randomGamma`"
@@ -3113,7 +3587,7 @@ according to the method by @@Marsaglia & Tsang (2000)@.
 
 ################################################################################
 "`randomGamma#`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2024
 
 A function that can be used in @Formulas.
 
@@ -3126,12 +3600,12 @@ Syntax and semantics
 : create a vector with the same number of elements as %`model#`,
 and fill all elements with independent \Ga-distributed numbers.
 This is shorthand for doing
-`
-	\#{randomGamma#} (\`{size} (model#), %`shape`, %`rate`)
-`
+{;
+	\#{randomGamma#} (\`{size} (model#), \%{shape}, \%{rate})
+}
 ################################################################################
 "`randomGamma##`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2024
 
 A function that can be used in @Formulas.
 
@@ -3140,13 +3614,13 @@ Syntax and semantics
 #`randomGamma##` (%`nrow`, %`ncol`, %`shape`, %`rate`)
 : generate %`nrow` \xx %`ncol` independent \Ga-distributed (@`randomGamma`) numbers.
 
-#`randomGamma##` (%`model#`, %`shape`, %`rate`)
-: create a matrix with the same number of rows and columns as %`model#`,
+#`randomGamma##` (%`model##`, %`shape`, %`rate`)
+: create a matrix with the same number of rows and columns as %`model##`,
 and fill all cells with independent \Ga-distributed numbers.
 This is shorthand for doing
-`
-	\#{randomGammma##} (\`{numberOfRows} (model##), \`{numberOfColumns} (model##), %`shape`, %`rate`)
-`
+{;
+	\#{randomGammma##} (\`{numberOfRows} (\%{model##}), \`{numberOfColumns} (\%{model##}), \%{shape}, \%{rate})
+}
 ################################################################################
 "`randomGauss`"
 © Paul Boersma 2023
@@ -3161,7 +3635,7 @@ with true population mean %`mu` and true population standard deviation %`sigma`.
 
 ################################################################################
 "`randomGauss#`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2024
 
 A function that can be used in @Formulas.
 
@@ -3174,12 +3648,12 @@ Syntax and semantics
 : create a vector with the same number of elements as %`model#`,
 and fill all elements with independent normally distributed numbers.
 This is shorthand for doing
-`
-	\#{randomGauss#} (\`{size} (model#), %`mu`, %`sigma`)
-`
+{;
+	\#{randomGauss#} (\`{size} (\%{model#}), \%{mu}, \%{sigma})
+}
 ################################################################################
 "`randomGauss##`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2024
 
 A function that can be used in @Formulas.
 
@@ -3188,13 +3662,13 @@ Syntax and semantics
 #`randomGauss##` (%`nrow`, %`ncol`, %`mu`, %`sigma`)
 : generate %`nrow` \xx %`ncol` independent normally distributed (@`randomGauss`) numbers.
 
-#`randomGauss##` (%`model#`, %`mu`, %`sigma`)
-: create a matrix with the same number of rows and columns as %`model#`,
+#`randomGauss##` (%`model##`, %`mu`, %`sigma`)
+: create a matrix with the same number of rows and columns as %`model##`,
 and fill all cells with independent normally distributed numbers.
 This is shorthand for doing
-`
-	\#{randomGauss##} (\`{numberOfRows} (model##), \`{numberOfColumns} (model##), %`mu`, %`sigma`)
-`
+{;
+	\#{randomGauss##} (\`{numberOfRows} (\%{model##}), \`{numberOfColumns} (\%{model##}), \%{mu}, \%{sigma})
+}
 ################################################################################
 "`randomInteger`"
 © Paul Boersma 2023
@@ -3209,7 +3683,7 @@ with minimum %`min` and maximum %`max`.
 
 ################################################################################
 "`randomInteger#`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2024
 
 A function that can be used in @@Formulas@.
 
@@ -3222,12 +3696,12 @@ Syntax and semantics
 : create a vector with the same number of elements as %`model#`,
 and fill all elements with independent uniformly distributed integer numbers.
 This is shorthand for doing
-`
-	\#{randomInteger#} (\`{size} (model#), %`min`, %`max`)
-`
+{;
+	\#{randomInteger#} (\`{size} (\%{model#}), \%{min}, \%{max})
+}
 ################################################################################
 "`randomInteger##`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2024
 
 A function that can be used in @@Formulas@.
 
@@ -3236,13 +3710,13 @@ Syntax and semantics
 #`randomInteger##` (%`nrow`, %`ncol`, %`min`, %`max`)
 : generate %`nrow` \xx %`ncol` independent normally distributed (@`randomInteger`) numbers.
 
-#`randomInteger##` (%`model#`, %`min`, %`max`)
-: create a matrix with the same number of rows and columns as %`model#`,
+#`randomInteger##` (%`model##`, %`min`, %`max`)
+: create a matrix with the same number of rows and columns as %`model##`,
 and fill all cells with independent uniformly distributed integer numbers.
 This is shorthand for doing
-`
-	\#{randomInteger##} (\`{numberOfRows} (model##), \`{numberOfColumns} (model##), %`min`, %`max`)
-`
+{;
+	\#{randomInteger##} (\`{numberOfRows} (\%{model##}), \`{numberOfColumns} (\%{model##}), \%{min}, \%{max})
+}
 ################################################################################
 "`randomPoisson`"
 © Paul Boersma 2023
@@ -3256,7 +3730,7 @@ Syntax and semantics
 
 ################################################################################
 "`randomPoisson#`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2024
 
 A function that can be used in @@Formulas@.
 
@@ -3269,12 +3743,12 @@ Syntax and semantics
 : create a vector with the same number of elements as %`model#`,
 and fill all elements with independent Poisson-distributed numbers.
 This is shorthand for doing
-`
-	\#{randomPoisson#} (\`{size} (model#), %`mean`)
-`
+{;
+	\#{randomPoisson#} (\`{size} (\%{model#}), \%{mean})
+}
 ################################################################################
 "`randomPoisson##`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2024
 
 A function that can be used in @@Formulas@.
 
@@ -3283,13 +3757,13 @@ Syntax and semantics
 #`randomPoisson##` (%`nrow`, %`ncol`, %`mean`)
 : generate %`nrow` \xx %`ncol` independent Poisson-distributed (@`randomPoisson`) numbers.
 
-#`randomPoisson##` (%`model#`, %`mean`)
-: create a matrix with the same number of rows and columns as %`model#`,
+#`randomPoisson##` (%`model##`, %`mean`)
+: create a matrix with the same number of rows and columns as %`model##`,
 and fill all cells with independent Poisson-distributed numbers.
 This is shorthand for doing
-`
-	\#{randomPoisson##} (\`{numberOfRows} (model##), \`{numberOfColumns} (model##), %`mean`)
-`
+{;
+	\#{randomPoisson##} (\`{numberOfRows} (\%{model##}), \`{numberOfColumns} (\%{model##}), \%{mean})
+}
 ################################################################################
 "`randomUniform`"
 © Paul Boersma 2023
@@ -3304,7 +3778,7 @@ with true minimum %`min` (included) and true maximum %`max` (excluded).
 
 ################################################################################
 "`randomUniform#`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2024
 
 A function that can be used in @@Formulas@.
 
@@ -3317,12 +3791,12 @@ Syntax and semantics
 : create a vector with the same number of elements as %`model#`,
 and fill all elements with independent uniformly distributed numbers.
 This is shorthand for doing
-`
-	\#{randomUniform#} (\`{size} (model#), %`min`, %`max`)
-`
+{;
+	\#{randomUniform#} (\`{size} (\%{model#}), \%{min}, \%{max})
+}
 ################################################################################
 "`randomUniform##`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2024
 
 A function that can be used in @@Formulas@.
 
@@ -3331,13 +3805,13 @@ Syntax and semantics
 #`randomUniform##` (%`nrow`, %`ncol`, %`min`, %`max`)
 : generate %`nrow` \xx %`ncol` independent uniformly distributed (@`randomUniform`) numbers.
 
-#`randomUniform##` (%`model#`, %`min`, %`max`)
-: create a matrix with the same number of rows and columns as %`model#`,
+#`randomUniform##` (%`model##`, %`min`, %`max`)
+: create a matrix with the same number of rows and columns as %`model##`,
 and fill all cells with independent uniformly distributed numbers.
 This is shorthand for doing
-`
-	\#{randomUniform##} (\`{numberOfRows} (model##), \`{numberOfColumns} (model##), %`min`, %`max`)
-`
+{;
+	\#{randomUniform##} (\`{numberOfRows} (\%{model##}), \`{numberOfColumns} (\%{model##}), \%{min}, \%{max})
+}
 ################################################################################
 "`random_initializeSafelyAndUnpredictably`"
 © Paul Boersma 2023
@@ -3632,6 +4106,27 @@ Syntax and semantics
 ====================
 #`round##` (%`m##`)
 : round (@`round`) each cell of the matrix %`m##`.
+
+################################################################################
+"`row`"
+© Paul Boersma 2024
+
+The row number (of the current cell) in a Formula command.
+
+See @@Formulas 1.7. Formulas for modification@.
+
+################################################################################
+"`row$`"
+© Paul Boersma 2024
+
+The name of a row of an object.
+
+Syntax and semantics
+====================
+#`row$` [%`i`]
+: the name of the %%i%th row of an object.
+
+See @@Formulas 8. Attributes of objects@.
 
 ################################################################################
 "`row#`"
@@ -4504,6 +4999,54 @@ Syntax and semantics
 : flip the matrix %`m##` along its diagonal.
 
 ################################################################################
+"`truncateLeft$`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@.
+
+Syntax and semantics
+====================
+#`truncateLeft$` (%`string$`, %`maximumNewWidth`)
+: remove characters from the left of %`string$` until the result is at least as short as %`maximumNewWidth`:
+{
+	\`{assert} \#{truncateLeft$} ("hello", 3) = "llo"
+	\`{assert} \#{truncateLeft$} ("hello", 5) = "hello"
+}
+No padding takes place, so the resulting string may be shorter than %`maximumNewWidth`:
+{
+	\`{assert} \#{truncateLeft$} ("hello", 12) = "hello"
+}
+Note that %`maximumNewWidth` cannot be negative:
+{
+	\`{asserterror} Can never truncate a string down to -3 characters.
+	a$ = \#{truncateLeft$} ("hello", -3)
+}
+
+################################################################################
+"`truncateRight$`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@.
+
+Syntax and semantics
+====================
+#`truncateRight$` (%`string$`, %`maximumNewWidth`)
+: remove characters from the left of %`string$` until the result is at least as short as %`maximumNewWidth`:
+{
+	\`{assert} \#{truncateRight$} ("hello", 3) = "hel"
+	\`{assert} \#{truncateRight$} ("hello", 5) = "hello"
+}
+No padding takes place, so the resulting string may be shorter than %`maximumNewWidth`:
+{
+	\`{assert} \#{truncateRight$} ("hello", 12) = "hello"
+}
+Note that %`maximumNewWidth` cannot be negative:
+{
+	\`{asserterror} Can never truncate a string down to -3 characters.
+	a$ = \#{truncateRight$} ("hello", -3)
+}
+
+################################################################################
 "`tryToAppendFile`"
 © Paul Boersma 2023
 
@@ -4604,6 +5147,24 @@ Syntax and semantics
 e.g. from “\ct” to “\bsct”.
 
 ################################################################################
+"`upperCaseAppName$`"
+© Paul Boersma 2024
+
+A function that can be used in @@Formulas@. The name of the present app,
+in upper camel case, such as `Praat` or `PraatForHospitals`.
+
+Syntax and semantics
+====================
+#`upperCaseAppName$` ( )
+: give the name of the present app, in upper camel case.
+
+Examples
+========
+{
+	writeInfoLine: \#{upperCaseAppName$} ( )
+}
+
+################################################################################
 "`variableExists`"
 © Paul Boersma 2023
 
@@ -4666,6 +5227,54 @@ and moving the output cursor to the next line.
 
 Examples of use:
 ================
+
+################################################################################
+"`x`"
+© Paul Boersma 2024
+
+The horizontal place (in world coordinates) of the current cell in a Formula command.
+
+See @@Formulas 1.7. Formulas for modification@.
+
+################################################################################
+"`xmax`"
+© Paul Boersma 2024
+
+The top of the horizontal domain of an object, in world coordinates.
+
+See @@Formulas 8. Attributes of objects@.
+
+################################################################################
+"`xmin`"
+© Paul Boersma 2024
+
+The bottom of the horizontal domain of an object, in world coordinates.
+
+See @@Formulas 8. Attributes of objects@.
+
+################################################################################
+"`y`"
+© Paul Boersma 2024
+
+The vertical place (in world coordinates) of the current cell in a Formula command.
+
+See @@Formulas 1.7. Formulas for modification@.
+
+################################################################################
+"`ymax`"
+© Paul Boersma 2024
+
+The top of the vertical domain of an object, in world coordinates.
+
+See @@Formulas 8. Attributes of objects@.
+
+################################################################################
+"`ymin`"
+© Paul Boersma 2024
+
+The bottom of the vertical domain of an object, in world coordinates.
+
+See @@Formulas 8. Attributes of objects@.
 
 ################################################################################
 "`zero#`"

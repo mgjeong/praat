@@ -2,7 +2,7 @@
 #define _praatM_h_
 /* praatM.h
  *
- * Copyright (C) 1992-2023 Paul Boersma
+ * Copyright (C) 1992-2024 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@
 	CHANNEL (variable, labelText, defaultStringValue)
 	BOOLEAN (variable, labelText, defaultBooleanValue)
 		the value is 0 (off) or 1 (on).
-	LABEL (labelText)
+	COMMENT (labelText)
 	TEXTFIELD (variable, labelText, defaultStringValue, numberOfLines)
 	REALVECTOR (variable, labelText, WHITESPACE_SEPARATED_, defaultStringValue)
 	REALMATRIX (variable, labelText, ONE_ROW_PER_LINE_, defaultStringValue)
@@ -119,11 +119,15 @@
 		static bool booleanVariable; \
 		UiForm_addBoolean (_dia_.get(), & booleanVariable, U"" #booleanVariable, labelText, defaultBooleanValue);
 
-#define LABEL(labelText)  UiForm_addLabel (_dia_.get(), nullptr, labelText);
+#define HEADING(labelText)  UiForm_addHeading (_dia_.get(), nullptr, labelText);
 
-#define MUTABLE_LABEL(stringVariable, labelText)  \
+#define COMMENT(labelText)  UiForm_addComment (_dia_.get(), nullptr, labelText);
+
+#define CAPTION(labelText)  UiForm_addCaption (_dia_.get(), nullptr, labelText);
+
+#define MUTABLE_COMMENT(stringVariable, labelText)  \
 		static conststring32 stringVariable; \
-		UiForm_addLabel (_dia_.get(), & stringVariable, labelText);
+		UiForm_addComment (_dia_.get(), & stringVariable, labelText);
 
 #define TEXTFIELD(stringVariable, labelText, defaultStringValue, numberOfLines)  \
 		static conststring32 stringVariable; \
@@ -258,14 +262,29 @@
 		for (int ienum = (int) EnumeratedType::MIN; ienum <= (int) EnumeratedType::MAX; ienum ++) \
 			UiForm_addOption (_dia_.get(), EnumeratedType##_getText ((enum EnumeratedType) ienum));
 
+/*
+	LIST will throw if the supplied string is not in the list.
+*/
 #define LIST(integerVariable, labelText, strings, defaultOptionNumber)  \
 		static integer integerVariable; \
 		UiForm_addList (_dia_.get(), & integerVariable, nullptr, U"" #integerVariable, \
 				labelText, strings, defaultOptionNumber);
 
-#define LISTSTR(stringVariable, labelText, numberOfStrings, strings, defaultOptionNumber)  \
-		static char32 *stringVariable; \
+/*
+	LISTSTR will throw if the supplied string is not in the list.
+*/
+#define LISTSTR(stringVariable, labelText, strings, defaultOptionNumber)  \
+		static conststring32 stringVariable; \
 		UiForm_addList (_dia_.get(), nullptr, & stringVariable, U"" #stringVariable, \
+				labelText, strings, defaultOptionNumber);
+
+/*
+	If the supplied string is not in the list, LISTSTR will return 0 as well as the supplied string, for later handling.
+*/
+#define LISTNUMSTR(integerVariable, stringVariable, labelText, strings, defaultOptionNumber)  \
+		static integer integerVariable; \
+		static conststring32 stringVariable; \
+		UiForm_addList (_dia_.get(), & integerVariable, & stringVariable, U"" #stringVariable, \
 				labelText, strings, defaultOptionNumber);
 
 #define FILE_IN(labelText)  \
@@ -295,6 +314,9 @@
 
 #define SET_BOOLEAN(booleanVariable, booleanValue)  \
 			UiForm_setBoolean (_dia_.get(), & booleanVariable, booleanValue);
+
+#define SET_OPTION(optionVariable, optionValue)  \
+			UiForm_setOption (_dia_.get(), & optionVariable, optionValue);
 
 #define SET_STRING(stringVariable, stringValue)  \
 			UiForm_setString (_dia_.get(), & stringVariable, stringValue);
@@ -456,7 +478,8 @@
 #define FIND_ONE_AND_ONE_WITH_IOBJECT(klas1,klas2)  \
 	klas1 me = nullptr; klas2 you = nullptr; integer _klas1_position = 0; \
 	LOOP { if (CLASS == class##klas1) me = (klas1) OBJECT, _klas1_position = IOBJECT; \
-		else if (CLASS == class##klas2) you = (klas2) OBJECT; if (me && you) break; } \
+		else if (CLASS == class##klas2) you = (klas2) OBJECT; \
+		if (me && you) break; } \
 	IOBJECT = _klas1_position;
 
 #define FIND_TWO(klas)  \
@@ -482,12 +505,15 @@
 #define FIND_ONE_AND_ONE_AND_ONE(klas1,klas2,klas3)  \
 	klas1 me = nullptr; klas2 you = nullptr; klas3 him = nullptr; \
 	LOOP { if (CLASS == class##klas1) me = (klas1) OBJECT; else if (CLASS == class##klas2) you = (klas2) OBJECT; \
-	else if (CLASS == class##klas3) him = (klas3) OBJECT; if (me && you && him) break; }
+	else if (CLASS == class##klas3) him = (klas3) OBJECT; \
+	if (me && you && him) break; }
 	
 #define FIND_ONE_AND_ONE_AND_ONE_WITH_IOBJECT(klas1,klas2,klas3)  \
 	klas1 me = nullptr; klas2 you = nullptr; klas3 him = nullptr; integer _klas1_position = 0;\
-	LOOP { if (CLASS == class##klas1) me = (klas1) OBJECT, _klas1_position = IOBJECT; else if (CLASS == class##klas2) you = (klas2) OBJECT; \
-	else if (CLASS == class##klas3) him = (klas3) OBJECT; if (me && you && him) break; } \
+	LOOP { if (CLASS == class##klas1) me = (klas1) OBJECT, _klas1_position = IOBJECT; \
+		else if (CLASS == class##klas2) you = (klas2) OBJECT; \
+		else if (CLASS == class##klas3) him = (klas3) OBJECT; \
+		if (me && you && him) break; } \
 	IOBJECT = _klas1_position;
 
 #define FIND_1_1_1_1(klas1,klas2,klas3,klas4)  \

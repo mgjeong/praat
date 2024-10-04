@@ -20,7 +20,7 @@
 // this version keeps wavemult window as a constant fraction
 // of the cycle length - but that spreads out the HF peaks too much
 
-#include "config.h"
+#include "espeak__config.h"
 
 #include <math.h>
 #include <stdbool.h>
@@ -36,6 +36,8 @@
 #include "common.h"                   // for espeak_rand
 #include "synthesize.h"               // for WGEN_DATA, RESONATOR, frame_t
 #include "mbrola.h"                  // for MbrolaFill, MbrolaReset, mbrola...
+
+#include "melder.h"   // for tracing
 
 #if USE_KLATT
 #include "klatt.h"
@@ -269,6 +271,8 @@ void WcmdqInc(void)
 {
 	wcmdq_tail++;
 	if (wcmdq_tail >= N_WCMDQ) wcmdq_tail = 0;
+	//TRACE
+	trace (U"Tail now ", wcmdq_tail);
 }
 
 static void WcmdqIncHead(void)
@@ -276,6 +280,8 @@ static void WcmdqIncHead(void)
 	MAKE_MEM_UNDEFINED(&wcmdq[wcmdq_head], sizeof(wcmdq[wcmdq_head]));
 	wcmdq_head++;
 	if (wcmdq_head >= N_WCMDQ) wcmdq_head = 0;
+	//TRACE
+	trace (U"Head now ", wcmdq_head);
 }
 
 #define PEAKSHAPEW 256
@@ -1344,7 +1350,12 @@ static int WavegenFill2(void)
 #endif
 		case WCMD_MARKER:
 			marker_type = q[0] >> 8;
-			MarkerEvent(marker_type, q[1], q[2], q[3], out_ptr);
+			trace (U"marker ", marker_type, U" ", q [1], U" ", q [2], U" ", q [3]);
+			if (marker_type == espeakEVENT_PHONEME)
+				MarkerEvent(marker_type, q[1], * (int *) & q[2], * ((int *) & q[2] + 1), out_ptr);
+						// ppgb-espeak: split up q [2] into two ints (eSpeak issue #1970, pull request #1973)
+			else
+				MarkerEvent(marker_type, q[1], q[2], q[3], out_ptr);
 			break;
 		case WCMD_AMPLITUDE:
 			SetAmplitude(length, (unsigned char *)q[2], q[3]);

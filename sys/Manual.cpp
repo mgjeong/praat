@@ -63,11 +63,7 @@ static void menu_cb_writeAllToHtmlFolder (Manual me, EDITOR_ARGS) {
 
 static void menu_cb_searchForPageList (Manual me, EDITOR_ARGS) {
 	EDITOR_FORM (U"Search for page", nullptr)
-		static ManPages manPages;   // BUG: why?
-		static constSTRVEC pages;
-		manPages = my manPages();
-		pages = ManPages_getTitles (manPages);
-		LIST (page, U"Page", pages, 1)
+		LIST (page, U"Page", ManPages_getTitles (my manPages()), 1)
 	EDITOR_OK
 	EDITOR_DO
 		HyperPage_goToPage_number (me, page);
@@ -140,6 +136,10 @@ void structManual :: v_draw () {
 			case kManPage_type::CODE4: HyperPage_code4 (this, paragraph -> text); break;
 			case kManPage_type::CODE5: HyperPage_code5 (this, paragraph -> text); break;
 			case kManPage_type::CAPTION: HyperPage_caption (this, paragraph -> text); break;
+			case kManPage_type::QUOTE: HyperPage_quote (this, paragraph -> text); break;
+			case kManPage_type::QUOTE1: HyperPage_quote1 (this, paragraph -> text); break;
+			case kManPage_type::QUOTE2: HyperPage_quote2 (this, paragraph -> text); break;
+			case kManPage_type::QUOTE3: HyperPage_quote3 (this, paragraph -> text); break;
 			default: break;
 		}
 	}
@@ -475,11 +475,12 @@ int structManual :: v_goToPage (conststring32 title) {
 		return 0;
 	} else {
 		const integer i = ManPages_lookUp (our manPages(), title);
-		if (i == 0)
+		if (i == 0) {
 			if (title [0] == U'`')
 				Melder_throw (U"Page ", title, U" not found.");
 			else
 				Melder_throw (U"Page “", title, U"” not found.");
+		}
 		our v_goToPage_number (i);
 		return 1;
 	}

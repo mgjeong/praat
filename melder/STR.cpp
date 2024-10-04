@@ -1,6 +1,6 @@
 /* STR.cpp
  *
- * Copyright (C) 2012-2017 David Weenink, 2008,2018,2020-2022 Paul Boersma
+ * Copyright (C) 2012-2017 David Weenink, 2008,2018,2020-2022,2024 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,6 +68,22 @@ autostring32 mid_STR (conststring32 str, integer startingPosition_1, integer num
 	autostring32 result (newLength);
 	str32ncpy (result.get(), & str [startingPosition_1-1], newLength);
 	return result;
+}
+
+autostring32 padLeft_STR (const conststring32 str, const integer width, const conststring32 pad) {
+	return Melder_dup (Melder_padLeft (str, width, pad));
+}
+
+autostring32 padOrTruncateLeft_STR (const conststring32 str, const integer width, const conststring32 pad) {
+	return Melder_dup (Melder_padOrTruncateLeft (str, width, pad));
+}
+
+autostring32 padOrTruncateRight_STR (const conststring32 str, const integer width, const conststring32 pad) {
+	return Melder_dup (Melder_padOrTruncateRight (str, width, pad));
+}
+
+autostring32 padRight_STR (const conststring32 str, const integer width, const conststring32 pad) {
+	return Melder_dup (Melder_padRight (str, width, pad));
 }
 
 autostring32 quote_doubleSTR (conststring32 str) {
@@ -300,6 +316,13 @@ autostring32 right_STR (conststring32 str, integer newLength) {
 	const integer length = Melder_length (str);
 	Melder_clip (0_integer, & newLength, length);
 	return Melder_dup (str + length - newLength);
+}
+
+autostring32 truncateLeft_STR (const conststring32 str, const integer width) {
+	return Melder_dup (Melder_truncateLeft (str, width));
+}
+autostring32 truncateRight_STR (const conststring32 str, const integer width) {
+	return Melder_dup (Melder_truncateRight (str, width));
 }
 
 autostring8 unhex_STR8 (conststring8 str, uint64 key) {

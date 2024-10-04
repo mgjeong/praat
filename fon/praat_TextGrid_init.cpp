@@ -1,6 +1,6 @@
 /* praat_TextGrid_init.cpp
  *
- * Copyright (C) 1992-2023 Paul Boersma
+ * Copyright (C) 1992-2024 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,9 @@
 
 #include "Pitch_AnyTier_to_PitchTier.h"
 #include "SpectrumEditor.h"
+#include "SpeechSynthesizer.h"
 #include "SpellingChecker.h"
+#include "Strings_extensions.h"
 #include "TextGridEditor.h"
 #include "TextGrid_extensions.h"
 #include "TextGrid_Sound.h"
@@ -205,7 +207,7 @@ DO
 FORM (GRAPHICS_TextGrid_Pitch_drawSemitones, U"TextGrid & Pitch: Draw semitones", nullptr) {
 	INTEGER (tierNumber, STRING_TIER_NUMBER, U"1")
 	praat_TimeFunction_RANGE (fromTime, toTime)
-	LABEL (U"Range in semitones re 100 hertz:")
+	COMMENT (U"Range in semitones re 100 hertz:")
 	REAL (fromFrequency, U"left Frequency range (st)", U"-12.0")
 	REAL (toFrequency, U"right Frequency range (st)", U"30.0")
 	POSITIVE (fontSize, U"Font size (points)", U"18")
@@ -282,7 +284,7 @@ DO
 
 FORM (GRAPHICS_TextGrid_Pitch_drawSeparatelySemitones, U"TextGrid & Pitch: Draw separately semitones", nullptr) {
 	praat_TimeFunction_RANGE (fromTime, toTime)
-	LABEL (U"Range in semitones re 100 hertz:")
+	COMMENT (U"Range in semitones re 100 hertz:")
 	REAL (fromFrequency, U"left Frequency range (st)", U"-12.0")
 	REAL (toFrequency, U"right Frequency range (st)", U"30.0")
 	BOOLEAN (showBoundaries, U"Show boundaries", true)
@@ -363,7 +365,7 @@ DO
 FORM (GRAPHICS_TextGrid_Pitch_speckleSemitones, U"TextGrid & Pitch: Speckle semitones", nullptr) {
 	INTEGER (tierNumber, STRING_TIER_NUMBER, U"1")
 	praat_TimeFunction_RANGE (fromTime, toTime)
-	LABEL (U"Range in semitones re 100 hertz:")
+	COMMENT (U"Range in semitones re 100 hertz:")
 	REAL (fromFrequency, U"left Frequency range (st)", U"-12.0")
 	REAL (toFrequency, U"right Frequency range (st)", U"30.0")
 	BOOLEAN (showBoundaries, U"Show boundaries", true)
@@ -439,7 +441,7 @@ DO
 
 FORM (GRAPHICS_TextGrid_Pitch_speckleSeparatelySemitones, U"TextGrid & Pitch: Speckle separately semitones", nullptr) {
 	praat_TimeFunction_RANGE (fromTime, toTime)
-	LABEL (U"Range in semitones re 100 hertz:")
+	COMMENT (U"Range in semitones re 100 hertz:")
 	REAL (fromFrequency, U"left Frequency range (st)", U"-12.0")
 	REAL (toFrequency, U"right Frequency range (st)", U"30.0")
 	BOOLEAN (showBoundaries, U"Show boundaries", true)
@@ -531,6 +533,21 @@ DO
 	CONVERT_ONE_AND_ONE_TO_ONE_END (U"dummy")
 }
 
+FORM (MODIFY_TextGrid_Sound_alignInterval, U"TextGrid & Sound: Align interval", nullptr) {
+	INTEGER (tierNumber, STRING_TIER_NUMBER, U"1")
+	NATURAL (intervalNumber, STRING_INTERVAL_NUMBER, U"1")
+	OPTIONMENUSTR (language, U"Language", (int) NUMfindFirst (theSpeechSynthesizerLanguageNames, U"English (Great Britain)"))
+	for (integer i = 1; i <= theSpeechSynthesizerLanguageNames.size; i ++)
+		OPTION (theSpeechSynthesizerLanguageNames [i]);
+	BOOLEAN (includeWords,    U"Include words",    true)
+	BOOLEAN (includePhonemes, U"Include phonemes", true)
+	OK
+DO
+	MODIFY_FIRST_OF_ONE_AND_ONE (TextGrid, Sound)
+		TextGrid_anySound_alignInterval (me, you, tierNumber, intervalNumber, language, includeWords, includePhonemes);
+	MODIFY_FIRST_OF_ONE_AND_ONE_END
+}
+
 DIRECT (MODIFY_TextGrid_Sound_scaleTimes) {
 	MODIFY_FIRST_OF_ONE_AND_ONE (TextGrid, Sound)
 		Function_scaleXTo (me, your xmin, your xmax);
@@ -557,19 +574,19 @@ DO
 }
 
 FORM (WINDOW_SpellingChecker_viewAndEdit, U"Edit spelling checker", U"SpellingChecker") {
-	LABEL (U"-- Syntax --")
+	COMMENT (U"-- Syntax --")
 	SENTENCE (forbiddenStrings, U"Forbidden strings", U"")
 	BOOLEAN (checkMatchingParentheses, U"Check matching parentheses", false)
 	SENTENCE (separatingCharacters, U"Separating characters", U"")
 	BOOLEAN (allowAllParenthesized, U"Allow all parenthesized", false)
-	LABEL (U"-- Capitals --")
+	COMMENT (U"-- Capitals --")
 	BOOLEAN (allowAllNames, U"Allow all names", false)
 	SENTENCE (namePrefixes, U"Name prefixes", U"")
 	BOOLEAN (allowAllAbbreviations, U"Allow all abbreviations", false)
-	LABEL (U"-- Capitalization --")
+	COMMENT (U"-- Capitalization --")
 	BOOLEAN (allowCapsSentenceInitially, U"Allow caps sentence-initially", false)
 	BOOLEAN (allowCapsAfterColon, U"Allow caps after colon", false)
-	LABEL (U"-- Word parts --")
+	COMMENT (U"-- Word parts --")
 	SENTENCE (allowAllWordsContaining, U"Allow all words containing", U"")
 	SENTENCE (allowAllWordsStartingWith, U"Allow all words starting with", U"")
 	SENTENCE (allowAllWordsEndingIn, U"Allow all words ending in", U"")
@@ -1741,6 +1758,7 @@ praat_addAction1 (classTextGrid, 0, U"Synthesize", nullptr, 0, nullptr);
 	praat_addAction2 (classSound, 1, classTextGrid, 1,   U"Extract intervals...", nullptr, GuiMenu_DEPTH_1 | GuiMenu_DEPRECATED_2005,
 			NEW1_TextGrid_Sound_extractIntervals);   // replace with Extract intervals where: arg1, arg2, "is equal to", arg3
 	praat_addAction2 (classSound, 1, classTextGrid, 1, U"Modify TextGrid", nullptr, 0, nullptr);
+	praat_addAction2 (classSound, 1, classTextGrid, 1, U"Align interval...", nullptr, 0, MODIFY_TextGrid_Sound_alignInterval);
 	praat_addAction2 (classSound, 1, classTextGrid, 1, U"Scale times", nullptr, 0, MODIFY_TextGrid_Sound_scaleTimes);
 	praat_addAction2 (classSound, 1, classTextGrid, 1, U"Modify Sound", nullptr, 0, nullptr);
 	praat_addAction2 (classSound, 1, classTextGrid, 1, U"Clone time domain", nullptr, 0, MODIFY_TextGrid_Sound_cloneTimeDomain);

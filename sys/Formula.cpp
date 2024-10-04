@@ -152,8 +152,10 @@ enum { NO_SYMBOL_,
 		MAX_, MAX_E_, MAX_IGNORE_UNDEFINED_,
 		IMIN_, IMIN_E_, IMIN_IGNORE_UNDEFINED_,
 		IMAX_, IMAX_E_, IMAX_IGNORE_UNDEFINED_,
+		QUANTILE_,
 		NORM_,
 		LEFT_STR_, RIGHT_STR_, MID_STR_,
+		PAD_LEFT_STR_, PAD_RIGHT_STR_, TRUNCATE_LEFT_STR_, TRUNCATE_RIGHT_STR_, PAD_OR_TRUNCATE_LEFT_STR_, PAD_OR_TRUNCATE_RIGHT_STR_,
 		SELECTED_, SELECTED_STR_, NUMBER_OF_SELECTED_, SELECTED_VEC_, SELECTED_STRVEC_,
 		SELECT_OBJECT_, PLUS_OBJECT_, MINUS_OBJECT_, REMOVE_OBJECT_,
 		BEGIN_PAUSE_,
@@ -162,14 +164,16 @@ enum { NO_SYMBOL_,
 		CHOICE_, OPTIONMENU_, OPTION_MENU_, OPTION_,
 		INFILE_, OUTFILE_, FOLDER_,
 		REALVECTOR_, POSITIVEVECTOR_, INTEGERVECTOR_, NATURALVECTOR_,
-		COMMENT_, END_PAUSE_,
+		HEADING_, COMMENT_, END_PAUSE_,
+		LOWER_CASE_APP_NAME_STR_, UPPER_CASE_APP_NAME_STR_,
+		APP_VERSION_, APP_VERSION_STR_, APP_YEAR_, APP_MONTH_, APP_MONTH_STR_, APP_DAY_,
 		CHOOSE_READ_FILE_STR_, CHOOSE_WRITE_FILE_STR_, CHOOSE_FOLDER_STR_, CHOOSE_DIRECTORY_STR_,
 		DEMO_WINDOW_TITLE_, DEMO_SHOW_, DEMO_WAIT_FOR_INPUT_, DEMO_PEEK_INPUT_, DEMO_INPUT_, DEMO_CLICKED_IN_,
 		DEMO_CLICKED_, DEMO_X_, DEMO_Y_, DEMO_KEY_PRESSED_, DEMO_KEY_,
 		DEMO_SHIFT_KEY_PRESSED_, DEMO_COMMAND_KEY_PRESSED_, DEMO_OPTION_KEY_PRESSED_,
 		ZERO_VEC_, ZERO_MAT_,
 		LINEAR_VEC_, LINEAR_MAT_, TO_VEC_, FROM_TO_VEC_, FROM_TO_BY_VEC_, FROM_TO_COUNT_VEC_, BETWEEN_BY_VEC_, BETWEEN_COUNT_VEC_,
-		SORT_VEC_, SORT_STRVEC_, SORT_NUMBER_AWARE_STRVEC_, SHUFFLE_VEC_, SHUFFLE_STRVEC_,
+		SORT_VEC_, SORT_REMOVE_UNDEFINED_VEC_, SORT_STRVEC_, SORT_NUMBER_AWARE_STRVEC_, SHUFFLE_VEC_, SHUFFLE_STRVEC_,
 		RANDOM_UNIFORM_VEC_, RANDOM_UNIFORM_MAT_,
 		RANDOM_INTEGER_VEC_, RANDOM_INTEGER_MAT_,
 		RANDOM_GAUSS_VEC_, RANDOM_GAUSS_MAT_,
@@ -286,7 +290,8 @@ static const conststring32 Formula_instructionNames [1 + highestSymbol] = { U"",
 	U"sum", U"mean", U"stdev", U"center",
 	U"evaluate", U"evaluate_nocheck", U"evaluate$", U"evaluate_nocheck$",
 	U"string$", U"vertical$", U"numbers#", U"sleep", U"unicode", U"unicode$",
-	U"arctan2", U"randomUniform", U"randomInteger", U"randomGauss", U"randomBinomial", U"randomGamma",
+	U"arctan2", U"randomUniform", U"randomInteger", U"randomGauss", U"randomBinomial",
+	U"randomGamma",
 	U"chiSquareP", U"chiSquareQ", U"incompleteGammaP", U"invChiSquareQ", U"studentP", U"studentQ", U"invStudentQ",
 	U"beta", U"beta2", U"besselI", U"besselK", U"lnBeta",
 	U"soundPressureToPhon", U"objectsAreIdentical",
@@ -306,8 +311,10 @@ static const conststring32 Formula_instructionNames [1 + highestSymbol] = { U"",
 	U"max", U"max_e", U"max_removeUndefined",
 	U"imin", U"imin_e", U"imin_removeUndefined",
 	U"imax", U"imax_e", U"imax_removeUndefined",
+	U"quantile",
 	U"norm",
 	U"left$", U"right$", U"mid$",
+	U"padLeft$", U"padRight$", U"truncateLeft$", U"truncateRight$", U"padOrTruncateLeft$", U"padOrTruncateRight$",
 	U"selected", U"selected$", U"numberOfSelected", U"selected#", U"selected$#",
 	U"selectObject", U"plusObject", U"minusObject", U"removeObject",
 	U"beginPause", U"real", U"positive", U"integer", U"natural",
@@ -315,14 +322,16 @@ static const conststring32 Formula_instructionNames [1 + highestSymbol] = { U"",
 	U"choice", U"optionmenu", U"optionMenu", U"option",
 	U"infile", U"outfile", U"folder",
 	U"realvector", U"positivevector", U"integervector", U"naturalvector",
-	U"comment", U"endPause",
+	U"heading", U"comment", U"endPause",
+	U"lowerCaseAppName$", U"upperCaseAppName$",
+	U"appVersion", U"appVersion$", U"appYear", U"appMonth", U"appMonth$", U"appDay",
 	U"chooseReadFile$", U"chooseWriteFile$", U"chooseFolder$", U"chooseDirectory$",
 	U"demoWindowTitle", U"demoShow", U"demoWaitForInput", U"demoPeekInput", U"demoInput", U"demoClickedIn",
 	U"demoClicked", U"demoX", U"demoY", U"demoKeyPressed", U"demoKey$",
 	U"demoShiftKeyPressed", U"demoCommandKeyPressed", U"demoOptionKeyPressed",
 	U"zero#", U"zero##",
 	U"linear#", U"linear##", U"to#", U"from_to#", U"from_to_by#", U"from_to_count#", U"between_by#", U"between_count#",
-	U"sort#", U"sort$#", U"sort_numberAware$#", U"shuffle#", U"shuffle$#",
+	U"sort#", U"sort_removeUndefined#", U"sort$#", U"sort_numberAware$#", U"shuffle#", U"shuffle$#",
 	U"randomUniform#", U"randomUniform##",
 	U"randomInteger#", U"randomInteger##",
 	U"randomGauss#", U"randomGauss##",
@@ -1597,6 +1606,13 @@ static void parsePowerFactor () {
 	}
 
 	if (symbol == OPENING_BRACE_) {
+		if (newread == CLOSING_BRACE_) {
+			newparse (NUMBER_);
+			parsenumber (0);
+			newparse (TENSOR_LITERAL_);
+			return;
+		}
+		oldread;
 		parseExpression ();
 		int n = 1;
 		while (newread == COMMA_) {
@@ -4394,6 +4410,7 @@ static void do_min () {
 			assert min ({ undefined, undefined }) = undefined
 			assert min ({ undefined }) = undefined
 			assert min (zero# (0)) = undefined
+			assert min ({ }) = undefined
 		@*/
 		Melder_require (n->number == 1,
 			U"The function “min” requires exactly one vector argument.");
@@ -4452,6 +4469,8 @@ static void do_min_e () {
 			pos = min_e ({ undefined })
 			asserterror Cannot determine the minimum of an empty vector.
 			pos = min_e (zero# (0))
+			asserterror Cannot determine the minimum of an empty vector.
+			pos = min_e ({})
 		@*/
 		Melder_require (n->number == 1,
 			U"The function “min_e” requires exactly one vector argument.");
@@ -4497,6 +4516,7 @@ static void do_min_removeUndefined () {
 			assert min_removeUndefined ({ undefined, undefined }) = undefined
 			assert min_removeUndefined ({ undefined }) = undefined
 			assert min_removeUndefined (zero# (0)) = undefined
+			assert min_removeUndefined ({ }) = undefined
 		@*/
 		Melder_require (n->number == 1,
 			U"The function “min_removeUndefined” requires exactly one vector argument.");
@@ -4518,7 +4538,7 @@ static void do_max () {
 		for (integer i = size - 1; i > 0; i --) {
 			const Stackel element = pop;
 			Melder_require (element->which == Stackel_NUMBER,
-				U"The function “min_removeUndefined” cannot mix a numeric argument with ", element->whichText(), U".");
+				U"The function “max_removeUndefined” cannot mix a numeric argument with ", element->whichText(), U".");
 			numericVector [i] = element->number;
 		}
 		pushNumber (NUMmax_u (numericVector.get()));
@@ -4814,6 +4834,19 @@ static void do_imax_removeUndefined () {
 		Melder_throw (U"Cannot compute the imax of ", last->whichText(), U".");
 	}
 }
+static void do_quantile () {
+	const Stackel n = pop;
+	Melder_assert (n->which == Stackel_NUMBER);
+	Melder_require (n->number == 2,
+		U"The function “quantile” requires two arguments, not ", n->number, U".");
+	const Stackel quantile = pop;
+	Melder_require (quantile->which == Stackel_NUMBER,
+		U"The second argument to “quantile” should be a number, not ", quantile->which, U".");
+	const Stackel vec = pop;
+	Melder_require (vec->which == Stackel_NUMERIC_VECTOR,
+		U"The first argument to “quantile” should be a numeric vector, not ", vec->which, U".");
+	pushNumber (NUMquantile (vec->numericVector, quantile->number));
+}
 static void do_norm () {
 	const Stackel n = pop;
 	Melder_assert (n->which == Stackel_NUMBER);
@@ -5013,7 +5046,18 @@ static void do_sort_VEC () {
 	const Stackel vec = pop;
 	Melder_require (vec->which == Stackel_NUMERIC_VECTOR,
 		U"The argument of the function “sort#” should be a numeric vector, not ", vec->whichText(), U".");
-	autoVEC result = sort_VEC (vec->numericVector);
+	autoVEC result = sort_e_VEC (vec->numericVector);
+	pushNumericVector (result.move());
+}
+static void do_sort_removeUndefined_VEC () {
+	const Stackel narg = pop;
+	Melder_assert (narg->which == Stackel_NUMBER);
+	Melder_require (narg->number == 1,
+		U"The function “sort_removeUndefined#” requires one argument, namely a vector.");
+	const Stackel vec = pop;
+	Melder_require (vec->which == Stackel_NUMERIC_VECTOR,
+		U"The argument of the function “sort_removeUndefined#” should be a numeric vector, not ", vec->whichText(), U".");
+	autoVEC result = sort_removeUndefined_VEC (vec->numericVector);
 	pushNumericVector (result.move());
 }
 static void do_sort_STRVEC () {
@@ -5493,7 +5537,9 @@ static void do_numericVectorElement () {
 	Melder_require (ielement > 0,
 		U"In vector indexing, the element index should be positive.");
 	Melder_require (ielement <= vector->numericVectorValue.size,
-		U"Element index out of bounds.");
+		U"Element index out of bounds. Looking for element ", ielement,
+		U", but there are only ", vector->numericVectorValue.size, U" elements."
+	);
 	pushNumber (vector->numericVectorValue [ielement]);
 }
 static void do_numericMatrixElement () {
@@ -5507,7 +5553,9 @@ static void do_numericMatrixElement () {
 	Melder_require (icolumn > 0,
 		U"In matrix indexing, the column index should be positive.");
 	Melder_require (icolumn <= matrix->numericMatrixValue. ncol,
-		U"Column index out of bounds.");
+		U"Column index out of bounds. Looking for column ", icolumn,
+		U", but there are only ", matrix->numericMatrixValue. ncol, U" columns."
+	);
 	const Stackel row = pop;
 	Melder_require (row->which == Stackel_NUMBER,
 		U"In matrix indexing, the row index should be a number, not ", row->whichText(), U".");
@@ -5517,7 +5565,9 @@ static void do_numericMatrixElement () {
 	Melder_require (irow > 0,
 		U"In matrix indexing, the row index should be positive.");
 	Melder_require (irow <= matrix->numericMatrixValue. nrow,
-		U"Row index out of bounds.");
+		U"Row index out of bounds. Looking for row ", irow,
+		U", but there are only ", matrix->numericMatrixValue. nrow, U" rows."
+	);
 	pushNumber (matrix->numericMatrixValue [irow] [icolumn]);
 }
 static void do_stringVectorElement () {
@@ -5531,7 +5581,9 @@ static void do_stringVectorElement () {
 	Melder_require (ielement > 0,
 		U"In vector indexing, the element index should be positive.");
 	Melder_require (ielement <= vector->stringArrayValue.size,
-		U"Element index out of bounds.");
+		U"Element index out of bounds. Looking for element ", ielement,
+		U", but there are only ", vector->stringArrayValue.size, U" elements."
+	);
 	pushString (Melder_dup (vector->stringArrayValue [ielement].get()));
 }
 static void do_indexedNumericVariable () {
@@ -5729,6 +5781,114 @@ static void do_mid_STR () {
 	} else {
 		Melder_throw (U"The function “mid$” requires two or three arguments.");
 	}
+}
+static void do_padLeft_STR () {
+	const Stackel narg = pop;
+	if (narg->number == 2) {
+		const Stackel width = pop, str = pop;
+		if (str->which == Stackel_STRING && width->which == Stackel_NUMBER)
+			pushString (padLeft_STR (str->getString(), Melder_iround (width->number)));
+		else
+			Melder_throw (U"The two arguments to “padLeft$” should be a string and a number (the desired width), not ",
+					str->whichText(), U" and ", width->whichText(), U".");
+	} else if (narg->number == 3) {
+		const Stackel pad = pop, width = pop, str = pop;
+		if (str->which == Stackel_STRING && width->which == Stackel_NUMBER && pad->which == Stackel_STRING)
+			pushString (padLeft_STR (str->getString(), Melder_iround (width->number), pad->getString()));
+		else
+			Melder_throw (U"The three arguments to “padLeft$” should be a string, a number (the desired width),"
+				U" and a string (the pad), not ", str->whichText(), U", ", width->whichText(),
+				U" and ", pad->whichText(), U"."
+			);
+	} else
+		Melder_throw (U"The function “padLeft$” requires two or three arguments (a string, a number, and an optional pad string).");
+}
+static void do_padRight_STR () {
+	const Stackel narg = pop;
+	if (narg->number == 2) {
+		const Stackel width = pop, str = pop;
+		if (str->which == Stackel_STRING && width->which == Stackel_NUMBER)
+			pushString (padRight_STR (str->getString(), Melder_iround (width->number)));
+		else
+			Melder_throw (U"The two arguments to “padRight$” should be a string and a number (the desired width), not ",
+					str->whichText(), U" and ", width->whichText(), U".");
+	} else if (narg->number == 3) {
+		const Stackel pad = pop, width = pop, str = pop;
+		if (str->which == Stackel_STRING && width->which == Stackel_NUMBER && pad->which == Stackel_STRING)
+			pushString (padRight_STR (str->getString(), Melder_iround (width->number), pad->getString()));
+		else
+			Melder_throw (U"The three arguments to “padRight$” should be a string, a number (the desired width),"
+				U" and a string (the pad), not ", str->whichText(), U", ", width->whichText(),
+				U" and ", pad->whichText(), U"."
+			);
+	} else
+		Melder_throw (U"The function “padRight$” requires two or three arguments (a string, a number, and an optional pad string).");
+}
+static void do_truncateLeft_STR () {
+	const Stackel narg = pop;
+	if (narg->number == 2) {
+		const Stackel width = pop, str = pop;
+		if (str->which == Stackel_STRING && width->which == Stackel_NUMBER)
+			pushString (truncateLeft_STR (str->getString(), Melder_iround (width->number)));
+		else
+			Melder_throw (U"The two arguments to “truncateLeft$” should be a string and a number (the desired width), not ",
+					str->whichText(), U" and ", width->whichText(), U".");
+	} else
+		Melder_throw (U"The function “truncateLeft$” requires two arguments: a string and a number (the desired width).");
+}
+static void do_truncateRight_STR () {
+	const Stackel narg = pop;
+	if (narg->number == 2) {
+		const Stackel width = pop, str = pop;
+		if (str->which == Stackel_STRING && width->which == Stackel_NUMBER)
+			pushString (truncateRight_STR (str->getString(), Melder_iround (width->number)));
+		else
+			Melder_throw (U"The two arguments to “truncateRight$” should be a string and a number (the desired width), not ",
+					str->whichText(), U" and ", width->whichText(), U".");
+	} else
+		Melder_throw (U"The function “truncateRight$” requires two arguments: a string and a number (the desired width).");
+}
+static void do_padOrTruncateLeft_STR () {
+	const Stackel narg = pop;
+	if (narg->number == 2) {
+		const Stackel width = pop, str = pop;
+		if (str->which == Stackel_STRING && width->which == Stackel_NUMBER)
+			pushString (padOrTruncateLeft_STR (str->getString(), Melder_iround (width->number)));
+		else
+			Melder_throw (U"The two arguments to “padOrTruncateLeft$” should be a string and a number (the desired width), not ",
+					str->whichText(), U" and ", width->whichText(), U".");
+	} else if (narg->number == 3) {
+		const Stackel pad = pop, width = pop, str = pop;
+		if (str->which == Stackel_STRING && width->which == Stackel_NUMBER && pad->which == Stackel_STRING)
+			pushString (padOrTruncateLeft_STR (str->getString(), Melder_iround (width->number), pad->getString()));
+		else
+			Melder_throw (U"The three arguments to “padOrTruncateLeft$” should be a string, a number (the desired width),"
+				U" and a string (the pad), not ", str->whichText(), U", ", width->whichText(),
+				U" and ", pad->whichText(), U"."
+			);
+	} else
+		Melder_throw (U"The function “padOrTruncateLeft$” requires two or three arguments (a string, a number, and an optional pad string).");
+}
+static void do_padOrTruncateRight_STR () {
+	const Stackel narg = pop;
+	if (narg->number == 2) {
+		const Stackel width = pop, str = pop;
+		if (str->which == Stackel_STRING && width->which == Stackel_NUMBER)
+			pushString (padOrTruncateRight_STR (str->getString(), Melder_iround (width->number)));
+		else
+			Melder_throw (U"The two arguments to “padOrTruncateRight$” should be a string and a number (the desired width), not ",
+					str->whichText(), U" and ", width->whichText(), U".");
+	} else if (narg->number == 3) {
+		const Stackel pad = pop, width = pop, str = pop;
+		if (str->which == Stackel_STRING && width->which == Stackel_NUMBER && pad->which == Stackel_STRING)
+			pushString (padOrTruncateRight_STR (str->getString(), Melder_iround (width->number), pad->getString()));
+		else
+			Melder_throw (U"The three arguments to “padOrTruncateRight$” should be a string, a number (the desired width),"
+				U" and a string (the pad), not ", str->whichText(), U", ", width->whichText(),
+				U" and ", pad->whichText(), U"."
+			);
+	} else
+		Melder_throw (U"The function “padOrTruncateRight$” requires two or three arguments (a string, a number, and an optional pad string).");
 }
 static void do_unicodeToBackslashTrigraphs_STR () {
 	const Stackel s = pop;
@@ -6480,7 +6640,12 @@ static void do_tensorLiteral () {
 	const Stackel n = pop;
 	Melder_assert (n->which == Stackel_NUMBER);
 	integer numberOfElements = Melder_iround (n->number);
-	Melder_assert (numberOfElements > 0);
+	Melder_assert (numberOfElements >= 0);
+	if (numberOfElements == 0) {
+		autoVEC result = raw_VEC (0);
+		pushNumericVector (result.move());
+		return;
+	}
 	/*
 		The type of the tensor can be a vector, or a matrix, or a tensor3...
 		This depends on whether the last element is a number, a vector, or a matrix...
@@ -7366,12 +7531,34 @@ static void do_boolean () {
 	Melder_require (n->number == 2,
 		U"The function “boolean” requires 2 arguments (a label text and a default value), not ", n->number, U".");
 	const Stackel defaultValue = pop;
-	Melder_require (defaultValue->which == Stackel_NUMBER,
-		U"The second argument of “boolean” (the default value) should be a number (0 or 1), not ", defaultValue->whichText(), U".");
+	double defaultNumber = undefined;
+	if (defaultValue->which == Stackel_STRING) {
+		conststring32 defaultString = defaultValue->getString();
+		if (
+			str32equ (defaultString, U"on") || str32equ (defaultString, U"yes") ||
+			str32equ (defaultString, U"ON") || str32equ (defaultString, U"YES") ||
+			str32equ (defaultString, U"On") || str32equ (defaultString, U"Yes")
+		)
+			defaultNumber = 1;
+		else if (
+			str32equ (defaultString, U"off") || str32equ (defaultString, U"no") ||
+			str32equ (defaultString, U"OFF") || str32equ (defaultString, U"NO") ||
+			str32equ (defaultString, U"Off") || str32equ (defaultString, U"No")
+		)
+			defaultNumber = 0;
+		else
+			Melder_throw (U"If the second argument of “boolean” is a string, it can only be "
+					"“yes”, “no”, “on”, or “off”, not “", defaultString, U"”.");
+	} else if (defaultValue->which == Stackel_NUMBER) {
+		defaultNumber = defaultValue->number;
+	} else {
+		Melder_throw (U"The second argument of “boolean” (the default value) should be a number (0 or 1) "
+				"or a string (“yes”, “no”, “on”, “off”), not ", defaultValue->whichText(), U".");
+	}
 	const Stackel label = pop;
 	Melder_require (label->which == Stackel_STRING,
 		U"The first argument of “boolean” (the label text) should be a string, not ", label->whichText(), U".");
-	UiPause_boolean (label->getString(), defaultValue->number != 0.0);
+	UiPause_boolean (label->getString(), defaultNumber != 0.0);
 	pushNumber (1);
 }
 static void do_choice () {
@@ -7414,6 +7601,18 @@ static void do_option () {
 	Melder_require (text->which == Stackel_STRING,
 		U"The argument of “option” should be a string (the text), not ", text->whichText(), U".");
 	UiPause_option (text->getString());
+	pushNumber (1);
+}
+static void do_heading () {
+	Melder_require (praat_commandsWithExternalSideEffectsAreAllowed (),
+		U"The function “heading” is not available inside manuals.");
+	const Stackel n = pop;
+	Melder_require (n->number == 1,
+		U"The function “heading” requires 1 argument (a text), not ", n->number, U".");
+	const Stackel text = pop;
+	Melder_require (text->which == Stackel_STRING,
+		U"The argument of “heading” should be a string (the text), not ", text->whichText(), U".");
+	UiPause_heading (text->getString());
 	pushNumber (1);
 }
 static void do_comment () {
@@ -7466,6 +7665,54 @@ static void do_endPause () {
 		theInterpreter);
 	//Melder_casual (U"Button ", buttonClicked);
 	pushNumber (buttonClicked);
+}
+static void do_lowerCaseAppNameStr () {
+	const Stackel n = pop;
+	Melder_require (n->number == 0,
+		U"The function “lowerCaseAppName$” requires 0 arguments, not ", n->number, U".");
+	return pushString (Melder_dup (Melder_lowerCaseAppName()));
+}
+static void do_upperCaseAppNameStr () {
+	const Stackel n = pop;
+	Melder_require (n->number == 0,
+		U"The function “upperCaseAppName$” requires 0 arguments, not ", n->number, U".");
+	return pushString (Melder_dup (Melder_upperCaseAppName()));
+}
+static void do_appVersion () {
+	const Stackel n = pop;
+	Melder_require (n->number == 0,
+		U"The function “appVersion” requires 0 arguments, not ", n->number, U".");
+	return pushNumber (Melder_appVersion());
+}
+static void do_appVersionStr () {
+	const Stackel n = pop;
+	Melder_require (n->number == 0,
+		U"The function “appVersion$” requires 0 arguments, not ", n->number, U".");
+	return pushString (Melder_dup (Melder_appVersionSTR()));
+}
+static void do_appYear () {
+	const Stackel n = pop;
+	Melder_require (n->number == 0,
+		U"The function “appYear” requires 0 arguments, not ", n->number, U".");
+	return pushNumber (Melder_appYear());
+}
+static void do_appMonth () {
+	const Stackel n = pop;
+	Melder_require (n->number == 0,
+		U"The function “appMonth” requires 0 arguments, not ", n->number, U".");
+	return pushNumber (Melder_appMonth());
+}
+static void do_appMonthStr () {
+	const Stackel n = pop;
+	Melder_require (n->number == 0,
+		U"The function “appMonth$” requires 0 arguments, not ", n->number, U".");
+	return pushString (Melder_dup (Melder_appMonthSTR()));
+}
+static void do_appDay () {
+	const Stackel n = pop;
+	Melder_require (n->number == 0,
+		U"The function “appDay” requires 0 arguments, not ", n->number, U".");
+	return pushNumber (Melder_appDay());
 }
 static void do_chooseReadFileStr () {
 	Melder_require (praat_commandsWithExternalSideEffectsAreAllowed (),
@@ -8369,6 +8616,7 @@ CASE_NUM_WITH_TENSORS (LOG10_, do_log10)
 } break; case IMAX_: { do_imax ();
 } break; case IMAX_E_: { do_imax_e ();
 } break; case IMAX_IGNORE_UNDEFINED_: { do_imax_removeUndefined ();
+} break; case QUANTILE_: { do_quantile ();
 } break; case NORM_: { do_norm ();
 } break; case ZERO_VEC_: { do_zero_VEC ();
 } break; case ZERO_MAT_: { do_zero_MAT ();
@@ -8380,6 +8628,7 @@ CASE_NUM_WITH_TENSORS (LOG10_, do_log10)
 } break; case BETWEEN_BY_VEC_: { do_between_by_VEC ();
 } break; case BETWEEN_COUNT_VEC_: { do_between_count_VEC ();
 } break; case SORT_VEC_: { do_sort_VEC ();
+} break; case SORT_REMOVE_UNDEFINED_VEC_: { do_sort_removeUndefined_VEC ();
 } break; case SORT_STRVEC_: { do_sort_STRVEC ();
 } break; case SORT_NUMBER_AWARE_STRVEC_: { do_sort_numberAware_STRVEC ();
 } break; case SHUFFLE_VEC_: { do_shuffle_VEC ();
@@ -8434,6 +8683,12 @@ CASE_NUM_WITH_TENSORS (LOG10_, do_log10)
 } break; case LEFT_STR_: { do_left_STR ();
 } break; case RIGHT_STR_: { do_right_STR ();
 } break; case MID_STR_: { do_mid_STR ();
+} break; case PAD_LEFT_STR_: { do_padLeft_STR ();
+} break; case PAD_RIGHT_STR_: { do_padRight_STR ();
+} break; case TRUNCATE_LEFT_STR_: { do_truncateLeft_STR ();
+} break; case TRUNCATE_RIGHT_STR_: { do_truncateRight_STR ();
+} break; case PAD_OR_TRUNCATE_LEFT_STR_: { do_padOrTruncateLeft_STR ();
+} break; case PAD_OR_TRUNCATE_RIGHT_STR_: { do_padOrTruncateRight_STR ();
 } break; case UNICODE_TO_BACKSLASH_TRIGRAPHS_STR_: { do_unicodeToBackslashTrigraphs_STR ();
 } break; case BACKSLASH_TRIGRAPHS_TO_UNICODE_STR_: { do_backslashTrigraphsToUnicode_STR ();
 } break; case ENVIRONMENT_STR_: { do_environment_STR ();
@@ -8531,8 +8786,17 @@ CASE_NUM_WITH_TENSORS (LOG10_, do_log10)
 } break; case POSITIVEVECTOR_: { do_positivevector ();
 } break; case INTEGERVECTOR_: { do_integervector ();
 } break; case NATURALVECTOR_: { do_naturalvector ();
+} break; case HEADING_: { do_heading ();
 } break; case COMMENT_: { do_comment ();
 } break; case END_PAUSE_: { do_endPause ();
+} break; case LOWER_CASE_APP_NAME_STR_: { do_lowerCaseAppNameStr ();
+} break; case UPPER_CASE_APP_NAME_STR_: { do_upperCaseAppNameStr ();
+} break; case APP_VERSION_: { do_appVersion ();
+} break; case APP_VERSION_STR_: { do_appVersionStr ();
+} break; case APP_YEAR_: { do_appYear ();
+} break; case APP_MONTH_: { do_appMonth ();
+} break; case APP_MONTH_STR_: { do_appMonthStr ();
+} break; case APP_DAY_: { do_appDay ();
 } break; case CHOOSE_READ_FILE_STR_: { do_chooseReadFileStr ();
 } break; case CHOOSE_WRITE_FILE_STR_: { do_chooseWriteFileStr ();
 } break; case CHOOSE_FOLDER_STR_: { do_chooseFolder_STR ();

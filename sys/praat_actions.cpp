@@ -18,7 +18,6 @@
 
 #include "praatP.h"
 #include "praat_script.h"
-#include "praat_version.h"
 #include "../kar/longchar.h"
 #include "machine.h"
 #include "GuiP.h"
@@ -198,7 +197,7 @@ void praat_addAction4_ (ClassInfo class1, integer n1, ClassInfo class2, integer 
 	integer positionOfSeparator = pSeparator - title;
 	static MelderString string;
 	MelderString_copy (& string, title);
-	char32 *pTitle = & string. string [0];
+	char32 *pTitle = & string.string [0];
 	do {
 		pTitle [positionOfSeparator] = U'\0';
 		praat_addAction4__ (class1, n1, class2, n2, class3, n3, class4, n4,
@@ -339,6 +338,7 @@ void praat_addActionScript (conststring32 className1, integer n1, conststring32 
 			static integer uniqueID = 0;
 			action -> uniqueID = ++ uniqueID;
 		}
+		action -> added = true;
 
 		/*
 			Insert new command.
@@ -692,14 +692,14 @@ void praat_actions_show () {
 					}
 				}
 				if (parentMenu) {
-					my button = GuiMenu_addItem (parentMenu, my title.get(),
+					my button = GuiMenu_addItem (parentMenu, my added ? Melder_cat (U"\u207A", my title.get()) : my title.get(),
 						( my executable ? 0 : GuiMenu_INSENSITIVE ),
 						cb_menu, me
 					);
 				} else {
 					my button = GuiButton_createShown (praat_form,
 						BUTTON_LEFT, BUTTON_RIGHT, y, y + Gui_PUSHBUTTON_HEIGHT,
-						my title.get(), gui_button_cb_menu,
+						my added ? Melder_cat (U"\u207A", my title.get()) : my title.get(), gui_button_cb_menu,
 						me, ( my executable ? 0 : GuiButton_INSENSITIVE ) | ( my attractive ? GuiButton_ATTRACTIVE : 0 )
 					);
 					y += Gui_PUSHBUTTON_HEIGHT + BUTTON_VSPACING;
@@ -708,7 +708,7 @@ void praat_actions_show () {
 				/*
 					Apparently a labelled separator.
 				*/
-				my button = GuiLabel_createShown (praat_form, BUTTON_LEFT, BUTTON_RIGHT, y, y + Gui_LABEL_HEIGHT, my title.get(), 0);
+				my button = GuiLabel_createShown (praat_form, BUTTON_LEFT, BUTTON_RIGHT, y, y + Gui_LABEL_HEIGHT, my added ? Melder_cat (U"\u207A", my title.get()) : my title.get(), 0);
 				y += Gui_LABEL_HEIGHT + BUTTON_VSPACING;
 			} else if (! my title || my title [0] == U'-') {
 				/*
@@ -725,12 +725,12 @@ void praat_actions_show () {
 				if (my depth == 0 || ! currentSubmenu1) {
 					currentSubmenu1 = GuiMenu_createInForm (praat_form,
 						BUTTON_LEFT, BUTTON_RIGHT, y, y + Gui_PUSHBUTTON_HEIGHT,
-						my title.get(), 0
+						my added ? Melder_cat (U"\u207A", my title.get()) : my title.get(), 0
 					);
 					y += Gui_PUSHBUTTON_HEIGHT + BUTTON_VSPACING;
 					my button = currentSubmenu1 -> d_cascadeButton.get();
 				} else {
-					currentSubmenu2 = GuiMenu_createInMenu (currentSubmenu1, my title.get(), 0);
+					currentSubmenu2 = GuiMenu_createInMenu (currentSubmenu1, my added ? Melder_cat (U"\u207A", my title.get()) : my title.get(), 0);
 					my button = currentSubmenu2 -> d_menuItem.get();
 				}
 				GuiThing_show (my button);
@@ -803,7 +803,7 @@ int praat_doAction (conststring32 title, conststring32 arguments, Interpreter in
 		return 0;
 	if (actionFound -> callback == DO_RunTheScriptFromAnyAddedMenuCommand) {
 		const conststring32 scriptPath = actionFound -> script.get();
-		const conststring32 preferencesFolderPath = Melder_folderToPath (& Melder_preferencesFolder);
+		const conststring32 preferencesFolderPath = Melder_folderToPath (Melder_preferencesFolder());
 		const bool scriptIsInPlugin = Melder_startsWith (scriptPath, preferencesFolderPath);
 		Melder_throw (
 			U"From a script you cannot directly call a menu command that calls another script. Use instead: \nrunScript: ",
@@ -833,7 +833,7 @@ int praat_doAction (conststring32 title, integer narg, Stackel args, Interpreter
 		return 0;
 	if (actionFound -> callback == DO_RunTheScriptFromAnyAddedMenuCommand) {
 		const conststring32 scriptPath = actionFound -> script.get();
-		const conststring32 preferencesFolderPath = Melder_folderToPath (& Melder_preferencesFolder);
+		const conststring32 preferencesFolderPath = Melder_folderToPath (Melder_preferencesFolder());
 		const bool scriptIsInPlugin = Melder_startsWith (scriptPath, preferencesFolderPath);
 		Melder_throw (
 			U"From a script you cannot directly call a menu command that calls another script. Use instead: \nrunScript: ",
@@ -878,7 +878,7 @@ static bool actionIsToBeIncluded (Praat_Command command, bool deprecated, bool i
 	bool includeQueryAPI, bool includeModifyAPI, bool includeToAPI,
 	bool includePlayAPI, bool includeDrawAPI, bool includeHelpAPI, bool includeWindowAPI)
 {
-	const bool obsolete = ( deprecated && (command -> deprecationYear < PRAAT_YEAR - 10 || command -> deprecationYear < 2017) );
+	const bool obsolete = ( deprecated && (command -> deprecationYear < Melder_appYear() - 10 || command -> deprecationYear < 2017) );
 	const bool hiddenByDefault = ( command -> hidden != command -> toggled );
 	const bool explicitlyHidden = hiddenByDefault && ! deprecated;
 	const bool hidden = explicitlyHidden || ! command -> callback || command -> noApi || obsolete ||

@@ -16,12 +16,6 @@
  * along with this work. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- djmw 20020313 GPL
- djmw 20130620 Latest modification
-*/
-
-#include "espeak_ng_version.h"
 #include "ManPagesM.h"
 #include "Sound_extensions.h"
 #include "TableOfReal_extensions.h"
@@ -2592,7 +2586,6 @@ EQUATION (U"\\Ga(\\al, %x) = \\in__%x_^^\\oo^ %t^^\\al−1^e^^-%t^dt, \\Ga(\\al)
 NORMAL (U"where \\al and %x are complex numbers and Re(\\al) > 0.")
 NORMAL (U"The complementary incomplete gamma function is defined as:")
 EQUATION (U"\\ga(\\al, %x) = \\in__%0_^^%x^ %t^^\\al−1^e^^-%t^dt = \\Ga(\\al)−\\Ga(\\al, %x).")
-
 MAN_END
 
 MAN_BEGIN (U"IDX file format", U"djmw", 20160220)
@@ -2613,7 +2606,7 @@ CODE (U"0x0B: short (2 bytes)")
 CODE (U"0x0C: int (4 bytes)")
 CODE (U"0x0D: float (4 bytes)")
 CODE (U"0x0E: double (8 bytes)")
-NORMAL (U"The fouth byte codes the number of dimensions of the vector/matrix: 1 for vectors, 2 for matrices....")
+NORMAL (U"The fourth byte codes the number of dimensions of the vector/matrix: 1 for vectors, 2 for matrices....")
 NORMAL (U"The sizes in each dimension are 4-byte integers (big endian, like in most non-Intel processors).")
 NORMAL (U"The data is stored like in a C array, i.e. the index in the last dimension changes the fastest.")
 ENTRY (U"Behaviour")
@@ -2651,7 +2644,7 @@ NORMAL (U"Suppose we have a sample #%x = (%x__1_, %x__2_,...%x__n_) and wish to 
 MAN_END
 
 MAN_BEGIN (U"Kirshenbaum phonetic encoding", U"djmw", 20120413)
-INTRO (U"The Kirshenbaum phonetic encoding represents International Phonetic Alphabet symbols using ascii characters. See: http://www.kirshenbaum.net/IPA/ascii-ipa.pdf. The @@espeak@ speech synthesizer on which our synthesizer is based accepts this encoding as text input. ")
+INTRO (U"The Kirshenbaum phonetic encoding represents International Phonetic Alphabet symbols using ascii characters. See: http://www.kirshenbaum.net/IPA/ascii-ipa.pdf. The @@eSpeak@ speech synthesizer on which our synthesizer is based accepts this encoding as text input. ")
 MAN_END
 
 MAN_BEGIN (U"LAPACK", U"djmw", 20200131)
@@ -4742,7 +4735,7 @@ DEFINITION (U"the number of neighbouring frequency points that are used in the c
 MAN_END
 
 MAN_BEGIN (U"SpeechSynthesizer", U"djmw", 20190811)
-INTRO (U"The SpeechSynthesizer is one of the @@types of objects@ in Praat. It creates a speech sound from text. The actual text-to-speech synthesis is performed by the @@Espeak|eSpeak NG@ speech synthsizer and therefore our SpeechSynthsizer is merely an interface to Espeak.")
+INTRO (U"The SpeechSynthesizer is one of the @@types of objects@ in Praat. It creates a speech sound from text. The actual text-to-speech synthesis is performed by the @@eSpeak|eSpeak NG@ speech synthsizer and therefore our SpeechSynthsizer is merely an interface to Espeak.")
 ENTRY (U"Commands")
 NORMAL (U"Creation:")
 LIST_ITEM (U"\\bu @@Create SpeechSynthesizer...@")
@@ -4755,7 +4748,7 @@ LIST_ITEM (U"\\bu @@SpeechSynthesizer: Speech output settings...|Speech output s
 MAN_END
 
 MAN_BEGIN (U"Create SpeechSynthesizer...", U"djmw", 20171101)
-INTRO (U"Creates the @@Espeak|eSpeak NG@ speech synthesizer.")
+INTRO (U"Creates the @@eSpeak|eSpeak NG@ speech synthesizer.")
 ENTRY (U"Settings")
 TERM (U"##Language#")
 DEFINITION (U"determines the language of the synthesizer.")
@@ -6205,9 +6198,11 @@ DEFINITION (U"Show the vowel marks in the editor from a fixed set of vowel inven
 TERM (U"##Show vowel marks from Table file...#")
 DEFINITION (U"Put your own marks in the editor. The Table needs to have at least three mandatory columns "
 	"labeled \"Vowel\", \"F1\" and  \"F2\" and "
-	" two optional column labeled \"Size\" and \"Colour\". The Vowel column contains the vowel marker labels, the F1 and "
+	"two optional column labeled \"Size\" and \"Colour\". The Vowel column contains the vowel marker labels, the F1 and "
 	"F2 columns have the first and second formant frequencies in Hertz. The optional Size column contains "
-	"the font size of the vowel markers, while the Colour column contains the @@Colour|colour@ specification of each vowel.")
+	"the font size of the vowel markers, while the Colour column contains the @@Colour|colour@ specification of each vowel. "
+	"The Table has to be in tab-separated format (or saved in Praat as a binary or text Table file)."
+)
 TERM (U"##Show trajectory time markers every...")
 DEFINITION (U"Shows time markers as small bars orthogonal to the trajectory. ")
 ENTRY (U"File menu")
@@ -6222,13 +6217,14 @@ TERM (U"##Draw trajectory...")
 DEFINITION (U"Draws the trajectory in the picture window.")
 MAN_END
 
-MAN_BEGIN (U"VowelEditor: Show vowel marks from Table file...", U"djmw", 20200403)
+MAN_BEGIN (U"VowelEditor: Show vowel marks from Table file...", U"djmw", 20200403)  // ppgb 2024
 INTRO (U"A command in the @@VowelEditor@ that lets you set your own vowel marks. ")
 ENTRY (U"Layout of the Table")
 NORMAL (U"The Table needs at least three mandatory columns labeled \"Vowel\", \"F1\" and  \"F2\" and "
 	"two optional column labeled \"Size\" and \"Colour\". The Vowel column contains the vowel marker labels, the F1 and "
 	"F2 columns have the first and second formant frequencies in Hertz. The optional Size column contains "
 	"the font size of the vowel markers, while the Colour column contains the @@Colour|colour@ specification of each vowel.")
+NORMAL (U"The Table has to be in tab-separated format (or saved in Praat as a binary or text Table file).")
 MAN_END
 
 /********************** GSL ********************************************/
@@ -6323,11 +6319,11 @@ NORMAL (U"B. Efron & R.J. Tibshirani (1993): %%An introduction "
 	"to the bootstrap%. Chapman & Hall.")
 MAN_END
 
-MAN_BEGIN (U"Espeak", U"djmw", 20211217)
-NORMAL (U"Espeak is a free text to speech synthesizer. It was developed by Jonathan Duddington and its development has stopped in 2015. "
-	"In 2015 Reece Dunn has taken a copy of espeak and together with a group of developers they maintain and actualize their version of espeak which they call \"eSpeak NG\". eSpeak NG uses formant synthesis. "
-	"Currently it supports 130 languages with varying quality of the voices. The current version of eSpeakNG incorporated in Praat is " stringize(ESPEAK_NG_VERSIONX) ".")
-NORMAL (U"The wikipedia page https://en.wikipedia.org/wiki/ESpeakNG gives more details.")
+MAN_BEGIN (U"eSpeak", U"David Weenink & Paul Boersma", 20211217) // 2024
+NORMAL (U"eSpeak is a free text-to-speech synthesizer. It was developed by Jonathan Duddington until 2015. "
+	"In 2015, Reece Dunn cloned it, and together with a group of developers they maintain and actualize it under the name “eSpeak NG”. "
+	"eSpeak NG uses formant synthesis. "
+	"On 2024-08-24, version 1.52-dev supports 137 languages with 104 voices, and is available in Praat (see @Acknowledgments).")
 MAN_END
 
 MAN_BEGIN (U"Févotte, Bertin & Durrieu (2009)", U"djmw", 20190618)
